@@ -1,87 +1,79 @@
 package org.example.untitled.models;
 
-import java.util.ArrayList;
+import org.example.untitled.utils.LazyAdjacentTileFinder;
+
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Stream;
 
 /**
- * Champ de mines.
+ * A Minefield.
  */
 public class Champ {
     final static int NB_MINES = 30;
-    final Field[][] _fields;
+    final Tile[][] _tiles;
 
     /**
-     * Champ de mines de largeur et de hauteur.
+     * A minefield based on length and height.
      *
-     * @param largeur Largeur du champ de mines
-     * @param hauteur Hauteur du champ de mines
+     * @param length Length of the minefield.
+     * @param height Height of the minefield.
      */
-    public Champ(int largeur, int hauteur) {
-        _fields = new Field[largeur][hauteur];
+    public Champ(int length, int height) {
+        _tiles = new Tile[length][height];
 
-        for (Field[] column : _fields) {
-            Arrays.setAll(column, p -> new Field.Empty());
+        for (Tile[] column : _tiles) {
+            Arrays.setAll(column, p -> new Tile.Empty());
         }
     }
 
     /**
-     * Place des mines dans le Champ selon les paramètres constantes.
+     * Place the mines on the minefield.
      */
     public void placeMines() {
         final var randomizer = new Random();
 
         var minesOnField = 0;
         while (minesOnField < NB_MINES) {
-            final int x = randomizer.nextInt(_fields.length);
-            final int y = randomizer.nextInt(_fields[0].length);
+            final int x = randomizer.nextInt(_tiles.length);
+            final int y = randomizer.nextInt(_tiles[0].length);
 
-            if (_fields[x][y] instanceof Field.Empty) {
-                _fields[x][y] = new Field.Mine();
+            if (_tiles[x][y] instanceof Tile.Empty) {
+                _tiles[x][y] = new Tile.Mine();
                 minesOnField++;
-                incrementAdjacentField(x, y);
+                incrementAdjacentCounters(x, y);
             }
         }
     }
 
     /**
-     * Affiche le terrain sur la console.
+     * Show the minefield in stdout.
      */
     public void affText() {
         System.out.println(toString());
     }
 
-    private void incrementAdjacentField(int x, int y) {
-        getAdjacentFields(x, y).forEach(field -> {
-            if (field instanceof Field.Empty) {
-                ((Field.Empty) field).incrementNeighborMines();
+    private void incrementAdjacentCounters(int x, int y) {
+        getAdjacentTiles(x, y).forEach(tile -> {
+            System.out.println("Shit");
+            if (tile instanceof Tile.Empty) {
+                ((Tile.Empty) tile).incrementAdjacentMines();
             }
         });
     }
 
-    private Iterable<Field> getAdjacentFields(int x, int y) {
-        final var result = new ArrayList<Field>();
-        final int maxX = _fields.length - 1;
-        final int maxY = _fields[1].length - 1;
+    private Stream<Tile> getAdjacentTiles(int x, int y) {
+        final var finder = new LazyAdjacentTileFinder(_tiles);
 
-        // Opérateur ternaire pour rester dans les bords.
-        for (int dx = (x > 0 ? -1 : 0); dx <= (x < maxX ? 1 : 0); dx++) {
-            for (int dy = (y > 0 ? -1 : 0); dy <= (y < maxY ? 1 : 0); dy++) {
-                if (dx != 0 || dy != 0) {
-                    result.add(_fields[x + dx][y + dy]);
-                }
-            }
-        }
-
-        return result;
+        return finder.execute(x, y);
     }
 
     @Override
     public String toString() {
         final var builder = new StringBuilder();
 
-        builder.append("Champ{_places=");
-        for (Field[] column : _fields) {
+        builder.append("Champ{_places=\n");
+        for (Tile[] column : _tiles) {
             builder.append(Arrays.toString(column));
             builder.append('\n');
         }
