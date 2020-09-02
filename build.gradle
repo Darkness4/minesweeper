@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+}
+
+dependencies {
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.example.untitled.Main'
+        )
+    }
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+task runApp(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'org.example.untitled.Main'
+}
