@@ -1,33 +1,42 @@
-package org.example.untitled.models;
+package marc.nguyen.minesweeper.models;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A tile that can be either Empty (which shows the number of adjacent mines) or Mine.
+ * A <code>Tile</code> that can be either <code>Empty</code> (which shows the number of adjacent mines) or <code>Mine</code>.
  */
 public abstract class Tile {
-    private State _state = State.BLANK;
+    private final AtomicReference<State> _state = new AtomicReference<>(State.BLANK);
 
-    /**
-     * Get the state of the tile.
-     *
-     * @return State of the tile
-     */
-    public State getState() {
-        return _state;
+    private Tile() {
     }
 
+    /**
+     * Get the <code>State</code> of the <code>Tile</code>.
+     *
+     * @return <code>State</code> of the <code>Tile</code>.
+     */
+    public State getState() {
+        return _state.get();
+    }
+
+    /**
+     * Set the <code>State</code> of the <code>Tile</code>.
+     *
+     * @param state <code>State</code> of the <code>Tile</code>.
+     */
     public void setState(State state) {
         if (state == null) {
             throw new IllegalArgumentException();
         }
 
-        this._state = state;
+        _state.set(state);
     }
 
     /**
-     * State of a tile based on the Minesweeper
+     * <code>State</code> of a tile based on the Minesweeper
      */
     public enum State {
         BLANK,
@@ -38,7 +47,7 @@ public abstract class Tile {
     }
 
     /**
-     * A tile filled with a mine.
+     * A <code>Tile</code> filled with a <code>Mine</code>.
      */
     public final static class Mine extends Tile {
         @Override
@@ -48,13 +57,13 @@ public abstract class Tile {
     }
 
     /**
-     * An empty tile.
+     * An empty <code>Tile</code>.
      */
     public final static class Empty extends Tile {
         private final AtomicInteger _adjacentMines = new AtomicInteger(0);
 
         /**
-         * Get the number of adjacent mines of the empty tile.
+         * Get the number of adjacent mines of the <code>Tile.Empty</code>.
          *
          * @return The adjacent mines.
          */
@@ -66,19 +75,19 @@ public abstract class Tile {
          * Increment the number of adjacent mines.
          */
         public void incrementAdjacentMines() {
-            this._adjacentMines.incrementAndGet();
+            _adjacentMines.getAndIncrement();
         }
 
         /**
          * Reset the number of adjacent mines to 0.
          */
         public void reset() {
-            this._adjacentMines.set(0);
+            _adjacentMines.set(0);
         }
 
         @Override
         public String toString() {
-            return this._adjacentMines.toString();
+            return _adjacentMines.toString();
         }
 
         @Override

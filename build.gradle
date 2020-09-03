@@ -1,9 +1,9 @@
 plugins {
-    id 'java'
+    id 'application'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'marc.nguyen'
+version '1.0'
 
 repositories {
     mavenCentral()
@@ -22,21 +22,6 @@ compileJava {
 dependencies {
 }
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'org.example.untitled.Main'
-        )
-    }
-
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-    }
-}
-
-task runApp(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-
-    main = 'org.example.untitled.Main'
+application {
+    mainClass = 'marc.nguyen.minesweeper.Main'
 }

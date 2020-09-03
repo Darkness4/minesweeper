@@ -1,7 +1,7 @@
-package org.example.untitled;
+package marc.nguyen.minesweeper;
 
 
-import org.example.untitled.models.Champ;
+import marc.nguyen.minesweeper.models.Champ;
 
 class Main {
     public static void main(String[] args) {

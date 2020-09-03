@@ -1,16 +1,17 @@
-package org.example.untitled.models;
-
-import org.example.untitled.utils.LazyAdjacentTileFinder;
+package marc.nguyen.minesweeper.models;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import marc.nguyen.minesweeper.utils.LazyAdjacentTileFinder;
 
 /**
  * A Minefield.
  */
 public class Champ {
-    final static int NB_MINES = 30;
+    final static int MINES = 30;
     final Tile[][] _tiles;
 
     /**
@@ -23,18 +24,18 @@ public class Champ {
         _tiles = new Tile[length][height];
 
         for (Tile[] column : _tiles) {
-            Arrays.setAll(column, p -> new Tile.Empty());
+            Arrays.parallelSetAll(column, index -> new Tile.Empty());
         }
     }
 
     /**
      * Place the mines on the minefield.
      */
-    public void placeMines() {
+    public synchronized void placeMines() {
         final var randomizer = new Random();
 
         var minesOnField = 0;
-        while (minesOnField < NB_MINES) {
+        while (minesOnField < MINES) {
             final int x = randomizer.nextInt(_tiles.length);
             final int y = randomizer.nextInt(_tiles[0].length);
 
@@ -55,7 +56,6 @@ public class Champ {
 
     private void incrementAdjacentCounters(int x, int y) {
         getAdjacentTiles(x, y).forEach(tile -> {
-            System.out.println("Shit");
             if (tile instanceof Tile.Empty) {
                 ((Tile.Empty) tile).incrementAdjacentMines();
             }
@@ -70,14 +70,10 @@ public class Champ {
 
     @Override
     public String toString() {
-        final var builder = new StringBuilder();
-
-        builder.append("Champ{_places=\n");
-        for (Tile[] column : _tiles) {
-            builder.append(Arrays.toString(column));
-            builder.append('\n');
-        }
-        builder.append('}');
-        return builder.toString();
+        return "Champ{_places=\n" +
+                Arrays.stream(_tiles)
+                        .map(column -> Arrays.toString(column) + '\n')
+                        .collect(Collectors.joining()) +
+                '}';
     }
 }

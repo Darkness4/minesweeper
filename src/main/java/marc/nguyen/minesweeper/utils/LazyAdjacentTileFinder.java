@@ -1,13 +1,13 @@
-package org.example.untitled.utils;
+package marc.nguyen.minesweeper.utils;
 
-import org.example.untitled.models.Tile;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import marc.nguyen.minesweeper.models.Tile;
+
 /**
- * LazyAdjacentTileFinder looks for the adjacent tiles lazily for optimization purpose.
+ * <code>LazyAdjacentTileFinder</code> looks for the adjacent tiles lazily for reactive programming purpose.
  */
 public class LazyAdjacentTileFinder {
     private final Tile[][] _tiles;
@@ -19,12 +19,12 @@ public class LazyAdjacentTileFinder {
     /**
      * Look for adjacent tiles based on coordinates.
      *
-     * @param x X coordinate (tiles[x][y])
-     * @param y Y coordinate (tiles[x][y])
-     * @return A stream of Tile.
+     * @param x X coordinate (<code>tiles[x][y]</code>)
+     * @param y Y coordinate (<code>tiles[x][y]</code>)
+     * @return A <code>Stream</code> of Tile.
      */
     public Stream<Tile> execute(int x, int y) {
-        final List<Coordinates> coordinatesList = new ArrayList<>();
+        final Set<Coordinates> coordinatesSet = new HashSet<>();
         final int maxX = _tiles.length - 1;
         final int maxY = _tiles[1].length - 1;
 
@@ -32,13 +32,13 @@ public class LazyAdjacentTileFinder {
         for (int dx = (x > 0 ? -1 : 0); dx <= (x < maxX ? 1 : 0); dx++) {
             for (int dy = (y > 0 ? -1 : 0); dy <= (y < maxY ? 1 : 0); dy++) {
                 if (dx != 0 || dy != 0) {
-                    coordinatesList.add(new Coordinates(x + dx, y + dy));
+                    coordinatesSet.add(new Coordinates(x + dx, y + dy));
                 }
             }
         }
 
         // Returns lazily the tiles.
-        return coordinatesList.stream().map(coordinates -> _tiles[coordinates.x][coordinates.y]);
+        return coordinatesSet.stream().map(coordinates -> _tiles[coordinates.x][coordinates.y]);
     }
 
     static class Coordinates {
