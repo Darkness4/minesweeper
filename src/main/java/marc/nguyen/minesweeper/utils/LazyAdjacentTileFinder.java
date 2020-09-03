@@ -38,7 +38,9 @@ public class LazyAdjacentTileFinder {
         }
 
         // Returns lazily the tiles.
-        return coordinatesSet.stream().map(coordinates -> _tiles[coordinates.x][coordinates.y]);
+        return coordinatesSet.stream()
+                .parallel()
+                .map(coordinates -> _tiles[coordinates.x][coordinates.y]);
     }
 
     static class Coordinates {
