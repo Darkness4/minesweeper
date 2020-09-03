@@ -55,7 +55,7 @@ public class Minefield {
 
   /** Show the minefield in stdout. */
   public void affText() {
-    System.out.println(toString());
+    System.out.println(this);
   }
 
   private void incrementAdjacentCounters(int x, int y) {
