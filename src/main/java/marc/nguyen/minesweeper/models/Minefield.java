@@ -25,6 +25,9 @@ public class Minefield {
    * @param height Height of the minefield.
    */
   public Minefield(int length, int height) {
+    if (length == 0 || height == 0) {
+      throw new IllegalArgumentException("Length and Height should be > 0");
+    }
     _tiles = new Tile[length][height];
     clear();
   }

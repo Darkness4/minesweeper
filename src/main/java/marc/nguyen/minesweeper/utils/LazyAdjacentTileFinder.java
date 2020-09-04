@@ -27,7 +27,7 @@ public class LazyAdjacentTileFinder {
   public Stream<Tile> execute(int x, int y) {
     final Set<Coordinates> coordinatesSet = new HashSet<>();
     final int maxX = _tiles.length - 1;
-    final int maxY = _tiles[1].length - 1;
+    final int maxY = _tiles[0].length - 1;
 
     // Look for correct coordinates sequentially.
     for (int dx = (x > 0 ? -1 : 0); dx <= (x < maxX ? 1 : 0); dx++) {
