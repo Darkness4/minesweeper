@@ -76,10 +76,10 @@ public class Minefield {
 
   @Override
   public String toString() {
-    return "Minefield{_places=\n"
+    return "Minefield{\n_tiles="
         + Arrays.stream(_tiles)
-            .map(column -> Arrays.toString(column) + '\n')
-            .collect(Collectors.joining())
-        + '}';
+            .map(Arrays::toString)
+            .collect(Collectors.joining(",\n  "))
+        + "\n}";
   }
 }
