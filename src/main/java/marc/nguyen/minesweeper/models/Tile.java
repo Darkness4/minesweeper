@@ -44,6 +44,11 @@ public abstract class Tile {
     return Objects.hash(_state);
   }
 
+  /**
+   * Update the <code>State</code> of the <code>Tile</code>
+   * @param state <code>State</code> of the <code>Tile</code>
+   * @return A new instance of the updated <code>Tile</code>.
+   */
   public abstract Tile update(State state);
 
   /** <code>State</code> of a tile based on the Minesweeper */
@@ -70,6 +75,11 @@ public abstract class Tile {
       return "X";
     }
 
+    /**
+     * {@inheritDoc}
+     * @param state <code>State</code> of the <code>Tile</code>
+     * @return A new instance of the updated <code>Tile</code>.
+     */
     @Override
     public Mine update(State state) {
       return new Mine(state);
@@ -105,12 +115,21 @@ public abstract class Tile {
       return Integer.toString(_adjacentMines);
     }
 
+    /**
+     * {@inheritDoc}
+     * @param state <code>State</code> of the <code>Tile</code>
+     * @return A new instance of the updated <code>Tile</code>.
+     */
     @Override
     public Empty update(State state) {
       return new Empty(state, this._adjacentMines);
     }
 
-    public Empty incrementAndGet() {
+    /**
+     * Increase the number of adjacent mines.
+     * @return A new instance of the updated <code>Tile</code>.
+     */
+    public Empty incrementAdjacentMinesAndGet() {
       return new Empty(this.getState(), this._adjacentMines + 1);
     }
 

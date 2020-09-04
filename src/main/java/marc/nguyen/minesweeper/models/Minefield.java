@@ -86,7 +86,7 @@ public class Minefield {
         if (dx != 0 || dy != 0) {
           var tile = _tiles[x + dx][y + dy];
           if (tile instanceof Tile.Empty) {
-            _tiles[x + dx][y + dy] = ((Tile.Empty) tile).incrementAndGet();
+            _tiles[x + dx][y + dy] = ((Tile.Empty) tile).incrementAdjacentMinesAndGet();
           }
         }
       }
