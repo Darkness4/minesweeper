@@ -15,7 +15,6 @@ import marc.nguyen.minesweeper.utils.LazyAdjacentTileFinder;
  */
 public class Minefield {
 
-  static final int MINES = 30;
   final Tile[][] _tiles;
 
   /**
@@ -25,7 +24,7 @@ public class Minefield {
    * @param height Height of the minefield.
    */
   public Minefield(int length, int height) {
-    if (length == 0 || height == 0) {
+    if (length <= 0 || height <= 0) {
       throw new IllegalArgumentException("Length and Height should be > 0");
     }
     _tiles = new Tile[length][height];
@@ -33,11 +32,15 @@ public class Minefield {
   }
 
   /** Place the mines on the minefield. */
-  public synchronized void placeMines() {
+  public synchronized void placeMines(int mines) {
+    if (mines >= _tiles.length * _tiles[0].length) {
+      throw new IllegalArgumentException(
+          "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
+    }
     final var randomizer = new Random();
 
     var minesOnField = 0;
-    while (minesOnField < MINES) {
+    while (minesOnField < mines) {
       final int x = randomizer.nextInt(_tiles.length);
       final int y = randomizer.nextInt(_tiles[0].length);
 
@@ -61,6 +64,17 @@ public class Minefield {
     System.out.println(this);
   }
 
+  /**
+   * Get a tile from x and y coordinates.
+   *
+   * @param x X coordinate.
+   * @param y Y coordinate.
+   * @return A <code>Tile</code> reference.
+   */
+  public Tile get(int x, int y) {
+    return _tiles[x][y];
+  }
+
   private void incrementAdjacentCounters(int x, int y) {
     getAdjacentTiles(x, y)
         .forEach(
@@ -80,9 +94,24 @@ public class Minefield {
   @Override
   public String toString() {
     return "Minefield{\n_tiles="
-        + Arrays.stream(_tiles)
-            .map(Arrays::toString)
-            .collect(Collectors.joining(",\n  "))
+        + Arrays.stream(_tiles).map(Arrays::toString).collect(Collectors.joining(",\n  "))
         + "\n}";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Minefield minefield = (Minefield) o;
+    return Arrays.equals(_tiles, minefield._tiles);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(_tiles);
   }
 }

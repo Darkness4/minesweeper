@@ -7,7 +7,7 @@ class Main {
   public static void main(String[] args) {
     final Minefield minefield = new Minefield(32, 5);
 
-    minefield.placeMines();
+    minefield.placeMines(20);
 
     System.out.println(minefield);
   }
