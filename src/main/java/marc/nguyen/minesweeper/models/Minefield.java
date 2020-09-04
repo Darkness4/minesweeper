@@ -37,7 +37,11 @@ public class Minefield {
     }
     final var randomizer = new Random();
 
-    var minesOnField = 0;
+    var minesOnField =
+        Arrays.stream(_tiles)
+            .flatMap(Arrays::stream)
+            .filter(tile -> tile instanceof Tile.Mine)
+            .count();
     while (minesOnField < mines) {
       final int x = randomizer.nextInt(_tiles.length);
       final int y = randomizer.nextInt(_tiles[0].length);
