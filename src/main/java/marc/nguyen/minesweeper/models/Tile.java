@@ -1,8 +1,6 @@
 package marc.nguyen.minesweeper.models;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A <code>Tile</code> that can be either <code>Empty</code> (which shows the number of adjacent
@@ -10,9 +8,15 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public abstract class Tile {
 
-  private final AtomicReference<State> _state = new AtomicReference<>(State.BLANK);
+  private final State _state;
 
-  private Tile() {}
+  private Tile() {
+    _state = State.BLANK;
+  }
+
+  private Tile(State state) {
+    _state = state;
+  }
 
   /**
    * Get the <code>State</code> of the <code>Tile</code>.
@@ -20,21 +24,27 @@ public abstract class Tile {
    * @return <code>State</code> of the <code>Tile</code>.
    */
   public State getState() {
-    return _state.get();
+    return _state;
   }
 
-  /**
-   * Set the <code>State</code> of the <code>Tile</code>.
-   *
-   * @param state <code>State</code> of the <code>Tile</code>.
-   */
-  public void setState(State state) {
-    if (state == null) {
-      throw new IllegalArgumentException();
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-
-    _state.set(state);
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Tile tile = (Tile) o;
+    return _state == tile._state;
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(_state);
+  }
+
+  public abstract Tile update(State state);
 
   /** <code>State</code> of a tile based on the Minesweeper */
   public enum State {
@@ -47,17 +57,39 @@ public abstract class Tile {
 
   /** A <code>Tile</code> filled with a <code>Mine</code>. */
   public static final class Mine extends Tile {
+    public Mine() {
+      super();
+    }
+
+    public Mine(State state) {
+      super(state);
+    }
 
     @Override
     public String toString() {
       return "X";
+    }
+
+    @Override
+    public Mine update(State state) {
+      return new Mine(state);
     }
   }
 
   /** An empty <code>Tile</code>. */
   public static final class Empty extends Tile {
 
-    private final AtomicInteger _adjacentMines = new AtomicInteger(0);
+    private final int _adjacentMines;
+
+    public Empty() {
+      super();
+      _adjacentMines = 0;
+    }
+
+    public Empty(State state, int adjacentMines) {
+      super(state);
+      _adjacentMines = adjacentMines;
+    }
 
     /**
      * Get the number of adjacent mines of the <code>Tile.Empty</code>.
@@ -65,22 +97,21 @@ public abstract class Tile {
      * @return The adjacent mines.
      */
     public int getNeighborMinesCount() {
-      return _adjacentMines.get();
-    }
-
-    /** Increment the number of adjacent mines. */
-    public void incrementAdjacentMines() {
-      _adjacentMines.getAndIncrement();
-    }
-
-    /** Reset the number of adjacent mines to 0. */
-    public void reset() {
-      _adjacentMines.set(0);
+      return _adjacentMines;
     }
 
     @Override
     public String toString() {
-      return _adjacentMines.toString();
+      return Integer.toString(_adjacentMines);
+    }
+
+    @Override
+    public Empty update(State state) {
+      return new Empty(state, this._adjacentMines);
+    }
+
+    public Empty incrementAndGet() {
+      return new Empty(this.getState(), this._adjacentMines + 1);
     }
 
     @Override
@@ -91,13 +122,16 @@ public abstract class Tile {
       if (o == null || getClass() != o.getClass()) {
         return false;
       }
+      if (!super.equals(o)) {
+        return false;
+      }
       Empty empty = (Empty) o;
-      return _adjacentMines.equals(empty._adjacentMines);
+      return _adjacentMines == empty._adjacentMines;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(_adjacentMines);
+      return Objects.hash(super.hashCode(), _adjacentMines);
     }
   }
 }

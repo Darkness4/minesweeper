@@ -3,8 +3,6 @@ package marc.nguyen.minesweeper.models;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import marc.nguyen.minesweeper.utils.LazyAdjacentTileFinder;
 
 /**
  * A Minefield.
@@ -76,19 +74,19 @@ public class Minefield {
   }
 
   private void incrementAdjacentCounters(int x, int y) {
-    getAdjacentTiles(x, y)
-        .forEach(
-            tile -> {
-              if (tile instanceof Tile.Empty) {
-                ((Tile.Empty) tile).incrementAdjacentMines();
-              }
-            });
-  }
+    final int maxX = _tiles.length - 1;
+    final int maxY = _tiles[0].length - 1;
 
-  private Stream<Tile> getAdjacentTiles(int x, int y) {
-    final var finder = new LazyAdjacentTileFinder(_tiles);
-
-    return finder.execute(x, y);
+    for (int dx = (x > 0 ? -1 : 0); dx <= (x < maxX ? 1 : 0); dx++) {
+      for (int dy = (y > 0 ? -1 : 0); dy <= (y < maxY ? 1 : 0); dy++) {
+        if (dx != 0 || dy != 0) {
+          var tile = _tiles[x + dx][y + dy];
+          if (tile instanceof Tile.Empty) {
+            _tiles[x + dx][y + dy] = ((Tile.Empty) tile).incrementAndGet();
+          }
+        }
+      }
+    }
   }
 
   @Override

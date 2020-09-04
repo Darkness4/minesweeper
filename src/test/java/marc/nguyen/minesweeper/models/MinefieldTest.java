@@ -19,9 +19,7 @@ public class MinefieldTest {
 
   @Test
   void Constructor_IllegalSize0x0() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Minefield(0, 0));
+    assertThrows(IllegalArgumentException.class, () -> new Minefield(0, 0));
   }
 
   @Test
