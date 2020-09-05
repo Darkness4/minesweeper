@@ -1,7 +1,7 @@
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
-    id 'java'
+    id 'application'
 }
 
 group 'marc.nguyen'
@@ -26,16 +26,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 }
 
+application {
+    mainClassName = 'marc.nguyen.minesweeper.Main'
+}
+
 jar {
     manifest {
         attributes(
                 'Main-Class': 'marc.nguyen.minesweeper.Main'
         )
     }
-}
-
-task runApp(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-
-    main = 'marc.nguyen.minesweeper.Main'
 }

@@ -46,6 +46,7 @@ public abstract class Tile {
 
   /**
    * Update the <code>State</code> of the <code>Tile</code>
+   *
    * @param state <code>State</code> of the <code>Tile</code>
    * @return A new instance of the updated <code>Tile</code>.
    */
@@ -77,6 +78,7 @@ public abstract class Tile {
 
     /**
      * {@inheritDoc}
+     *
      * @param state <code>State</code> of the <code>Tile</code>
      * @return A new instance of the updated <code>Tile</code>.
      */
@@ -117,6 +119,7 @@ public abstract class Tile {
 
     /**
      * {@inheritDoc}
+     *
      * @param state <code>State</code> of the <code>Tile</code>
      * @return A new instance of the updated <code>Tile</code>.
      */
@@ -127,6 +130,7 @@ public abstract class Tile {
 
     /**
      * Increase the number of adjacent mines.
+     *
      * @return A new instance of the updated <code>Tile</code>.
      */
     public Empty incrementAdjacentMinesAndGet() {
