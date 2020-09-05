@@ -30,7 +30,7 @@ public class Minefield {
   }
 
   /** Place the mines on the minefield. */
-  public synchronized void placeMines(int mines) {
+  public void placeMines(int mines) {
     if (mines >= _tiles.length * _tiles[0].length) {
       throw new IllegalArgumentException(
           "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
@@ -39,6 +39,7 @@ public class Minefield {
 
     var minesOnField =
         Arrays.stream(_tiles)
+            .parallel()
             .flatMap(Arrays::stream)
             .filter(tile -> tile instanceof Tile.Mine)
             .count();
@@ -55,7 +56,7 @@ public class Minefield {
   }
 
   /** Clear the mines on the minefield. */
-  public synchronized void clear() {
+  public void clear() {
     for (Tile[] column : _tiles) {
       Arrays.parallelSetAll(column, index -> new Tile.Empty());
     }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class MinefieldTest {
 
@@ -19,7 +20,11 @@ public class MinefieldTest {
 
   @Test
   void Constructor_IllegalSize0x0() {
-    assertThrows(IllegalArgumentException.class, () -> new Minefield(0, 0));
+    // Act
+    final Executable executable = () -> new Minefield(0, 0);
+
+    // Assert
+    assertThrows(IllegalArgumentException.class, executable);
   }
 
   @Test
@@ -40,6 +45,15 @@ public class MinefieldTest {
 
     // Assert
     assertEquals(result.chars().filter(c -> c == '1').count(), 3);
+  }
+
+  @Test
+  void PlaceMines_ExcessOfMines() {
+    // Act
+    final Executable executable = () -> minefield.placeMines(5);
+
+    // Assert
+    assertThrows(IllegalArgumentException.class, executable);
   }
 
   @Test

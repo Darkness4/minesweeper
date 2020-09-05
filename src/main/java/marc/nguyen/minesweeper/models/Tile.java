@@ -67,7 +67,7 @@ public abstract class Tile {
       super();
     }
 
-    public Mine(State state) {
+    private Mine(State state) {
       super(state);
     }
 
@@ -98,7 +98,7 @@ public abstract class Tile {
       _adjacentMines = 0;
     }
 
-    public Empty(State state, int adjacentMines) {
+    private Empty(State state, int adjacentMines) {
       super(state);
       _adjacentMines = adjacentMines;
     }
