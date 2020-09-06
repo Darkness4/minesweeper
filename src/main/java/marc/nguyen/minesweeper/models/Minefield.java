@@ -29,7 +29,11 @@ public class Minefield {
     clear();
   }
 
-  /** Place the mines on the minefield. */
+  /**
+   * Place the mines on the minefield.
+   *
+   * @param mines Number of mines to be placed.
+   */
   public void placeMines(int mines) {
     if (mines >= _tiles.length * _tiles[0].length) {
       throw new IllegalArgumentException(
