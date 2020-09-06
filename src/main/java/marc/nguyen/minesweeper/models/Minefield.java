@@ -37,12 +37,7 @@ public class Minefield {
     }
     final var randomizer = new Random();
 
-    var minesOnField =
-        Arrays.stream(_tiles)
-            .parallel()
-            .flatMap(Arrays::stream)
-            .filter(tile -> tile instanceof Tile.Mine)
-            .count();
+    var minesOnField = countMinesOnField();
     while (minesOnField < mines) {
       final int x = randomizer.nextInt(_tiles.length);
       final int y = randomizer.nextInt(_tiles[0].length);
@@ -78,6 +73,14 @@ public class Minefield {
     return _tiles[x][y];
   }
 
+  private long countMinesOnField() {
+    return Arrays.stream(_tiles)
+        .parallel()
+        .flatMap(Arrays::stream)
+        .filter(tile -> tile instanceof Tile.Mine)
+        .count();
+  }
+
   private void incrementAdjacentCounters(int x, int y) {
     final int maxX = _tiles.length - 1;
     final int maxY = _tiles[0].length - 1;
@@ -109,7 +112,7 @@ public class Minefield {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Minefield minefield = (Minefield) o;
+    final Minefield minefield = (Minefield) o;
     return Arrays.equals(_tiles, minefield._tiles);
   }
 

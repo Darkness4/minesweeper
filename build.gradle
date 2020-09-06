@@ -21,6 +21,8 @@ compileJava {
     targetCompatibility = '11'
 }
 
+apply from: rootProject.file('gradle/install-git-hooks.gradle')
+
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
