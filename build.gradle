@@ -26,6 +26,9 @@ compileJava {
 apply from: rootProject.file('gradle/install-git-hooks.gradle')
 
 dependencies {
+    implementation "io.reactivex.rxjava3:rxjava:3.0.6"
+    implementation "io.reactivex:rxswing:0.27.0"
+    implementation 'com.google.inject:guice:4.2.3'
     implementation 'org.jetbrains:annotations:19.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
