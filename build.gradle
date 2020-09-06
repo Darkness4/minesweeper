@@ -1,7 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
-    id 'application'
+    id 'java'
 }
 
 group 'marc.nguyen'
@@ -24,18 +26,59 @@ compileJava {
 apply from: rootProject.file('gradle/install-git-hooks.gradle')
 
 dependencies {
+    implementation 'org.jetbrains:annotations:19.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 }
 
-application {
-    mainClassName = 'marc.nguyen.minesweeper.Main'
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'marc.nguyen.minesweeper.server.Server'
 }
 
-jar {
+task serverJar(type: Jar) {
     manifest {
         attributes(
-                'Main-Class': 'marc.nguyen.minesweeper.Main'
+                'Main-Class': 'marc.nguyen.minesweeper.server.Server'
         )
     }
+    archiveClassifier.set("server")
+    from sourceSets.main.output
+}
+
+task serverShadowJar(type: ShadowJar) {
+    manifest {
+        inheritFrom project.tasks.serverJar.manifest
+    }
+    archiveClassifier.set("all-server")
+    from sourceSets.main.output
+    configurations = [ configurations.runtime ]
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+}
+
+task runClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'marc.nguyen.minesweeper.client.Client'
+}
+
+task clientJar(type: Jar) {
+    manifest {
+        attributes(
+                'Main-Class': 'marc.nguyen.minesweeper.client.Client'
+        )
+    }
+    archiveClassifier.set("client")
+    from sourceSets.main.output
+}
+
+task clientShadowJar(type: ShadowJar) {
+    manifest {
+        inheritFrom project.tasks.clientJar.manifest
+    }
+    archiveClassifier.set("all-client")
+    from sourceSets.main.output
+    configurations = [ configurations.runtime ]
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }

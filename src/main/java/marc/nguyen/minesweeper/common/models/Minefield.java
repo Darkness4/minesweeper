@@ -1,8 +1,9 @@
-package marc.nguyen.minesweeper.models;
+package marc.nguyen.minesweeper.common.models;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Minefield.
@@ -73,6 +74,7 @@ public class Minefield {
    * @param y Y coordinate.
    * @return A <code>Tile</code> reference.
    */
+  @NotNull
   public Tile get(int x, int y) {
     return _tiles[x][y];
   }

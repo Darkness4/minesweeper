@@ -1,8 +1,8 @@
-package marc.nguyen.minesweeper;
+package marc.nguyen.minesweeper.server;
 
-import marc.nguyen.minesweeper.models.Minefield;
+import marc.nguyen.minesweeper.common.models.Minefield;
 
-class Main {
+public class Server {
 
   public static void main(String[] args) {
     final Minefield minefield = new Minefield(32, 5);

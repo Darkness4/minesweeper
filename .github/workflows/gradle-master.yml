@@ -61,9 +61,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew shadowJar
+      run: ./gradlew clientShadowJar
+    - name: Build with Gradle
+      run: ./gradlew serverShadowJar
     - name: Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: Jar
+        name: Jars
         path: build/libs

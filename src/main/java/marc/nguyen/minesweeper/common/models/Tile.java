@@ -1,6 +1,7 @@
-package marc.nguyen.minesweeper.models;
+package marc.nguyen.minesweeper.common.models;
 
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A <code>Tile</code> that can be either <code>Empty</code> (which shows the number of adjacent
@@ -14,7 +15,7 @@ public abstract class Tile {
     _state = State.BLANK;
   }
 
-  private Tile(State state) {
+  private Tile(@NotNull State state) {
     _state = state;
   }
 
@@ -23,6 +24,7 @@ public abstract class Tile {
    *
    * @return <code>State</code> of the <code>Tile</code>.
    */
+  @NotNull
   public State getState() {
     return _state;
   }
@@ -50,7 +52,8 @@ public abstract class Tile {
    * @param state <code>State</code> of the <code>Tile</code>
    * @return A new instance of the updated <code>Tile</code>.
    */
-  public abstract Tile update(State state);
+  @NotNull
+  public abstract Tile update(@NotNull State state);
 
   /** <code>State</code> of a tile based on the Minesweeper */
   public enum State {
@@ -83,7 +86,8 @@ public abstract class Tile {
      * @return A new instance of the updated <code>Tile</code>.
      */
     @Override
-    public Mine update(State state) {
+    @NotNull
+    public Mine update(@NotNull State state) {
       return new Mine(state);
     }
   }
@@ -98,7 +102,7 @@ public abstract class Tile {
       _adjacentMines = 0;
     }
 
-    private Empty(State state, int adjacentMines) {
+    private Empty(@NotNull State state, int adjacentMines) {
       super(state);
       _adjacentMines = adjacentMines;
     }
@@ -124,7 +128,8 @@ public abstract class Tile {
      * @return A new instance of the updated <code>Tile</code>.
      */
     @Override
-    public Empty update(State state) {
+    @NotNull
+    public Empty update(@NotNull State state) {
       return new Empty(state, this._adjacentMines);
     }
 
@@ -133,6 +138,7 @@ public abstract class Tile {
      *
      * @return A new instance of the updated <code>Tile</code>.
      */
+    @NotNull
     public Empty incrementAdjacentMinesAndGet() {
       return new Empty(this.getState(), this._adjacentMines + 1);
     }
@@ -148,7 +154,7 @@ public abstract class Tile {
       if (!super.equals(o)) {
         return false;
       }
-      Empty empty = (Empty) o;
+      final Empty empty = (Empty) o;
       return _adjacentMines == empty._adjacentMines;
     }
 

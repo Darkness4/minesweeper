@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.models;
+package marc.nguyen.minesweeper.common.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
