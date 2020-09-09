@@ -61,8 +61,7 @@ public abstract class Tile implements Serializable {
     BLANK,
     FLAG,
     EXPOSED,
-    HIT_MINE,
-    WRONG_MINE
+    HIT_MINE
   }
 
   /** A <code>Tile</code> filled with a <code>Mine</code>. */

@@ -12,6 +12,7 @@ public class MainView extends JPanel {
 
   final MainModel _model;
   public final GamePanel gamePanel;
+  public final DisplayPanel displayPanel;
 
   @Inject
   public MainView(MainModel model) {
@@ -22,7 +23,9 @@ public class MainView extends JPanel {
     this._model = model;
     setLayout(new BorderLayout());
 
-    add(new DisplayPanel(_model.minefield), BorderLayout.PAGE_START);
+    displayPanel = new DisplayPanel(_model.minefield);
+    add(displayPanel, BorderLayout.PAGE_START);
+
     gamePanel = new GamePanel(_model.minefield);
     add(gamePanel, BorderLayout.CENTER);
   }

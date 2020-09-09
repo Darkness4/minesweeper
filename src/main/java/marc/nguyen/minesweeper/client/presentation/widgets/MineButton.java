@@ -14,5 +14,9 @@ public class MineButton extends JButton {
 
     this.x = x;
     this.y = y;
+
+    final String id = Integer.toString(x) + '_' + y;
+    setText(" ");
+    setName("Button_" + id);
   }
 }

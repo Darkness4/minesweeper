@@ -7,7 +7,8 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
 public class DisplayPanel extends JPanel {
-  public final Minefield minefield;
+  private final Minefield minefield;
+  public final JLabel bombLeftText;
 
   public DisplayPanel(Minefield minefield) {
     if (!SwingUtilities.isEventDispatchThread()) {
@@ -18,6 +19,7 @@ public class DisplayPanel extends JPanel {
 
     setLayout(new FlowLayout());
 
-    add(new JLabel(String.valueOf(minefield.countMinesOnField())));
+    bombLeftText = new JLabel(String.valueOf(minefield.countMinesOnField()));
+    add(bombLeftText);
   }
 }

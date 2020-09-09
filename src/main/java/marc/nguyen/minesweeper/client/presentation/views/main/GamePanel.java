@@ -26,9 +26,6 @@ public class GamePanel extends JPanel {
     for (int i = 0; i < _minefield.getLength(); i++) {
       for (int j = 0; j < _minefield.getHeight(); j++) {
         final var button = new MineButton(i, j);
-        final String id = Integer.toString(i) + '_' + j;
-        button.setText(" ");
-        button.setName("Button_" + id);
         add(button);
         _buttons[i][j] = button;
       }

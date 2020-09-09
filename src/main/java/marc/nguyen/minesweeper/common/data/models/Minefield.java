@@ -60,7 +60,7 @@ public class Minefield implements Serializable {
    *
    * @param mines Number of mines to be placed.
    */
-  public void placeMines(int mines) {
+  public synchronized void placeMines(int mines) {
     if (mines >= _tiles.length * _tiles[0].length) {
       throw new IllegalArgumentException(
           "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
@@ -91,13 +91,19 @@ public class Minefield implements Serializable {
   }
 
   /** Clear the mines on the minefield. */
-  public void clear() {
+  public synchronized void clear() {
     for (Tile[] column : _tiles) {
       Arrays.parallelSetAll(column, index -> new Tile.Empty());
     }
   }
 
-  public void flag(int x, int y) {
+  /**
+   * Switch the state of a tile to FLAG or BLANK.
+   *
+   * @param x X coordinates.
+   * @param y Y coordinates.
+   */
+  public synchronized void flag(int x, int y) {
     final var state = _tiles[x][y].getState();
     if (state == State.BLANK) {
       _tiles[x][y] = _tiles[x][y].update(State.FLAG);
@@ -106,14 +112,21 @@ public class Minefield implements Serializable {
     }
   }
 
-  public void expose(int x, int y) {
+  /**
+   * Expose a tile if Empty. Else, change to HIT_MINE.
+   *
+   * @param x X coordinates.
+   * @param y Y coordinates.
+   */
+  public synchronized void expose(int x, int y) {
     final var tile = _tiles[x][y];
     final var state = tile.getState();
     if (tile instanceof Tile.Empty) {
       _tiles[x][y] = _tiles[x][y].update(State.EXPOSED);
+      // TODO: Export adjacent Empty
     } else if (tile instanceof Tile.Mine) {
       _tiles[x][y] = _tiles[x][y].update(State.HIT_MINE);
-      // TODO: Export everything
+      // TODO: Minus score -1
     }
   }
 
@@ -140,6 +153,14 @@ public class Minefield implements Serializable {
         .parallel()
         .flatMap(Arrays::stream)
         .filter(tile -> tile instanceof Tile.Mine)
+        .count();
+  }
+
+  public long countFlagsAndVisibleBombsOnField() {
+    return Arrays.stream(_tiles)
+        .parallel()
+        .flatMap(Arrays::stream)
+        .filter(tile -> tile.getState() == State.FLAG || tile.getState() == State.HIT_MINE)
         .count();
   }
 
