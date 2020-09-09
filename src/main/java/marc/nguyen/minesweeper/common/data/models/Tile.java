@@ -1,5 +1,6 @@
-package marc.nguyen.minesweeper.common.models;
+package marc.nguyen.minesweeper.common.data.models;
 
+import java.io.Serializable;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * A <code>Tile</code> that can be either <code>Empty</code> (which shows the number of adjacent
  * mines) or <code>Mine</code>.
  */
-public abstract class Tile {
+public abstract class Tile implements Serializable {
 
   private final State _state;
 
@@ -76,7 +77,7 @@ public abstract class Tile {
 
     @Override
     public String toString() {
-      return "X";
+      return "Tile{" + "_state=" + getState() + '}';
     }
 
     /**
@@ -118,7 +119,7 @@ public abstract class Tile {
 
     @Override
     public String toString() {
-      return Integer.toString(_adjacentMines);
+      return "Empty{" + "_state=" + getState() + ", _adjacentMines=" + _adjacentMines + '}';
     }
 
     /**

@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.common.models;
+package marc.nguyen.minesweeper.common.data.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,20 +31,18 @@ public class MinefieldTest {
   void PlaceMines_3Mines_ShouldPlaceTheSpecifiedNumberOfMines() {
     // Act
     minefield.placeMines(3);
-    var result = minefield.toString();
 
     // Assert
-    assertEquals(result.chars().filter(c -> c == 'X').count(), 3);
+    assertEquals(minefield.countMinesOnField(), 3);
   }
 
   @Test
   void PlaceMines_1Mine_AdjacentTileShouldBeEqualsToOne() {
     // Act
     minefield.placeMines(1);
-    var result = minefield.toString();
 
     // Assert
-    assertEquals(result.chars().filter(c -> c == '1').count(), 3);
+    assertEquals(4 - minefield.countMinesOnField(), 3);
   }
 
   @Test
@@ -60,14 +58,12 @@ public class MinefieldTest {
   void Clear_ShouldClearTheMinefield() {
     // Arrange
     minefield.placeMines(3);
-    var arrange = minefield.toString();
-    assert arrange.chars().filter(c -> c == 'X').count() == 3;
+    assert minefield.countMinesOnField() == 3;
 
     // Act
     minefield.clear();
-    var result = minefield.toString();
 
     // Assert
-    assertEquals(result.chars().filter(c -> c == 'X').count(), 0);
+    assertEquals(minefield.countMinesOnField(), 0);
   }
 }
