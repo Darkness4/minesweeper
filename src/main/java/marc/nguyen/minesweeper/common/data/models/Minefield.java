@@ -1,11 +1,11 @@
 package marc.nguyen.minesweeper.common.data.models;
 
-import io.reactivex.rxjava3.annotations.NonNull;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
 import marc.nguyen.minesweeper.common.data.models.Tile.State;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,7 +20,7 @@ public class Minefield implements Serializable {
   final Tile[][] _tiles;
 
   /**
-   * A minefield based on length and height.
+   * An empty minefield based on length and height.
    *
    * @param length Length of the minefield.
    * @param height Height of the minefield.
@@ -33,10 +33,26 @@ public class Minefield implements Serializable {
     clear();
   }
 
+  /**
+   * A minefield based on length, height and the number of mines.
+   *
+   * @param length Length of the minefield.
+   * @param height Height of the minefield.
+   * @param mines Number of mines.
+   */
+  public Minefield(int length, int height, int mines) {
+    this(length, height);
+    placeMines(mines);
+  }
+
+  /**
+   * Generate a Minefield based on the difficulty.
+   *
+   * @param level Level of difficulty.
+   */
   public Minefield(@NonNull Level level) {
-    _tiles = new Tile[level.length][level.height];
+    this(level.length, level.height);
     placeMines(level.mines);
-    clear();
   }
 
   /**

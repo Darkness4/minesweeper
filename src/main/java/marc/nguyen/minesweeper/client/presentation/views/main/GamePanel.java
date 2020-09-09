@@ -4,6 +4,7 @@ import java.awt.GridLayout;
 import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
@@ -12,6 +13,10 @@ public class GamePanel extends JPanel {
   final JButton[][] _buttons;
 
   public GamePanel(Minefield minefield) {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      throw new RuntimeException("View is running on unsafe thread!");
+    }
+
     _minefield = minefield;
 
     setLayout(new GridLayout(_minefield.getLength(), _minefield.getHeight()));

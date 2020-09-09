@@ -8,14 +8,12 @@ import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 
 public class MainController implements MouseListener {
-  private final MainView _view;
   private final MainModel _model;
 
   public MainController(MainModel model, MainView view) {
-    _view = view;
     _model = model;
 
-    _view.gamePanel.addButtonListener(this);
+    view.gamePanel.addButtonListener(this);
   }
 
   public void discover(int x, int y) {
@@ -28,19 +26,22 @@ public class MainController implements MouseListener {
 
   @Override
   public void mouseClicked(MouseEvent e) {
-    if (SwingUtilities.isRightMouseButton(e) || e.isControlDown()) {
-      final var source = e.getSource();
-      if (source instanceof MineButton) {
-        flag(((MineButton) source).x, ((MineButton) source).y);
-        System.out.println(_model.minefield.get(((MineButton) source).x, ((MineButton) source).y));
-      }
-    } else if (SwingUtilities.isLeftMouseButton(e) || e.isControlDown()) {
-      final var source = e.getSource();
-      if (source instanceof MineButton) {
-        discover(((MineButton) source).x, ((MineButton) source).y);
-        System.out.println(_model.minefield.get(((MineButton) source).x, ((MineButton) source).y));
-      }
-    }
+    // Work on IO Thread
+    new Thread(
+            () -> {
+              final var source = e.getSource();
+              if (source instanceof MineButton) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                  flag(((MineButton) source).x, ((MineButton) source).y);
+
+                } else if (SwingUtilities.isLeftMouseButton(e)) {
+                  discover(((MineButton) source).x, ((MineButton) source).y);
+                }
+                System.out.println(
+                    _model.minefield.get(((MineButton) source).x, ((MineButton) source).y));
+              }
+            })
+        .start();
   }
 
   @Override
@@ -54,4 +55,10 @@ public class MainController implements MouseListener {
 
   @Override
   public void mouseExited(MouseEvent e) {}
+
+  public static class Factory {
+    public MainController create(MainModel model, MainView view) {
+      return new MainController(model, view);
+    }
+  }
 }
