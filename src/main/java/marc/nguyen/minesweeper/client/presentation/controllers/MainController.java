@@ -1,16 +1,20 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
+import marc.nguyen.minesweeper.common.data.models.Tile.Empty;
+import marc.nguyen.minesweeper.common.data.models.Tile.State;
 
-public class MainController implements MouseListener {
+public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
   private final MainModel _model;
   private final MainView _view;
@@ -22,7 +26,7 @@ public class MainController implements MouseListener {
     _view.gamePanel.addButtonListener(this);
   }
 
-  public void updateBombLeft() {
+  private void updateBombLeft() {
     new SwingWorker<Long, Void>() {
       @Override
       protected Long doInBackground() {
@@ -30,6 +34,7 @@ public class MainController implements MouseListener {
             - _model.minefield.countFlagsAndVisibleBombsOnField();
       }
 
+      @Override
       protected void done() {
         try {
           _view.displayPanel.bombLeftText.setText(String.valueOf(get()));
@@ -40,31 +45,59 @@ public class MainController implements MouseListener {
     }.execute();
   }
 
-  @Override
-  public void mouseClicked(MouseEvent e) {
-    new Thread(
-            () -> {
-              final var source = e.getSource();
-              if (source instanceof MineButton) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                  _model.minefield.flag(((MineButton) source).x, ((MineButton) source).y);
-                  updateBombLeft();
-                } else if (SwingUtilities.isLeftMouseButton(e)) {
-                  _model.minefield.expose(((MineButton) source).x, ((MineButton) source).y);
-                  // TODO: Use UpdateMinefield
+  private void updateField() {
+    SwingUtilities.invokeLater(
+        () -> {
+          for (int i = 0; i < _model.minefield.getLength(); i++) {
+            for (int j = 0; j < _model.minefield.getHeight(); j++) {
+              final var tile = _model.minefield.get(i, j);
+              final var state = tile.getState();
+              if (state == State.BLANK) {
+                _view.gamePanel.mineButtons[i][j].setBackground(Color.WHITE);
+              } else if (state == State.EXPOSED) {
+                _view.gamePanel.mineButtons[i][j].setBackground(Color.GRAY);
+                if (tile instanceof Empty) {
+                  final var neighbors = ((Empty) tile).getNeighborMinesCount();
+                  if (neighbors != 0) {
+                    _view.gamePanel.mineButtons[i][j].setText(String.valueOf(neighbors));
+                  }
+                  _view.gamePanel.mineButtons[i][j].setEnabled(false);
                 }
-                System.out.println(
-                    _model.minefield.get(((MineButton) source).x, ((MineButton) source).y));
+              } else if (state == State.FLAG) {
+                _view.gamePanel.mineButtons[i][j].setBackground(Color.CYAN);
+              } else if (state == State.HIT_MINE) {
+                _view.gamePanel.mineButtons[i][j].setBackground(Color.RED);
+                _view.gamePanel.mineButtons[i][j].setEnabled(false);
               }
-            })
-        .start();
+            }
+          }
+        });
   }
+
+  @Override
+  public void mouseClicked(MouseEvent e) {}
 
   @Override
   public void mousePressed(MouseEvent e) {}
 
   @Override
-  public void mouseReleased(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {
+    new Thread(
+            () -> {
+              final var source = e.getSource();
+              if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                  _model.minefield.flag(((MineButton) source).x, ((MineButton) source).y);
+                } else if (SwingUtilities.isLeftMouseButton(e)) {
+                  _model.minefield.expose(((MineButton) source).x, ((MineButton) source).y);
+                }
+
+                updateBombLeft();
+                updateField();
+              }
+            })
+        .start();
+  }
 
   @Override
   public void mouseEntered(MouseEvent e) {}

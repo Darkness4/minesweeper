@@ -2,9 +2,13 @@ package marc.nguyen.minesweeper.common.data.models;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import marc.nguyen.minesweeper.common.data.models.Tile.State;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
  * A Minefield.
  *
  * <p>Initialize it with <code>Minefield::placeMines()</code>.
- *
- * <p>Clear it with <code>Minefield::clear()</code>.
  */
 public class Minefield implements Serializable {
 
@@ -30,7 +32,10 @@ public class Minefield implements Serializable {
       throw new IllegalArgumentException("Length and Height should be > 0");
     }
     _tiles = new Tile[length][height];
-    clear();
+    for (int i = 0; i < _tiles.length; i++) {
+      final int finalI = i;
+      Arrays.parallelSetAll(_tiles[i], j -> new Tile.Empty(finalI, j));
+    }
   }
 
   /**
@@ -73,9 +78,9 @@ public class Minefield implements Serializable {
       final int y = randomizer.nextInt(_tiles[0].length);
 
       if (_tiles[x][y] instanceof Tile.Empty) {
-        _tiles[x][y] = new Tile.Mine();
+        _tiles[x][y] = new Tile.Mine(x, y);
         minesOnField++;
-        incrementAdjacentCounters(x, y);
+        incrementAdjacentCounters(_tiles[x][y]);
       }
     }
   }
@@ -90,13 +95,6 @@ public class Minefield implements Serializable {
     return _tiles[0].length;
   }
 
-  /** Clear the mines on the minefield. */
-  public synchronized void clear() {
-    for (Tile[] column : _tiles) {
-      Arrays.parallelSetAll(column, index -> new Tile.Empty());
-    }
-  }
-
   /**
    * Switch the state of a tile to FLAG or BLANK.
    *
@@ -105,10 +103,10 @@ public class Minefield implements Serializable {
    */
   public synchronized void flag(int x, int y) {
     final var state = _tiles[x][y].getState();
-    if (state == State.BLANK) {
-      _tiles[x][y] = _tiles[x][y].update(State.FLAG);
-    } else if (state == State.FLAG) {
-      _tiles[x][y] = _tiles[x][y].update(State.BLANK);
+    if (state == Tile.State.BLANK) {
+      _tiles[x][y] = _tiles[x][y].update(Tile.State.FLAG);
+    } else if (state == Tile.State.FLAG) {
+      _tiles[x][y] = _tiles[x][y].update(Tile.State.BLANK);
     }
   }
 
@@ -120,19 +118,35 @@ public class Minefield implements Serializable {
    */
   public synchronized void expose(int x, int y) {
     final var tile = _tiles[x][y];
-    final var state = tile.getState();
     if (tile instanceof Tile.Empty) {
-      _tiles[x][y] = _tiles[x][y].update(State.EXPOSED);
-      // TODO: Export adjacent Empty
+      treeSearchEmptyTile((Tile.Empty) tile);
     } else if (tile instanceof Tile.Mine) {
-      _tiles[x][y] = _tiles[x][y].update(State.HIT_MINE);
+      _tiles[x][y] = _tiles[x][y].update(Tile.State.HIT_MINE);
       // TODO: Minus score -1
     }
   }
 
-  /** Show the minefield in stdout. */
-  public void affText() {
-    System.out.println(this);
+  /**
+   * Use BFS Tree Search Algorithm to reveal tiles.
+   *
+   * @param tile Find neighbors of that tile.
+   */
+  private synchronized void treeSearchEmptyTile(Tile.Empty tile) {
+    final Queue<Tile.Empty> queue = new LinkedList<>();
+
+    queue.add(tile);
+
+    while (!queue.isEmpty()) {
+      final var head = queue.poll();
+
+      if (head.getState() != Tile.State.EXPOSED) {
+        _tiles[head.x][head.y] = head.update(Tile.State.EXPOSED);
+
+        if (head.getNeighborMinesCount() == 0) {
+          getNeighborsIndicesOf(head).forEach(neighbor -> queue.add((Tile.Empty) neighbor));
+        }
+      }
+    }
   }
 
   /**
@@ -156,34 +170,44 @@ public class Minefield implements Serializable {
         .count();
   }
 
+  /** @return Number of flags and mine exposed. */
   public long countFlagsAndVisibleBombsOnField() {
     return Arrays.stream(_tiles)
         .parallel()
         .flatMap(Arrays::stream)
-        .filter(tile -> tile.getState() == State.FLAG || tile.getState() == State.HIT_MINE)
+        .filter(
+            tile -> tile.getState() == Tile.State.FLAG || tile.getState() == Tile.State.HIT_MINE)
         .count();
   }
 
-  private void incrementAdjacentCounters(int x, int y) {
+  private synchronized void incrementAdjacentCounters(Tile tile) {
+    getNeighborsIndicesOf(tile)
+        .parallel()
+        .forEach(
+            neighbor -> {
+              if (neighbor instanceof Tile.Empty) {
+                _tiles[neighbor.x][neighbor.y] =
+                    ((Tile.Empty) neighbor).incrementAdjacentMinesAndGet();
+              }
+            });
+  }
+
+  private Stream<Tile> getNeighborsIndicesOf(Tile tile) {
     final int maxX = _tiles.length - 1;
     final int maxY = _tiles[0].length - 1;
 
-    final int dxStart = x > 0 ? -1 : 0;
-    final int dxEnd = x < maxX ? 1 : 0;
+    final int startX = tile.x > 0 ? tile.x - 1 : tile.x;
+    final int endX = tile.x < maxX ? tile.x + 1 : tile.x;
+    final int startY = tile.y > 0 ? tile.y - 1 : tile.y;
+    final int endY = tile.y < maxY ? tile.y + 1 : tile.y;
 
-    final int dyStart = y > 0 ? -1 : 0;
-    final int dyEnd = y < maxY ? 1 : 0;
-
-    for (int dx = dxStart; dx <= dxEnd; dx++) {
-      for (int dy = dyStart; dy <= dyEnd; dy++) {
-        if (dx != 0 || dy != 0) {
-          final var tile = _tiles[x + dx][y + dy];
-          if (tile instanceof Tile.Empty) {
-            _tiles[x + dx][y + dy] = ((Tile.Empty) tile).incrementAdjacentMinesAndGet();
-          }
-        }
-      }
-    }
+    return IntStream.rangeClosed(startX, endX)
+        .mapToObj(
+            i ->
+                IntStream.rangeClosed(startY, endY)
+                    .filter(j -> i != tile.x || j != tile.y)
+                    .mapToObj(j -> _tiles[i][j]))
+        .flatMap(Function.identity());
   }
 
   @Override

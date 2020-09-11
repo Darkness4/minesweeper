@@ -1,7 +1,7 @@
 package marc.nguyen.minesweeper.common.data.models;
 
 public enum Level {
-  EASY(10, 10, 5),
+  EASY(10, 10, 10),
   MEDIUM(20, 20, 40),
   HARD(30, 30, 90);
 
@@ -13,5 +13,10 @@ public enum Level {
     this.length = length;
     this.height = height;
     this.mines = mines;
+  }
+
+  @Override
+  public String toString() {
+    return "Level{" + "length=" + length + ", height=" + height + ", mines=" + mines + '}';
   }
 }

@@ -17,6 +17,8 @@ public class ClientWorkerRunnable implements Runnable {
       final ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
       final ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
 
+      // TODO: Handle input output
+
       output.close();
       input.close();
     } catch (IOException e) {

@@ -2,21 +2,29 @@ package marc.nguyen.minesweeper.common.data.models;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A <code>Tile</code> that can be either <code>Empty</code> (which shows the number of adjacent
- * mines) or <code>Mine</code>.
+ * mines) or <code>Mine</code>.<br>
+ * <br>
+ * This class is immutable.
  */
 public abstract class Tile implements Serializable {
 
   private final State _state;
 
-  private Tile() {
-    _state = State.BLANK;
+  public final int x;
+  public final int y;
+
+  private Tile(int x, int y) {
+    this(x, y, State.BLANK);
   }
 
-  private Tile(@NotNull State state) {
+  private Tile(int x, int y, @NotNull State state) {
+    this.x = x;
+    this.y = y;
     _state = state;
   }
 
@@ -39,12 +47,17 @@ public abstract class Tile implements Serializable {
       return false;
     }
     Tile tile = (Tile) o;
-    return _state == tile._state;
+    return x == tile.x && y == tile.y && _state == tile._state;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(_state);
+    return Objects.hash(_state, x, y);
+  }
+
+  @Override
+  public String toString() {
+    return "Tile{" + "_state=" + _state + ", x=" + x + ", y=" + y + '}';
   }
 
   /**
@@ -66,17 +79,17 @@ public abstract class Tile implements Serializable {
 
   /** A <code>Tile</code> filled with a <code>Mine</code>. */
   public static final class Mine extends Tile {
-    public Mine() {
-      super();
+    public Mine(int x, int y) {
+      super(x, y);
     }
 
-    private Mine(State state) {
-      super(state);
+    private Mine(int x, int y, @NonNull State state) {
+      super(x, y, state);
     }
 
     @Override
     public String toString() {
-      return "Tile{" + "_state=" + getState() + '}';
+      return "Tile{" + "_state=" + getState() + ", x=" + x + ", y=" + y + '}';
     }
 
     /**
@@ -88,7 +101,7 @@ public abstract class Tile implements Serializable {
     @Override
     @NotNull
     public Mine update(@NotNull State state) {
-      return new Mine(state);
+      return new Mine(x, y, state);
     }
   }
 
@@ -97,13 +110,13 @@ public abstract class Tile implements Serializable {
 
     private final int _adjacentMines;
 
-    public Empty() {
-      super();
+    public Empty(int x, int y) {
+      super(x, y);
       _adjacentMines = 0;
     }
 
-    private Empty(@NotNull State state, int adjacentMines) {
-      super(state);
+    private Empty(int x, int y, @NotNull State state, int adjacentMines) {
+      super(x, y, state);
       _adjacentMines = adjacentMines;
     }
 
@@ -118,7 +131,16 @@ public abstract class Tile implements Serializable {
 
     @Override
     public String toString() {
-      return "Empty{" + "_state=" + getState() + ", _adjacentMines=" + _adjacentMines + '}';
+      return "Empty{"
+          + "_state="
+          + getState()
+          + ", x="
+          + x
+          + ", y="
+          + y
+          + ", _adjacentMines="
+          + _adjacentMines
+          + '}';
     }
 
     /**
@@ -130,7 +152,7 @@ public abstract class Tile implements Serializable {
     @Override
     @NotNull
     public Empty update(@NotNull State state) {
-      return new Empty(state, this._adjacentMines);
+      return new Empty(x, y, state, this._adjacentMines);
     }
 
     /**
@@ -140,7 +162,7 @@ public abstract class Tile implements Serializable {
      */
     @NotNull
     public Empty incrementAdjacentMinesAndGet() {
-      return new Empty(this.getState(), this._adjacentMines + 1);
+      return new Empty(x, y, this.getState(), this._adjacentMines + 1);
     }
 
     @Override

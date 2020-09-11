@@ -53,17 +53,4 @@ public class MinefieldTest {
     // Assert
     assertThrows(IllegalArgumentException.class, executable);
   }
-
-  @Test
-  void Clear_ShouldClearTheMinefield() {
-    // Arrange
-    minefield.placeMines(3);
-    assert minefield.countMinesOnField() == 3;
-
-    // Act
-    minefield.clear();
-
-    // Assert
-    assertEquals(minefield.countMinesOnField(), 0);
-  }
 }

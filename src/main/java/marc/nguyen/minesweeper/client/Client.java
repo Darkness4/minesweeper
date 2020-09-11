@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import marc.nguyen.minesweeper.client.di.ClientModule;
 import marc.nguyen.minesweeper.client.di.PresentationModule;
 import marc.nguyen.minesweeper.client.presentation.controllers.MainController;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
@@ -14,6 +13,10 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
 public final class Client extends JFrame {
+  final MainView view;
+  final MainModel model;
+  final MainController controller;
+
   private Client() {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -21,14 +24,13 @@ public final class Client extends JFrame {
       e.printStackTrace();
     }
 
-    // Use a DI instead of factory pattern
-    final var injector = Guice.createInjector(new ClientModule(), new PresentationModule());
+    final var injector = Guice.createInjector(new PresentationModule());
 
     final var minefield = new Minefield(Level.EASY);
-    final var model = new MainModel(minefield);
-    final var view = new MainView(model);
+    model = new MainModel(minefield);
+    view = new MainView(model);
     final var mainControllerFactory = injector.getInstance(MainController.Factory.class);
-    final var controller = mainControllerFactory.create(model, view);
+    controller = mainControllerFactory.create(model, view);
 
     setJMenuBar(new MainMenuBar());
     setContentPane(view);

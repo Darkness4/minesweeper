@@ -1,7 +1,7 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
-import marc.nguyen.minesweeper.common.domain.usecases.NoParams;
-import marc.nguyen.minesweeper.common.domain.usecases.UseCase;
+import marc.nguyen.minesweeper.client.core.usecases.NoParams;
+import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 
 public class Quit implements UseCase<NoParams, Void> {
 

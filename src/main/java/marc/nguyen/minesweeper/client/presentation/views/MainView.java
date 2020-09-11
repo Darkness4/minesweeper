@@ -4,11 +4,12 @@ import com.google.inject.Inject;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import marc.nguyen.minesweeper.client.core.mvc.View;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.main.DisplayPanel;
 import marc.nguyen.minesweeper.client.presentation.views.main.GamePanel;
 
-public class MainView extends JPanel {
+public class MainView extends JPanel implements View {
 
   final MainModel _model;
   public final GamePanel gamePanel;
