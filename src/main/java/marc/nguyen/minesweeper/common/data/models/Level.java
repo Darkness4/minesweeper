@@ -3,7 +3,8 @@ package marc.nguyen.minesweeper.common.data.models;
 public enum Level {
   EASY(10, 10, 10),
   MEDIUM(16, 16, 40),
-  HARD(16, 30, 100);
+  HARD(16, 30, 100),
+  CUSTOM(-1, -1, -1);
 
   final int length;
   final int height;

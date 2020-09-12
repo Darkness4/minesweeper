@@ -15,10 +15,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class Tile implements Serializable {
 
-  private final State _state;
-
   public final int x;
   public final int y;
+  private final State _state;
 
   private Tile(int x, int y) {
     this(x, y, State.BLANK);
@@ -105,6 +104,7 @@ public abstract class Tile implements Serializable {
 
   /** A <code>Tile</code> filled with a <code>Mine</code>. */
   public static final class Mine extends Tile {
+
     public Mine(int x, int y) {
       super(x, y);
     }

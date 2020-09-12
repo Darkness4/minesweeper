@@ -6,6 +6,7 @@ import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
 public class MineButton extends JButton {
+
   public final int x;
   public final int y;
 

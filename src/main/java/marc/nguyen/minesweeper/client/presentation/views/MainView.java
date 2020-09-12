@@ -9,7 +9,8 @@ import marc.nguyen.minesweeper.client.presentation.views.main.DisplayPanel;
 import marc.nguyen.minesweeper.client.presentation.views.main.GamePanel;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
-public class MainView extends JPanel implements View {
+public final class MainView extends JPanel implements View {
+
   public final GamePanel gamePanel;
   public final DisplayPanel displayPanel;
 

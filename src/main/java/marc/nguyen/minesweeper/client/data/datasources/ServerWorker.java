@@ -6,6 +6,7 @@ import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
 public class ServerWorker extends Thread {
+
   private final ObjectInputStream inputStream;
 
   public ServerWorker(ObjectInputStream inputStream) {

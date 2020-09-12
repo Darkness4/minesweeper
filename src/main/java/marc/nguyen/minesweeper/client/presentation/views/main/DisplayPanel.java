@@ -7,6 +7,7 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
 public class DisplayPanel extends JPanel {
+
   public final JLabel bombLeftText;
 
   public DisplayPanel(Minefield minefield) {

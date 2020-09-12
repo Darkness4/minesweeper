@@ -110,10 +110,12 @@ public class MainController implements MouseListener, Controller<MainModel, Main
             () -> {
               final var source = e.getSource();
               if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
+                final var mineButton = (MineButton) source;
+                final var tile = _model.minefield.get(mineButton.x, mineButton.y);
                 if (SwingUtilities.isRightMouseButton(e)) {
-                  _model.minefield.flag(((MineButton) source).x, ((MineButton) source).y);
+                  _model.minefield.flag(tile);
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                  _model.minefield.expose(((MineButton) source).x, ((MineButton) source).y);
+                  _model.minefield.expose(tile);
                 }
 
                 updateBombLeft();
@@ -132,6 +134,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   @AssistedInject.Factory
   public interface Factory {
+
     MainController create(MainModel model, MainView view);
   }
 }

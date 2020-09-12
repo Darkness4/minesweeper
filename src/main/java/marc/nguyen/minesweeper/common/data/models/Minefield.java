@@ -94,31 +94,28 @@ public class Minefield implements Serializable {
   /**
    * Switch the state of a tile to FLAG or BLANK.
    *
-   * @param x X coordinates.
-   * @param y Y coordinates.
+   * @param tile Tile to be flagged.
    */
-  public synchronized void flag(int x, int y) {
-    final var state = _tiles[x][y].getState();
+  public synchronized void flag(Tile tile) {
+    final var state = tile.getState();
     if (state == Tile.State.BLANK) {
-      _tiles[x][y] = _tiles[x][y].copyWith(Tile.State.FLAG);
+      _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.FLAG);
     } else if (state == Tile.State.FLAG) {
-      _tiles[x][y] = _tiles[x][y].copyWith(Tile.State.BLANK);
+      _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.BLANK);
     }
   }
 
   /**
    * Expose a tile if Empty. Else, change to HIT_MINE.
    *
-   * @param x X coordinates.
-   * @param y Y coordinates.
+   * @param tile Tile to be exposed.
    */
-  public void expose(int x, int y) {
-    final var tile = _tiles[x][y];
+  public void expose(Tile tile) {
     if (tile instanceof Tile.Empty) {
       treeSearchEmptyTile((Tile.Empty) tile);
     } else if (tile instanceof Tile.Mine) {
-      synchronized (_tiles[x][y]) {
-        _tiles[x][y] = _tiles[x][y].copyWith(Tile.State.HIT_MINE);
+      synchronized (_tiles[tile.x][tile.y]) {
+        _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);
       }
       // TODO: Minus score -1
     }
