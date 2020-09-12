@@ -1,6 +1,7 @@
 package marc.nguyen.minesweeper.client.presentation.views;
 
 import java.awt.BorderLayout;
+import javax.inject.Inject;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.mvc.View;
@@ -12,6 +13,7 @@ public class MainView extends JPanel implements View {
   public final GamePanel gamePanel;
   public final DisplayPanel displayPanel;
 
+  @Inject
   public MainView(Minefield minefield) {
     if (!SwingUtilities.isEventDispatchThread()) {
       throw new RuntimeException("View is running on unsafe thread!");
