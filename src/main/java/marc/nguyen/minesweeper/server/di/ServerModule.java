@@ -1,9 +1,6 @@
 package marc.nguyen.minesweeper.server.di;
 
-import com.google.inject.AbstractModule;
+import dagger.Module;
 
-public class ServerModule extends AbstractModule {
-
-  @Override
-  protected void configure() {}
-}
+@Module
+public class ServerModule {}

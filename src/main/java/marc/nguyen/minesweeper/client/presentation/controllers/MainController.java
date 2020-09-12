@@ -1,16 +1,19 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
+import com.squareup.inject.assisted.Assisted;
+import com.squareup.inject.assisted.AssistedInject;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.ExecutionException;
-import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
+import marc.nguyen.minesweeper.common.data.models.Tile;
 import marc.nguyen.minesweeper.common.data.models.Tile.Empty;
 import marc.nguyen.minesweeper.common.data.models.Tile.State;
 
@@ -18,10 +21,14 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   private final MainModel _model;
   private final MainView _view;
+  private final UpdateMinefield _updateMinefield;
 
-  public MainController(MainModel model, MainView view) {
+  @AssistedInject
+  public MainController(
+      UpdateMinefield updateMinefield, @Assisted MainModel model, @Assisted MainView view) {
     _model = model;
     _view = view;
+    _updateMinefield = updateMinefield;
 
     _view.gamePanel.addButtonListener(this);
   }
@@ -52,26 +59,43 @@ public class MainController implements MouseListener, Controller<MainModel, Main
             for (int j = 0; j < _model.minefield.getHeight(); j++) {
               final var tile = _model.minefield.get(i, j);
               final var state = tile.getState();
+              final var mineButton = _view.gamePanel.mineButtons[i][j];
               if (state == State.BLANK) {
-                _view.gamePanel.mineButtons[i][j].setBackground(Color.WHITE);
+                onBlank(mineButton);
               } else if (state == State.EXPOSED) {
-                _view.gamePanel.mineButtons[i][j].setBackground(Color.GRAY);
-                if (tile instanceof Empty) {
-                  final var neighbors = ((Empty) tile).getNeighborMinesCount();
-                  if (neighbors != 0) {
-                    _view.gamePanel.mineButtons[i][j].setText(String.valueOf(neighbors));
-                  }
-                  _view.gamePanel.mineButtons[i][j].setEnabled(false);
-                }
+                onExposed(mineButton, tile);
               } else if (state == State.FLAG) {
-                _view.gamePanel.mineButtons[i][j].setBackground(Color.CYAN);
+                onFlag(mineButton);
               } else if (state == State.HIT_MINE) {
-                _view.gamePanel.mineButtons[i][j].setBackground(Color.RED);
-                _view.gamePanel.mineButtons[i][j].setEnabled(false);
+                onHitMine(mineButton);
               }
             }
           }
         });
+  }
+
+  private void onHitMine(MineButton mineButton) {
+    mineButton.setBackground(Color.RED);
+    mineButton.setEnabled(false);
+  }
+
+  private void onFlag(MineButton mineButton) {
+    mineButton.setBackground(Color.CYAN);
+  }
+
+  private void onExposed(MineButton mineButton, Tile tile) {
+    mineButton.setBackground(Color.GRAY);
+    if (tile instanceof Empty) {
+      final var neighbors = ((Empty) tile).getNeighborMinesCount();
+      if (neighbors != 0) {
+        mineButton.setText(String.valueOf(neighbors));
+      }
+      mineButton.setEnabled(false);
+    }
+  }
+
+  private void onBlank(MineButton mineButton) {
+    mineButton.setBackground(Color.WHITE);
   }
 
   @Override
@@ -94,6 +118,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
                 updateBombLeft();
                 updateField();
+                _updateMinefield.execute(_model.minefield);
               }
             })
         .start();
@@ -105,13 +130,8 @@ public class MainController implements MouseListener, Controller<MainModel, Main
   @Override
   public void mouseExited(MouseEvent e) {}
 
-  public static class Factory {
-
-    @Inject
-    public Factory() {}
-
-    public MainController create(MainModel model, MainView view) {
-      return new MainController(model, view);
-    }
+  @AssistedInject.Factory
+  public interface Factory {
+    MainController create(MainModel model, MainView view);
   }
 }

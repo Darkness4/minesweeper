@@ -1,13 +1,18 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
-import marc.nguyen.minesweeper.client.core.usecases.NoParams;
+import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import org.jetbrains.annotations.NotNull;
 
-public class FetchMinefield implements UseCase<NoParams, Minefield> {
+public class FetchMinefield implements UseCase<Void, Minefield> {
+
+  @Inject
+  public FetchMinefield() {}
 
   @Override
-  public Minefield execute(NoParams params) {
+  @NotNull
+  public Minefield execute(Void params) {
     // TODO: implements
     return null;
   }

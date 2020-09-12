@@ -2,7 +2,9 @@ package marc.nguyen.minesweeper.common.data.models;
 
 import java.io.Serializable;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,6 +28,30 @@ public abstract class Tile implements Serializable {
     this.x = x;
     this.y = y;
     _state = state;
+  }
+
+  /**
+   * Look for the neighbor based on the indices stored in this object in a 2D Array of tiles.
+   *
+   * @param tiles A 2D array of Tile.
+   * @return Neighbors Tiles of this.
+   */
+  public Stream<Tile> getNeighborsTilesIn(Tile[][] tiles) {
+    final int maxX = tiles.length - 1;
+    final int maxY = tiles[0].length - 1;
+
+    final int startX = x > 0 ? x - 1 : x;
+    final int endX = x < maxX ? x + 1 : x;
+    final int startY = y > 0 ? y - 1 : y;
+    final int endY = y < maxY ? y + 1 : y;
+
+    return IntStream.rangeClosed(startX, endX)
+        .mapToObj(
+            i ->
+                IntStream.rangeClosed(startY, endY)
+                    .filter(j -> i != x || j != y)
+                    .mapToObj(j -> tiles[i][j]))
+        .flatMap(Function.identity());
   }
 
   /**
@@ -61,13 +87,13 @@ public abstract class Tile implements Serializable {
   }
 
   /**
-   * Update the <code>State</code> of the <code>Tile</code>
+   * Copy the Tile and change the state.
    *
    * @param state <code>State</code> of the <code>Tile</code>
    * @return A new instance of the updated <code>Tile</code>.
    */
   @NotNull
-  public abstract Tile update(@NotNull State state);
+  public abstract Tile copyWith(@NotNull State state);
 
   /** <code>State</code> of a tile based on the Minesweeper */
   public enum State {
@@ -83,7 +109,7 @@ public abstract class Tile implements Serializable {
       super(x, y);
     }
 
-    private Mine(int x, int y, @NonNull State state) {
+    private Mine(int x, int y, @NotNull State state) {
       super(x, y, state);
     }
 
@@ -100,7 +126,7 @@ public abstract class Tile implements Serializable {
      */
     @Override
     @NotNull
-    public Mine update(@NotNull State state) {
+    public Mine copyWith(@NotNull State state) {
       return new Mine(x, y, state);
     }
   }
@@ -151,7 +177,7 @@ public abstract class Tile implements Serializable {
      */
     @Override
     @NotNull
-    public Empty update(@NotNull State state) {
+    public Empty copyWith(@NotNull State state) {
       return new Empty(x, y, state, this._adjacentMines);
     }
 
@@ -161,7 +187,7 @@ public abstract class Tile implements Serializable {
      * @return A new instance of the updated <code>Tile</code>.
      */
     @NotNull
-    public Empty incrementAdjacentMinesAndGet() {
+    public Empty copyAndIncrementAdjacentMines() {
       return new Empty(x, y, this.getState(), this._adjacentMines + 1);
     }
 

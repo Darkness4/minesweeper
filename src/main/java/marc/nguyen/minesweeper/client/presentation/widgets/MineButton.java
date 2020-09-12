@@ -19,7 +19,7 @@ public class MineButton extends JButton {
 
     setText(" ");
     setName("Button_" + x + '_' + y);
-    setPreferredSize(new Dimension(32, 32));
+    setPreferredSize(new Dimension(20, 20));
     setMargin(new Insets(0, 0, 0, 0));
     setFocusable(false);
   }
