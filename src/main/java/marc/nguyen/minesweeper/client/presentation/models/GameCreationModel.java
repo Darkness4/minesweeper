@@ -13,9 +13,36 @@ public class GameCreationModel implements Model {
       new Vector<>(Arrays.asList(Level.EASY, Level.MEDIUM, Level.HARD, Level.CUSTOM));
 
   @NotNull private Level level = Level.EASY;
+  private int length = 10;
+  private int height = 10;
+  private int mines = 10;
 
   @Inject
   public GameCreationModel() {}
+
+  public int getLength() {
+    return length;
+  }
+
+  public void setLength(int length) {
+    this.length = length;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
+  }
+
+  public int getMines() {
+    return mines;
+  }
+
+  public void setMines(int mines) {
+    this.mines = mines;
+  }
 
   public @NotNull Level getLevel() {
     return level;

@@ -14,5 +14,7 @@ public class GameCreationDialog extends Dialog {
       GameCreationController.Factory gameCreationControllerFactory) {
     super(view);
     gameCreationControllerFactory.create(model, view);
+
+    setTitle("Create a new game.");
   }
 }

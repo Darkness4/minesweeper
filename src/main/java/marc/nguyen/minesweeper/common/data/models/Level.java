@@ -6,9 +6,9 @@ public enum Level {
   HARD(16, 30, 100),
   CUSTOM(-1, -1, -1);
 
-  final int length;
-  final int height;
-  final int mines;
+  public final int length;
+  public final int height;
+  public final int mines;
 
   Level(int length, int height, int mines) {
     this.length = length;

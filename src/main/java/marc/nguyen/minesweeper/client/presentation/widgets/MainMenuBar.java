@@ -10,9 +10,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
+import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
 
 public class MainMenuBar extends JMenuBar implements ActionListener {
+
   final JMenu menu;
 
   enum Action {
@@ -53,7 +54,8 @@ public class MainMenuBar extends JMenuBar implements ActionListener {
     final var action = e.getActionCommand();
     if (e.getActionCommand() != null) {
       if (action.equals(Action.CREATE.name())) {
-        final var view = new Dialog(new GameCreationView());
+        SwingUtilities.windowForComponent(this).dispose();
+        DaggerGameCreationComponent.builder().build().gameCreationDialog();
       } else if (action.equals(Action.QUIT.name())) {
         SwingUtilities.windowForComponent(this).dispose();
       }
