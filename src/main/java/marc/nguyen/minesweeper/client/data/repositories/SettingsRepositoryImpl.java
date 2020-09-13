@@ -3,16 +3,17 @@ package marc.nguyen.minesweeper.client.data.repositories;
 import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
-import marc.nguyen.minesweeper.client.data.database.SettingsDB;
+import marc.nguyen.minesweeper.client.data.database.SettingsDb;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
 public class SettingsRepositoryImpl implements SettingsRepository {
-  final SettingsDB db;
+
+  final SettingsDb db;
 
   @Inject
-  public SettingsRepositoryImpl(SettingsDB db) {
+  public SettingsRepositoryImpl(SettingsDb db) {
     this.db = db;
   }
 

@@ -18,7 +18,7 @@ public class GameCreationModel implements Model {
   private int height = 10;
   private int mines = 10;
   private String address = InetAddress.getLoopbackAddress().getHostName();
-  private String settingsName;
+  private String settingsName = "My Settings";
 
   @Inject
   public GameCreationModel() {}

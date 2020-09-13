@@ -5,7 +5,9 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 
 public class SavedSettingsPanel extends JPanel {
@@ -20,7 +22,10 @@ public class SavedSettingsPanel extends JPanel {
     setLayout(new BorderLayout());
 
     settingsList = new JList<>();
-    add(settingsList, BorderLayout.CENTER);
+    settingsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    final var jScrollPane = new JScrollPane(settingsList);
+    jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    add(jScrollPane, BorderLayout.CENTER);
 
     final var bottomFlow = new JPanel(new FlowLayout());
 
@@ -44,5 +49,6 @@ public class SavedSettingsPanel extends JPanel {
     loadButton.addActionListener(listener);
     deleteButton.addActionListener(listener);
     settingsNameTextField.getDocument().addDocumentListener(listener);
+    settingsList.addListSelectionListener(listener);
   }
 }

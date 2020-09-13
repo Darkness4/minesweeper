@@ -17,6 +17,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import marc.nguyen.minesweeper.client.di.components.DaggerMainComponent;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
@@ -30,7 +32,11 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
 public class GameCreationController
-    implements ActionListener, ItemListener, ChangeListener, DocumentListener {
+    implements ActionListener,
+        ItemListener,
+        ChangeListener,
+        DocumentListener,
+        ListSelectionListener {
 
   private final GameCreationModel _model;
   private final GameCreationView _view;
@@ -81,14 +87,19 @@ public class GameCreationController
               final String action = e.getActionCommand();
 
               if (action != null) {
-                if (action.equals("start")) {
-                  onStartButtonPushed();
-                } else if (action.equals("load_settings")) {
-                  onLoadSettingsPushed();
-                } else if (action.equals("save_settings")) {
-                  onSaveSettingsPushed();
-                } else if (action.equals("delete_settings")) {
-                  onDeleteSettingsPushed();
+                switch (action) {
+                  case "start":
+                    onStartButtonPushed();
+                    break;
+                  case "load_settings":
+                    onLoadSettingsPushed();
+                    break;
+                  case "save_settings":
+                    onSaveSettingsPushed();
+                    break;
+                  case "delete_settings":
+                    onDeleteSettingsPushed();
+                    break;
                 }
               }
             })
@@ -96,13 +107,12 @@ public class GameCreationController
   }
 
   private void onDeleteSettingsPushed() {
-    System.out.println("Delete");
     _deleteSettings.execute(_model.getSettingsName());
     refreshListModel();
+    validateSettingsName();
   }
 
   private void onSaveSettingsPushed() {
-    System.out.println("Save");
     try {
       _saveSettings.execute(
           new Settings(
@@ -113,6 +123,7 @@ public class GameCreationController
               _model.getMines(),
               _model.getLevel()));
       refreshListModel();
+      validateSettingsName();
     } catch (UnknownHostException unknownHostException) {
       SwingUtilities.invokeLater(
           () ->
@@ -126,13 +137,11 @@ public class GameCreationController
 
   private void refreshListModel() {
     final List<String> settings = _fetchAllSettingsName.execute(null);
-    System.out.println(settings);
     listModel.clear();
     settings.forEach(listModel::addElement);
   }
 
   private void onLoadSettingsPushed() {
-    System.out.println("Load");
     final Settings settings =
         _loadSettings.execute(_view.savedSettingsPanel.settingsNameTextField.getText());
     _model.setHeight(settings.height);
@@ -276,17 +285,43 @@ public class GameCreationController
     new Thread(
             () -> {
               final var text = _view.savedSettingsPanel.settingsNameTextField.getText();
-              if (text == null || text.isEmpty()) {
-                SwingUtilities.invokeLater(
-                    () -> _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.RED));
-              } else {
-                _model.setSettingsName(_view.savedSettingsPanel.settingsNameTextField.getText());
-                SwingUtilities.invokeLater(
-                    () ->
-                        _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.WHITE));
-              }
+              _model.setSettingsName(text);
+              validateSettingsName();
             })
         .start();
+  }
+
+  private void validateSettingsName() {
+    final var text = _model.getSettingsName();
+    if (text == null || text.isEmpty()) {
+      SwingUtilities.invokeLater(
+          () -> {
+            _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.RED);
+            _view.savedSettingsPanel.saveButton.setEnabled(false);
+            _view.savedSettingsPanel.loadButton.setEnabled(false);
+            _view.savedSettingsPanel.deleteButton.setEnabled(false);
+          });
+    } else {
+      SwingUtilities.invokeLater(
+          () -> {
+            _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.WHITE);
+            _view.savedSettingsPanel.saveButton.setEnabled(true);
+            _view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
+            _view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
+          });
+    }
+  }
+
+  @Override
+  public void valueChanged(ListSelectionEvent e) {
+    if (e.getSource() == _view.savedSettingsPanel.settingsList) {
+      final var value = _view.savedSettingsPanel.settingsList.getSelectedValue();
+      if (value != null) {
+        _model.setSettingsName(value);
+        SwingUtilities.invokeLater(
+            () -> _view.savedSettingsPanel.settingsNameTextField.setText(value));
+      }
+    }
   }
 
   @AssistedInject.Factory

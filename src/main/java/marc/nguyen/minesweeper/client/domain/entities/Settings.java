@@ -1,10 +1,11 @@
 package marc.nguyen.minesweeper.client.domain.entities;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Objects;
 import marc.nguyen.minesweeper.common.data.models.Level;
 
-public class Settings {
+public class Settings implements Serializable {
 
   public final String name;
   public final InetAddress address;

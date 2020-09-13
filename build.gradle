@@ -62,7 +62,7 @@ task serverShadowJar(type: ShadowJar) {
     }
     archiveClassifier.set("all-server")
     from sourceSets.main.output
-    configurations = [ configurations.runtime ]
+    configurations = [configurations.runtime]
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
@@ -88,6 +88,6 @@ task clientShadowJar(type: ShadowJar) {
     }
     archiveClassifier.set("all-client")
     from sourceSets.main.output
-    configurations = [ configurations.runtime ]
+    configurations = [configurations.runtime]
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
