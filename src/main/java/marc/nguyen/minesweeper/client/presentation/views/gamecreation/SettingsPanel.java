@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
+import marc.nguyen.minesweeper.client.presentation.utils.SpringUtilities;
 import marc.nguyen.minesweeper.common.data.models.Level;
 
 public class SettingsPanel extends JPanel {
@@ -40,17 +41,9 @@ public class SettingsPanel extends JPanel {
 
     /* IP settings */
     final var ipLabel = new JLabel("IP Address");
-    ipTextField = new JTextField("127.0.0.1");
+    ipTextField = new JTextField();
     add(ipLabel);
     add(ipTextField);
-    // Align label
-    _layout.putConstraint(SpringLayout.NORTH, ipLabel, 0, SpringLayout.NORTH, ipTextField);
-    _layout.putConstraint(SpringLayout.SOUTH, ipLabel, 0, SpringLayout.SOUTH, ipTextField);
-    _layout.putConstraint(SpringLayout.WEST, ipLabel, 5, SpringLayout.WEST, this);
-    // Align field
-    _layout.putConstraint(SpringLayout.NORTH, ipTextField, 5, SpringLayout.NORTH, this);
-    _layout.putConstraint(SpringLayout.WEST, ipTextField, 5, SpringLayout.EAST, ipLabel);
-    _layout.putConstraint(SpringLayout.EAST, ipTextField, -5, SpringLayout.EAST, this);
 
     /* Level settings */
     final var levelLabel = new JLabel("Level");
@@ -72,66 +65,43 @@ public class SettingsPanel extends JPanel {
         });
     add(levelLabel);
     add(levelComboBox);
-    // Align label
-    _layout.putConstraint(SpringLayout.NORTH, levelLabel, 0, SpringLayout.NORTH, levelComboBox);
-    _layout.putConstraint(SpringLayout.SOUTH, levelLabel, 0, SpringLayout.SOUTH, levelComboBox);
-    _layout.putConstraint(SpringLayout.WEST, levelLabel, 5, SpringLayout.WEST, this);
-    // Align field
-    _layout.putConstraint(SpringLayout.NORTH, levelComboBox, 5, SpringLayout.SOUTH, ipTextField);
-    _layout.putConstraint(SpringLayout.EAST, levelComboBox, -5, SpringLayout.EAST, this);
-    _layout.putConstraint(SpringLayout.WEST, levelComboBox, 5, SpringLayout.EAST, levelLabel);
 
     /* Custom Settings */
     sizeLabel = new JLabel("Size");
-
     final var sizePanel = new JPanel(new GridLayout(1, 2));
     lengthSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
     heightSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+    sizePanel.add(lengthSpinner);
+    sizePanel.add(heightSpinner);
+    add(sizeLabel);
+    add(sizePanel);
+
     minesLabel = new JLabel("Mines");
     minesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
     disableCustomSettings();
-    add(sizeLabel);
     add(minesLabel);
-    add(sizePanel);
-    sizePanel.add(lengthSpinner);
-    sizePanel.add(heightSpinner);
-
     add(minesSpinner);
 
-    // Size Label
-    _layout.putConstraint(SpringLayout.NORTH, sizeLabel, 0, SpringLayout.NORTH, sizePanel);
-    _layout.putConstraint(SpringLayout.SOUTH, sizeLabel, 0, SpringLayout.SOUTH, sizePanel);
-    _layout.putConstraint(SpringLayout.WEST, sizeLabel, 5, SpringLayout.WEST, this);
+    SpringUtilities.makeCompactGrid(this, 4, 2, 6, 6, 6, 6);
 
-    // SizePanel
-    _layout.putConstraint(SpringLayout.NORTH, sizePanel, 5, SpringLayout.SOUTH, levelComboBox);
-    _layout.putConstraint(SpringLayout.WEST, sizePanel, 5, SpringLayout.EAST, sizeLabel);
-    _layout.putConstraint(SpringLayout.EAST, sizePanel, -5, SpringLayout.EAST, this);
-    // Mines Label
-    _layout.putConstraint(SpringLayout.NORTH, minesLabel, 0, SpringLayout.NORTH, minesSpinner);
-    _layout.putConstraint(SpringLayout.SOUTH, minesLabel, 0, SpringLayout.SOUTH, minesSpinner);
-    _layout.putConstraint(SpringLayout.WEST, minesLabel, 5, SpringLayout.WEST, this);
-
-    // Mines
-    _layout.putConstraint(SpringLayout.NORTH, minesSpinner, 5, SpringLayout.SOUTH, sizePanel);
-    _layout.putConstraint(SpringLayout.WEST, minesSpinner, 5, SpringLayout.EAST, minesLabel);
-    _layout.putConstraint(SpringLayout.EAST, minesSpinner, -5, SpringLayout.EAST, this);
-
+    /* Start */
     startButton = new JButton("Create game !");
+    startButton.setActionCommand("start");
+    add(startButton);
     // Align button
     _layout.putConstraint(SpringLayout.NORTH, startButton, 5, SpringLayout.SOUTH, minesSpinner);
     _layout.putConstraint(SpringLayout.WEST, startButton, 5, SpringLayout.WEST, this);
     _layout.putConstraint(SpringLayout.EAST, startButton, -5, SpringLayout.EAST, this);
     // Expand Pane
     _layout.putConstraint(SpringLayout.SOUTH, this, 5, SpringLayout.SOUTH, startButton);
-    startButton.setActionCommand("start");
-    add(startButton);
+
+    setOpaque(true);
   }
 
   public void addListener(GameCreationController listener) {
     startButton.addActionListener(listener);
     levelComboBox.addItemListener(listener);
-    ipTextField.addActionListener(listener);
+    ipTextField.getDocument().addDocumentListener(listener);
     lengthSpinner.addChangeListener(listener);
     heightSpinner.addChangeListener(listener);
     minesSpinner.addChangeListener(listener);

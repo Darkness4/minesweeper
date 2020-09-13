@@ -1,5 +1,6 @@
 package marc.nguyen.minesweeper.client.presentation.models;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.inject.Inject;
@@ -16,9 +17,19 @@ public class GameCreationModel implements Model {
   private int length = 10;
   private int height = 10;
   private int mines = 10;
+  private String address = InetAddress.getLoopbackAddress().getHostName();
+  private String settingsName;
 
   @Inject
   public GameCreationModel() {}
+
+  public String getSettingsName() {
+    return settingsName;
+  }
+
+  public void setSettingsName(String settingsName) {
+    this.settingsName = settingsName;
+  }
 
   public int getLength() {
     return length;
@@ -50,5 +61,13 @@ public class GameCreationModel implements Model {
 
   public void setLevel(@NotNull Level level) {
     this.level = level;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
   }
 }

@@ -11,7 +11,7 @@ import marc.nguyen.minesweeper.client.presentation.views.gamecreation.SettingsPa
 public final class GameCreationView extends JPanel implements View {
 
   public final SettingsPanel settingsPanel;
-  public final SavedSettingsPanel savedSettingsList;
+  public final SavedSettingsPanel savedSettingsPanel;
 
   @Inject
   public GameCreationView() {
@@ -25,8 +25,8 @@ public final class GameCreationView extends JPanel implements View {
 
     add(settingsPanel, BorderLayout.CENTER);
 
-    savedSettingsList = new SavedSettingsPanel();
+    savedSettingsPanel = new SavedSettingsPanel();
 
-    add(savedSettingsList, BorderLayout.EAST);
+    add(savedSettingsPanel, BorderLayout.EAST);
   }
 }
