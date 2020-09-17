@@ -23,6 +23,7 @@ public final class MainFrame extends JFrame {
 
     pack();
     setLocationRelativeTo(null); // Center of the screen
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setVisible(true);
   }
 }

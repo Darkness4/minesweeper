@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.presentation.controllers;
 
 import com.squareup.inject.assisted.Assisted;
 import com.squareup.inject.assisted.AssistedInject;
+import dagger.Lazy;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -21,11 +22,11 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   private final MainModel _model;
   private final MainView _view;
-  private final UpdateMinefield _updateMinefield;
+  private final Lazy<UpdateMinefield> _updateMinefield;
 
   @AssistedInject
   public MainController(
-      UpdateMinefield updateMinefield, @Assisted MainModel model, @Assisted MainView view) {
+      Lazy<UpdateMinefield> updateMinefield, @Assisted MainModel model, @Assisted MainView view) {
     _model = model;
     _view = view;
     _updateMinefield = updateMinefield;
@@ -120,7 +121,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
                 updateBombLeft();
                 updateField();
-                _updateMinefield.execute(_model.minefield);
+                _updateMinefield.get().execute(_model.minefield);
               }
             })
         .start();

@@ -29,7 +29,7 @@ public class SavedSettingsPanel extends JPanel {
 
     final var bottomFlow = new JPanel(new FlowLayout());
 
-    settingsNameTextField = new JTextField(20);
+    settingsNameTextField = new JTextField(10);
     saveButton = new JButton("Save");
     saveButton.setActionCommand("save_settings");
     loadButton = new JButton("Load");

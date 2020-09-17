@@ -5,12 +5,12 @@ import javax.inject.Inject;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.mvc.View;
+import marc.nguyen.minesweeper.client.presentation.views.gamecreation.EditSettingsPanel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.SavedSettingsPanel;
-import marc.nguyen.minesweeper.client.presentation.views.gamecreation.SettingsPanel;
 
 public final class GameCreationView extends JPanel implements View {
 
-  public final SettingsPanel settingsPanel;
+  public final EditSettingsPanel editSettingsPanel;
   public final SavedSettingsPanel savedSettingsPanel;
 
   @Inject
@@ -21,12 +21,10 @@ public final class GameCreationView extends JPanel implements View {
 
     setLayout(new BorderLayout());
 
-    settingsPanel = new SettingsPanel();
-
-    add(settingsPanel, BorderLayout.CENTER);
+    editSettingsPanel = new EditSettingsPanel();
+    add(editSettingsPanel, BorderLayout.CENTER);
 
     savedSettingsPanel = new SavedSettingsPanel();
-
     add(savedSettingsPanel, BorderLayout.EAST);
   }
 }

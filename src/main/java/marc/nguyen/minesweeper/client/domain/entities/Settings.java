@@ -4,20 +4,29 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Objects;
 import marc.nguyen.minesweeper.common.data.models.Level;
+import org.jetbrains.annotations.NotNull;
 
 public class Settings implements Serializable {
 
-  public final String name;
-  public final InetAddress address;
+  @NotNull public final String name;
+  @NotNull public final InetAddress address;
+  public final int port;
   public final int length;
   public final int height;
   public final int mines;
-  public final Level level;
+  @NotNull public final Level level;
 
   public Settings(
-      String name, InetAddress address, int length, int height, int mines, Level level) {
+      @NotNull String name,
+      @NotNull InetAddress address,
+      int port,
+      int length,
+      int height,
+      int mines,
+      @NotNull Level level) {
     this.name = name;
     this.address = address;
+    this.port = port;
     this.length = length;
     this.height = height;
     this.mines = mines;
@@ -32,6 +41,8 @@ public class Settings implements Serializable {
         + '\''
         + ", address="
         + address
+        + ", port="
+        + port
         + ", length="
         + length
         + ", height="
@@ -52,7 +63,8 @@ public class Settings implements Serializable {
       return false;
     }
     Settings settings = (Settings) o;
-    return length == settings.length
+    return port == settings.port
+        && length == settings.length
         && height == settings.height
         && mines == settings.mines
         && name.equals(settings.name)
@@ -62,6 +74,6 @@ public class Settings implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, address, length, height, mines, level);
+    return Objects.hash(name, address, port, length, height, mines, level);
   }
 }

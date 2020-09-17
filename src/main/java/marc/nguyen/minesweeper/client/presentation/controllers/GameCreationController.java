@@ -2,12 +2,12 @@ package marc.nguyen.minesweeper.client.presentation.controllers;
 
 import com.squareup.inject.assisted.Assisted;
 import com.squareup.inject.assisted.AssistedInject;
+import dagger.Lazy;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -41,21 +41,21 @@ public class GameCreationController
   private final GameCreationModel _model;
   private final GameCreationView _view;
   private final DefaultListModel<String> listModel;
-  private final Connect _connect;
-  private final LoadSettings _loadSettings;
-  private final SaveSettings _saveSettings;
-  private final DeleteSettings _deleteSettings;
-  private final FetchAllSettingsName _fetchAllSettingsName;
+  private final Lazy<Connect> _connect;
+  private final Lazy<LoadSettings> _loadSettings;
+  private final Lazy<SaveSettings> _saveSettings;
+  private final Lazy<DeleteSettings> _deleteSettings;
+  private final Lazy<FetchAllSettingsName> _fetchAllSettingsName;
 
   @AssistedInject
   public GameCreationController(
-      Connect connect,
-      LoadSettings loadSettings,
-      SaveSettings saveSettings,
-      DeleteSettings deleteSettings,
+      Lazy<Connect> connect,
+      Lazy<LoadSettings> loadSettings,
+      Lazy<SaveSettings> saveSettings,
+      Lazy<DeleteSettings> deleteSettings,
+      Lazy<FetchAllSettingsName> fetchAllSettingsName,
       @Assisted GameCreationModel model,
-      @Assisted GameCreationView view,
-      FetchAllSettingsName fetchAllSettingsName) {
+      @Assisted GameCreationView view) {
     _model = model;
     _view = view;
     _connect = connect;
@@ -66,12 +66,12 @@ public class GameCreationController
 
     listModel = new DefaultListModel<>();
     _view.savedSettingsPanel.settingsList.setModel(listModel);
-    _view.settingsPanel.addListener(this);
+    _view.editSettingsPanel.addListener(this);
     _view.savedSettingsPanel.addListener(this);
 
-    final List<String> settings = _fetchAllSettingsName.execute(null);
+    final List<String> settings = _fetchAllSettingsName.get().execute(null);
     settings.forEach(listModel::addElement);
-    _view.settingsPanel.ipTextField.setText(_model.getAddress());
+    _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(_model.getAddress());
     _view.savedSettingsPanel.settingsNameTextField.setText(_model.getSettingsName());
   }
 
@@ -107,23 +107,14 @@ public class GameCreationController
   }
 
   private void onDeleteSettingsPushed() {
-    _deleteSettings.execute(_model.getSettingsName());
+    _deleteSettings.get().execute(_model.getSettingsName());
     refreshListModel();
-    validateSettingsName();
   }
 
   private void onSaveSettingsPushed() {
     try {
-      _saveSettings.execute(
-          new Settings(
-              _model.getSettingsName(),
-              InetAddress.getByName(_model.getAddress()),
-              _model.getLength(),
-              _model.getHeight(),
-              _model.getMines(),
-              _model.getLevel()));
+      _saveSettings.get().execute(_model.toEntity());
       refreshListModel();
-      validateSettingsName();
     } catch (UnknownHostException unknownHostException) {
       SwingUtilities.invokeLater(
           () ->
@@ -136,45 +127,59 @@ public class GameCreationController
   }
 
   private void refreshListModel() {
-    final List<String> settings = _fetchAllSettingsName.execute(null);
+    final List<String> settings = _fetchAllSettingsName.get().execute(null);
     listModel.clear();
     settings.forEach(listModel::addElement);
   }
 
   private void onLoadSettingsPushed() {
     final Settings settings =
-        _loadSettings.execute(_view.savedSettingsPanel.settingsNameTextField.getText());
+        _loadSettings.get().execute(_view.savedSettingsPanel.settingsNameTextField.getText());
     _model.setHeight(settings.height);
     _model.setLength(settings.length);
+    _model.setPort(settings.port);
     _model.setMines(settings.mines);
     _model.setLevel(settings.level);
     _model.setAddress(settings.address.getHostAddress());
     SwingUtilities.invokeLater(
         () -> {
           _view.savedSettingsPanel.settingsNameTextField.setText(settings.name);
-          _view.settingsPanel.ipTextField.setText(settings.address.getHostAddress());
-          _view.settingsPanel.lengthSpinner.setValue(settings.length);
-          _view.settingsPanel.heightSpinner.setValue(settings.height);
-          _view.settingsPanel.minesSpinner.setValue(settings.mines);
-          _view.settingsPanel.levelComboBox.setSelectedItem(settings.level);
+          _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(
+              settings.address.getHostAddress());
+          _view.editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
+          _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
+          _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
+          _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
+          _view.editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(settings.level);
         });
   }
 
   private void onStartButtonPushed() {
     // TODO: Connect
-    final var level = _model.getLevel();
+    try {
+      _connect.get().execute(new Connect.Params(_model.getInetAddress(), _model.getPort()));
+      final var level = _model.getLevel();
 
-    final Minefield minefield;
-    if (level == Level.CUSTOM) {
-      minefield = new Minefield(_model.getLength(), _model.getHeight());
-      minefield.placeMines(_model.getMines());
-    } else {
-      minefield = new Minefield(level);
+      final Minefield minefield;
+      if (level == Level.CUSTOM) {
+        minefield = new Minefield(_model.getLength(), _model.getHeight());
+        minefield.placeMines(_model.getMines());
+      } else {
+        minefield = new Minefield(level);
+      }
+
+      SwingUtilities.windowForComponent(_view).dispose();
+      SwingUtilities.invokeLater(
+          () -> DaggerMainComponent.builder().minefield(minefield).build().mainFrame());
+    } catch (UnknownHostException e) {
+      SwingUtilities.invokeLater(
+          () ->
+              JOptionPane.showMessageDialog(
+                  null,
+                  String.format("Error: Incorrect Internet Address %s", _model.getAddress()),
+                  "Error Message",
+                  JOptionPane.ERROR_MESSAGE));
     }
-
-    SwingUtilities.windowForComponent(_view).dispose();
-    SwingUtilities.invokeLater(
-        () -> DaggerMainComponent.builder().minefield(minefield).build().mainFrame());
   }
 
   /**
@@ -189,14 +194,14 @@ public class GameCreationController
       final Level level = (Level) item;
       _model.setLevel(level);
       if (level == Level.CUSTOM) {
-        SwingUtilities.invokeLater(_view.settingsPanel::enableCustomSettings);
+        SwingUtilities.invokeLater(_view.editSettingsPanel.gameSettingsPanel::enableCustomSettings);
       } else {
         SwingUtilities.invokeLater(
             () -> {
-              _view.settingsPanel.disableCustomSettings();
-              _view.settingsPanel.lengthSpinner.setValue(level.length);
-              _view.settingsPanel.heightSpinner.setValue(level.height);
-              _view.settingsPanel.minesSpinner.setValue(level.mines);
+              _view.editSettingsPanel.gameSettingsPanel.disableCustomSettings();
+              _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(level.length);
+              _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(level.height);
+              _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(level.mines);
             });
       }
     }
@@ -210,12 +215,16 @@ public class GameCreationController
   @Override
   public void stateChanged(ChangeEvent e) {
     final var source = e.getSource();
-    if (source == _view.settingsPanel.lengthSpinner) {
-      _model.setLength((Integer) _view.settingsPanel.lengthSpinner.getValue());
-    } else if (source == _view.settingsPanel.heightSpinner) {
-      _model.setHeight((Integer) _view.settingsPanel.heightSpinner.getValue());
-    } else if (source == _view.settingsPanel.minesSpinner) {
-      _model.setMines((Integer) _view.settingsPanel.minesSpinner.getValue());
+    if (source == _view.editSettingsPanel.gameSettingsPanel.lengthSpinner) {
+      _model.setLength(
+          (Integer) _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.getValue());
+    } else if (source == _view.editSettingsPanel.gameSettingsPanel.heightSpinner) {
+      _model.setHeight(
+          (Integer) _view.editSettingsPanel.gameSettingsPanel.heightSpinner.getValue());
+    } else if (source == _view.editSettingsPanel.gameSettingsPanel.minesSpinner) {
+      _model.setMines((Integer) _view.editSettingsPanel.gameSettingsPanel.minesSpinner.getValue());
+    } else if (source == _view.editSettingsPanel.networkSettingsPanel.portSpinner) {
+      _model.setPort((Integer) _view.editSettingsPanel.networkSettingsPanel.portSpinner.getValue());
     }
   }
 
@@ -227,7 +236,7 @@ public class GameCreationController
   @Override
   public void insertUpdate(DocumentEvent e) {
     final var doc = e.getDocument();
-    if (doc == _view.settingsPanel.ipTextField.getDocument()) {
+    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
       onIpAddressInput();
     } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
       onNameSettingsInput();
@@ -242,7 +251,7 @@ public class GameCreationController
   @Override
   public void removeUpdate(DocumentEvent e) {
     final var doc = e.getDocument();
-    if (doc == _view.settingsPanel.ipTextField.getDocument()) {
+    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
       onIpAddressInput();
     } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
       onNameSettingsInput();
@@ -257,7 +266,7 @@ public class GameCreationController
   @Override
   public void changedUpdate(DocumentEvent e) {
     final var doc = e.getDocument();
-    if (doc == _view.settingsPanel.ipTextField.getDocument()) {
+    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
       onIpAddressInput();
     } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
       onNameSettingsInput();
@@ -265,20 +274,7 @@ public class GameCreationController
   }
 
   private void onIpAddressInput() {
-    new Thread(
-            () -> {
-              try {
-                final var address =
-                    InetAddress.getByName(_view.settingsPanel.ipTextField.getText());
-                _model.setAddress(address.getHostAddress());
-                SwingUtilities.invokeLater(
-                    () -> _view.settingsPanel.ipTextField.setBackground(Color.WHITE));
-              } catch (UnknownHostException unknownHostException) {
-                SwingUtilities.invokeLater(
-                    () -> _view.settingsPanel.ipTextField.setBackground(Color.RED));
-              }
-            })
-        .start();
+    _model.setAddress(_view.editSettingsPanel.networkSettingsPanel.ipTextField.getText());
   }
 
   private void onNameSettingsInput() {
@@ -286,30 +282,17 @@ public class GameCreationController
             () -> {
               final var text = _view.savedSettingsPanel.settingsNameTextField.getText();
               _model.setSettingsName(text);
-              validateSettingsName();
+              final var isValid = _model.isSettingsNameValid();
+              SwingUtilities.invokeLater(
+                  () -> {
+                    _view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
+                    _view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
+                    _view.savedSettingsPanel.saveButton.setEnabled(isValid);
+                    _view.savedSettingsPanel.settingsNameTextField.setBackground(
+                        isValid ? Color.WHITE : Color.RED);
+                  });
             })
         .start();
-  }
-
-  private void validateSettingsName() {
-    final var text = _model.getSettingsName();
-    if (text == null || text.isEmpty()) {
-      SwingUtilities.invokeLater(
-          () -> {
-            _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.RED);
-            _view.savedSettingsPanel.saveButton.setEnabled(false);
-            _view.savedSettingsPanel.loadButton.setEnabled(false);
-            _view.savedSettingsPanel.deleteButton.setEnabled(false);
-          });
-    } else {
-      SwingUtilities.invokeLater(
-          () -> {
-            _view.savedSettingsPanel.settingsNameTextField.setBackground(Color.WHITE);
-            _view.savedSettingsPanel.saveButton.setEnabled(true);
-            _view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
-            _view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
-          });
-    }
   }
 
   @Override

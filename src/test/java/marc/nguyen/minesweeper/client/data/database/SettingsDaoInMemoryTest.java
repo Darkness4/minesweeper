@@ -10,43 +10,44 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SettingsDbInMemoryTest {
+class SettingsDaoInMemoryTest {
 
-  SettingsDb db;
+  SettingsDao db;
 
   @BeforeEach
   void setUp() {
-    db = new SettingsDbInMemory();
+    db = new SettingsDaoInMemory();
   }
 
   @Test
   void delete() {
     // Arrange
-    db.insert(new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY));
+    db.insert(
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY));
     // Act
-    db.delete("name");
+    db.deleteByName("name");
     // Assert
-    assertNull(db.find("name"));
+    assertNull(db.findByName("name"));
   }
 
   @Test
   void insert() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     // Act
     db.insert(tSettings);
     // Assert
-    assertEquals(db.find("name"), tSettings);
+    assertEquals(db.findByName("name"), tSettings);
   }
 
   @Test
   void findAll() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     final var tSettings2 =
-        new Settings("name2", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name2", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     db.insert(tSettings);
     db.insert(tSettings2);
     // Act
@@ -59,13 +60,13 @@ class SettingsDbInMemoryTest {
   void find() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     final var tSettings2 =
-        new Settings("name2", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name2", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     db.insert(tSettings);
     db.insert(tSettings2);
     // Act
-    final var result = db.find("name");
+    final var result = db.findByName("name");
     // Assert
     assertEquals(result, tSettings);
   }

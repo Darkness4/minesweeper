@@ -1,5 +1,6 @@
 package marc.nguyen.minesweeper.client.di.modules;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
@@ -41,19 +42,19 @@ public abstract class DomainModule {
 
   @Provides
   @Singleton
-  static DeleteSettings provideDeleteSettings(SettingsRepository repository) {
+  static DeleteSettings provideDeleteSettings(Lazy<SettingsRepository> repository) {
     return new DeleteSettings(repository);
   }
 
   @Provides
   @Singleton
-  static LoadSettings provideLoadSettings(SettingsRepository repository) {
+  static LoadSettings provideLoadSettings(Lazy<SettingsRepository> repository) {
     return new LoadSettings(repository);
   }
 
   @Provides
   @Singleton
-  static SaveSettings provideSaveSettings(SettingsRepository repository) {
+  static SaveSettings provideSaveSettings(Lazy<SettingsRepository> repository) {
     return new SaveSettings(repository);
   }
 }

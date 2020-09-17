@@ -1,8 +1,5 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
-    id 'com.github.johnrengelman.shadow' version '6.0.0'
     id 'java'
 }
 
@@ -26,6 +23,9 @@ compileJava {
 apply from: rootProject.file('gradle/install-git-hooks.gradle')
 
 dependencies {
+    // Persistent Cache
+    implementation 'org.xerial:sqlite-jdbc:3.32.3.2'
+
     // DI
     implementation 'com.google.dagger:dagger:2.29.1'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.29.1'
@@ -54,17 +54,14 @@ task serverJar(type: Jar) {
         )
     }
     archiveClassifier.set("server")
-    from sourceSets.main.output
-}
 
-task serverShadowJar(type: ShadowJar) {
-    manifest {
-        inheritFrom project.tasks.serverJar.manifest
-    }
-    archiveClassifier.set("all-server")
     from sourceSets.main.output
-    configurations = [configurations.runtime]
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class')
 }
 
 task runClient(type: JavaExec) {
@@ -80,15 +77,12 @@ task clientJar(type: Jar) {
         )
     }
     archiveClassifier.set("client")
-    from sourceSets.main.output
-}
 
-task clientShadowJar(type: ShadowJar) {
-    manifest {
-        inheritFrom project.tasks.clientJar.manifest
-    }
-    archiveClassifier.set("all-client")
     from sourceSets.main.output
-    configurations = [configurations.runtime]
-    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class')
 }

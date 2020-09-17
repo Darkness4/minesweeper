@@ -2,9 +2,11 @@ package marc.nguyen.minesweeper.client.data.datasources;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import javax.inject.Singleton;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
+@Singleton
 public class ServerWorker extends Thread {
 
   private final ObjectInputStream inputStream;
@@ -17,7 +19,7 @@ public class ServerWorker extends Thread {
   public void run() {
     while (!interrupted()) {
       try {
-        final var packet = this.inputStream.readObject();
+        final var packet = inputStream.readObject();
         handle(packet);
       } catch (IOException | ClassNotFoundException e) {
         // Server disconnected

@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import dagger.Lazy;
 import java.net.InetAddress;
 import java.util.List;
-import marc.nguyen.minesweeper.client.data.database.SettingsDb;
+import marc.nguyen.minesweeper.client.data.database.SettingsDao;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import marc.nguyen.minesweeper.common.data.models.Level;
@@ -20,35 +21,39 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SettingsRepositoryImplTest {
 
   SettingsRepository repository;
-  SettingsDb settingsDb;
+  SettingsDao settingsDao;
+  Lazy<SettingsDao> lazySettingsDao;
 
   @BeforeEach
-  void setUp(@Mock SettingsDb settingsDb) {
-    this.settingsDb = settingsDb;
-    repository = new SettingsRepositoryImpl(settingsDb);
+  void setUp(@Mock SettingsDao settingsDao, @Mock Lazy<SettingsDao> lazySettingsDao) {
+    this.settingsDao = settingsDao;
+    this.lazySettingsDao = lazySettingsDao;
+    repository = new SettingsRepositoryImpl(lazySettingsDao);
+
+    when(lazySettingsDao.get()).thenReturn(settingsDao);
   }
 
   @Test
   void save() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
     // Act
     repository.save(tSettings);
     // Assert
-    verify(settingsDb).insert(tSettings);
+    verify(settingsDao).insert(tSettings);
   }
 
   @Test
   void findByKey() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY);
-    when(settingsDb.find("name")).thenReturn(tSettings);
+        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
+    when(settingsDao.findByName("name")).thenReturn(tSettings);
     // Act
     final var result = repository.findByKey("name");
     // Assert
-    verify(settingsDb).find("name");
+    verify(settingsDao).findByName("name");
     assertEquals(result, tSettings);
   }
 
@@ -56,12 +61,13 @@ class SettingsRepositoryImplTest {
   void findAll() {
     // Arrange
     final var tSettingsList =
-        List.of(new Settings("name", InetAddress.getLoopbackAddress(), 10, 10, 10, Level.EASY));
-    when(settingsDb.findAll()).thenReturn(tSettingsList);
+        List.of(
+            new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY));
+    when(settingsDao.findAll()).thenReturn(tSettingsList);
     // Act
     final var result = repository.findAll();
     // Assert
-    verify(settingsDb).findAll();
+    verify(settingsDao).findAll();
     assertEquals(result, tSettingsList);
   }
 
@@ -71,6 +77,6 @@ class SettingsRepositoryImplTest {
     // Act
     repository.delete("name");
     // Assert
-    verify(settingsDb).delete("name");
+    verify(settingsDao).deleteByName("name");
   }
 }

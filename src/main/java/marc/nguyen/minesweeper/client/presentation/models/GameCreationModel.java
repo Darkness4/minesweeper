@@ -1,10 +1,12 @@
 package marc.nguyen.minesweeper.client.presentation.models;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.mvc.Model;
+import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,10 +20,19 @@ public class GameCreationModel implements Model {
   private int height = 10;
   private int mines = 10;
   private String address = InetAddress.getLoopbackAddress().getHostName();
+  private int port = 12345;
   private String settingsName = "My Settings";
 
   @Inject
   public GameCreationModel() {}
+
+  public int getPort() {
+    return port;
+  }
+
+  public void setPort(int port) {
+    this.port = port;
+  }
 
   public String getSettingsName() {
     return settingsName;
@@ -69,5 +80,24 @@ public class GameCreationModel implements Model {
 
   public void setAddress(String address) {
     this.address = address;
+  }
+
+  public InetAddress getInetAddress() throws UnknownHostException {
+    return InetAddress.getByName(address);
+  }
+
+  public boolean isSettingsNameValid() {
+    return settingsName != null && !settingsName.isEmpty();
+  }
+
+  public Settings toEntity() throws UnknownHostException {
+    return new Settings(
+        getSettingsName(),
+        getInetAddress(),
+        getPort(),
+        getLength(),
+        getHeight(),
+        getMines(),
+        getLevel());
   }
 }

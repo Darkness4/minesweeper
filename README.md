@@ -28,17 +28,15 @@ Client :
 
 #### Export
 
-Packing in a fat jar is enabled with [Gradle Shadow](https://github.com/johnrengelman/shadow).
-
 ```sh
 # Server
-./gradlew serverShadowJar
+./gradlew serverJar
 
 # Client
-./gradlew clientShadowJar
+./gradlew clientJar
 ```
 
-The fat JAR is stored in `./build/libs/minesweeper-*-all-server.jar` or `./build/libs/minesweeper-*-all-client.jar`
+The fat JAR is stored in `./build/libs/minesweeper-*-server.jar` or `./build/libs/minesweeper-*-client.jar`
 
 #### Executing
 
@@ -46,10 +44,10 @@ You can execute it with :
 
 ```sh
 # Server
-java -jar ./minesweeper-*-all-server.jar
+java -jar ./minesweeper-*-server.jar
 
 # Client
-java -jar ./minesweeper-*-all-client.jar
+java -jar ./minesweeper-*-client.jar
 ```
 
 ## Docs

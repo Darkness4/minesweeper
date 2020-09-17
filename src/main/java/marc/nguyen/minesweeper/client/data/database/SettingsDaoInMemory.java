@@ -6,19 +6,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SettingsDbInMemory implements SettingsDb {
+@Singleton
+public class SettingsDaoInMemory implements SettingsDao {
 
   @Inject
-  public SettingsDbInMemory() {}
+  public SettingsDaoInMemory() {}
 
   final Map<String, Settings> _db = new ConcurrentHashMap<>();
 
   @Override
-  public void delete(@NotNull String key) {
+  public void deleteByName(@NotNull String key) {
     _db.remove(key);
   }
 
@@ -36,7 +38,7 @@ public class SettingsDbInMemory implements SettingsDb {
 
   @Nullable
   @Override
-  public Settings find(@NotNull String key) {
+  public Settings findByName(@NotNull String key) {
     return _db.get(key);
   }
 }
