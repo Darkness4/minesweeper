@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Singleton
 public class SettingsDaoSqlite implements SettingsDao {
-
   private final Lazy<LocalDataSource> dataSource;
 
   @Inject

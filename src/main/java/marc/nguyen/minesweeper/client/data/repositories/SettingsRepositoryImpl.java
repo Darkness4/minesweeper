@@ -13,30 +13,30 @@ import org.jetbrains.annotations.NotNull;
 @Singleton
 public class SettingsRepositoryImpl implements SettingsRepository {
 
-  final Lazy<SettingsDao> db;
+  final Lazy<SettingsDao> dao;
 
   @Inject
-  public SettingsRepositoryImpl(Lazy<SettingsDao> db) {
-    this.db = db;
+  public SettingsRepositoryImpl(Lazy<SettingsDao> dao) {
+    this.dao = dao;
   }
 
   @Override
   public void save(@NotNull Settings settings) {
-    db.get().insert(settings);
+    dao.get().insert(settings);
   }
 
   @Override
   public @NotNull Settings findByKey(@NotNull String name) {
-    return Objects.requireNonNull(db.get().findByName(name));
+    return Objects.requireNonNull(dao.get().findByName(name));
   }
 
   @Override
   public @NotNull List<Settings> findAll() {
-    return db.get().findAll();
+    return dao.get().findAll();
   }
 
   @Override
   public void delete(@NotNull String name) {
-    db.get().deleteByName(name);
+    dao.get().deleteByName(name);
   }
 }
