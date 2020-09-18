@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.swing.JFrame;
 import marc.nguyen.minesweeper.client.presentation.controllers.MainController;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
+import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 
 public final class MainFrame extends JFrame {
@@ -12,6 +13,7 @@ public final class MainFrame extends JFrame {
 
   @Inject
   public MainFrame(
+      ResourcesLoader resourcesLoader,
       MainMenuBar mainMenuBar,
       MainView view,
       MainModel model,
@@ -24,6 +26,7 @@ public final class MainFrame extends JFrame {
     pack();
     setLocationRelativeTo(null); // Center of the screen
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setResizable(false);
     setVisible(true);
   }
 }

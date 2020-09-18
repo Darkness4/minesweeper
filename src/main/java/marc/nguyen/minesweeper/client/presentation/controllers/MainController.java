@@ -1,12 +1,10 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
-import com.squareup.inject.assisted.Assisted;
-import com.squareup.inject.assisted.AssistedInject;
 import dagger.Lazy;
-import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
@@ -14,9 +12,6 @@ import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
-import marc.nguyen.minesweeper.common.data.models.Tile;
-import marc.nguyen.minesweeper.common.data.models.Tile.Empty;
-import marc.nguyen.minesweeper.common.data.models.Tile.State;
 
 public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
@@ -24,9 +19,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
   private final MainView _view;
   private final Lazy<UpdateMinefield> _updateMinefield;
 
-  @AssistedInject
-  public MainController(
-      Lazy<UpdateMinefield> updateMinefield, @Assisted MainModel model, @Assisted MainView view) {
+  public MainController(Lazy<UpdateMinefield> updateMinefield, MainModel model, MainView view) {
     _model = model;
     _view = view;
     _updateMinefield = updateMinefield;
@@ -59,44 +52,11 @@ public class MainController implements MouseListener, Controller<MainModel, Main
           for (int i = 0; i < _model.minefield.getLength(); i++) {
             for (int j = 0; j < _model.minefield.getHeight(); j++) {
               final var tile = _model.minefield.get(i, j);
-              final var state = tile.getState();
               final var mineButton = _view.gamePanel.mineButtons[i][j];
-              if (state == State.BLANK) {
-                onBlank(mineButton);
-              } else if (state == State.EXPOSED) {
-                onExposed(mineButton, tile);
-              } else if (state == State.FLAG) {
-                onFlag(mineButton);
-              } else if (state == State.HIT_MINE) {
-                onHitMine(mineButton);
-              }
+              mineButton.updateValueFromTile(tile);
             }
           }
         });
-  }
-
-  private void onHitMine(MineButton mineButton) {
-    mineButton.setBackground(Color.RED);
-    mineButton.setEnabled(false);
-  }
-
-  private void onFlag(MineButton mineButton) {
-    mineButton.setBackground(Color.CYAN);
-  }
-
-  private void onExposed(MineButton mineButton, Tile tile) {
-    mineButton.setBackground(Color.GRAY);
-    if (tile instanceof Empty) {
-      final var neighbors = ((Empty) tile).getNeighborMinesCount();
-      if (neighbors != 0) {
-        mineButton.setText(String.valueOf(neighbors));
-      }
-      mineButton.setEnabled(false);
-    }
-  }
-
-  private void onBlank(MineButton mineButton) {
-    mineButton.setBackground(Color.WHITE);
   }
 
   @Override
@@ -133,9 +93,17 @@ public class MainController implements MouseListener, Controller<MainModel, Main
   @Override
   public void mouseExited(MouseEvent e) {}
 
-  @AssistedInject.Factory
-  public interface Factory {
+  public static final class Factory {
 
-    MainController create(MainModel model, MainView view);
+    final Lazy<UpdateMinefield> updateMinefield;
+
+    @Inject
+    public Factory(Lazy<UpdateMinefield> updateMinefield) {
+      this.updateMinefield = updateMinefield;
+    }
+
+    public MainController create(MainModel model, MainView view) {
+      return new MainController(updateMinefield, model, view);
+    }
   }
 }

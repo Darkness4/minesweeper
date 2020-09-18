@@ -1,7 +1,5 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
-import com.squareup.inject.assisted.Assisted;
-import com.squareup.inject.assisted.AssistedInject;
 import dagger.Lazy;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -10,6 +8,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
+import javax.inject.Inject;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -47,15 +47,14 @@ public class GameCreationController
   private final Lazy<DeleteSettings> _deleteSettings;
   private final Lazy<FetchAllSettingsName> _fetchAllSettingsName;
 
-  @AssistedInject
   public GameCreationController(
       Lazy<Connect> connect,
       Lazy<LoadSettings> loadSettings,
       Lazy<SaveSettings> saveSettings,
       Lazy<DeleteSettings> deleteSettings,
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
-      @Assisted GameCreationModel model,
-      @Assisted GameCreationView view) {
+      GameCreationModel model,
+      GameCreationView view) {
     _model = model;
     _view = view;
     _connect = connect;
@@ -133,24 +132,32 @@ public class GameCreationController
   }
 
   private void onLoadSettingsPushed() {
-    final Settings settings =
+    final Optional<Settings> settingsOptional =
         _loadSettings.get().execute(_view.savedSettingsPanel.settingsNameTextField.getText());
-    _model.setHeight(settings.height);
-    _model.setLength(settings.length);
-    _model.setPort(settings.port);
-    _model.setMines(settings.mines);
-    _model.setLevel(settings.level);
-    _model.setAddress(settings.address.getHostAddress());
-    SwingUtilities.invokeLater(
+
+    settingsOptional.ifPresentOrElse(
+        (settings) -> {
+          _model.setHeight(settings.height);
+          _model.setLength(settings.length);
+          _model.setPort(settings.port);
+          _model.setMines(settings.mines);
+          _model.setLevel(settings.level);
+          _model.setAddress(settings.address.getHostAddress());
+          SwingUtilities.invokeLater(
+              () -> {
+                _view.savedSettingsPanel.settingsNameTextField.setText(settings.name);
+                _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(
+                    settings.address.getHostAddress());
+                _view.editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
+                _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
+                _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
+                _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
+                _view.editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(
+                    settings.level);
+              });
+        },
         () -> {
-          _view.savedSettingsPanel.settingsNameTextField.setText(settings.name);
-          _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(
-              settings.address.getHostAddress());
-          _view.editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
-          _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
-          _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
-          _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
-          _view.editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(settings.level);
+          System.out.println("Settings couldn't be loaded.");
         });
   }
 
@@ -307,9 +314,36 @@ public class GameCreationController
     }
   }
 
-  @AssistedInject.Factory
-  public interface Factory {
+  public static final class Factory {
+    private final Lazy<Connect> _connect;
+    private final Lazy<LoadSettings> _loadSettings;
+    private final Lazy<SaveSettings> _saveSettings;
+    private final Lazy<DeleteSettings> _deleteSettings;
+    private final Lazy<FetchAllSettingsName> _fetchAllSettingsName;
 
-    GameCreationController create(GameCreationModel model, GameCreationView view);
+    @Inject
+    public Factory(
+        Lazy<Connect> connect,
+        Lazy<LoadSettings> loadSettings,
+        Lazy<SaveSettings> saveSettings,
+        Lazy<DeleteSettings> deleteSettings,
+        Lazy<FetchAllSettingsName> fetchAllSettingsName) {
+      _connect = connect;
+      _loadSettings = loadSettings;
+      _saveSettings = saveSettings;
+      _deleteSettings = deleteSettings;
+      _fetchAllSettingsName = fetchAllSettingsName;
+    }
+
+    public GameCreationController create(GameCreationModel model, GameCreationView view) {
+      return new GameCreationController(
+          _connect,
+          _loadSettings,
+          _saveSettings,
+          _deleteSettings,
+          _fetchAllSettingsName,
+          model,
+          view);
+    }
   }
 }

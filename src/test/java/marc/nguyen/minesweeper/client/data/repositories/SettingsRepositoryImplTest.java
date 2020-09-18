@@ -1,12 +1,14 @@
 package marc.nguyen.minesweeper.client.data.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import dagger.Lazy;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Optional;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
@@ -45,16 +47,28 @@ class SettingsRepositoryImplTest {
   }
 
   @Test
-  void findByKey() {
+  void findByKey_found() {
     // Arrange
     final var tSettings =
         new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
-    when(settingsDao.findByName("name")).thenReturn(tSettings);
+    when(settingsDao.findByName("name")).thenReturn(Optional.of(tSettings));
     // Act
     final var result = repository.findByKey("name");
     // Assert
     verify(settingsDao).findByName("name");
-    assertEquals(result, tSettings);
+    assertTrue(result.isPresent());
+    assertEquals(result.get(), tSettings);
+  }
+
+  @Test
+  void findByKey_notFound() {
+    // Arrange
+    when(settingsDao.findByName("name")).thenReturn(Optional.empty());
+    // Act
+    final var result = repository.findByKey("name");
+    // Assert
+    verify(settingsDao).findByName("name");
+    assertTrue(result.isEmpty());
   }
 
   @Test

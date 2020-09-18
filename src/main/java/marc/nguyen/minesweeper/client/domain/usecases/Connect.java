@@ -15,10 +15,16 @@ public class Connect implements UseCase<Connect.Params, Void> {
   @Override
   public Void execute(@NotNull Params params) {
     // TODO: implements
+    //    try {
+    //      new ServerWorker(new Socket(params.address, params.port)).start();
+    //    } catch (IOException e) {
+    //      e.printStackTrace();
+    //    }
     return null;
   }
 
   public static class Params {
+
     @NotNull final InetAddress address;
     final int port;
 

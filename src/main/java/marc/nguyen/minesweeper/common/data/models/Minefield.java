@@ -112,7 +112,13 @@ public class Minefield implements Serializable {
    */
   public void expose(Tile tile) {
     if (tile instanceof Tile.Empty) {
-      treeSearchEmptyTile((Tile.Empty) tile);
+      // TODO: Apply here tree-search
+      // treeSearchEmptyTile((Tile.Empty) tile);
+      if (tile.getState() != Tile.State.EXPOSED) {
+        synchronized (_tiles[tile.x][tile.y]) {
+          _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+        }
+      }
     } else if (tile instanceof Tile.Mine) {
       synchronized (_tiles[tile.x][tile.y]) {
         _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);

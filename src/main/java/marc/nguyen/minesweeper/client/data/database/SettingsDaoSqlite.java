@@ -9,16 +9,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Singleton
 public class SettingsDaoSqlite implements SettingsDao {
+
   private final Lazy<LocalDataSource> dataSource;
 
   @Inject
@@ -143,7 +144,7 @@ public class SettingsDaoSqlite implements SettingsDao {
   }
 
   @Override
-  public @Nullable Settings findByName(@NotNull String name) {
+  public @NotNull Optional<Settings> findByName(@NotNull String name) {
     final Connection connection;
     final PreparedStatement statement;
     final ResultSet result;
@@ -175,6 +176,6 @@ public class SettingsDaoSqlite implements SettingsDao {
     } catch (SQLException | UnknownHostException e) {
       e.printStackTrace();
     }
-    return settings;
+    return Optional.ofNullable(settings);
   }
 }

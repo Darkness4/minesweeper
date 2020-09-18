@@ -2,7 +2,7 @@ package marc.nguyen.minesweeper.client.data.repositories;
 
 import dagger.Lazy;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
@@ -26,8 +26,8 @@ public class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @Override
-  public @NotNull Settings findByKey(@NotNull String name) {
-    return Objects.requireNonNull(dao.get().findByName(name));
+  public @NotNull Optional<Settings> findByKey(@NotNull String name) {
+    return dao.get().findByName(name);
   }
 
   @Override

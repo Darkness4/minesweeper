@@ -1,7 +1,6 @@
 package marc.nguyen.minesweeper.client.data.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -102,7 +101,8 @@ class SettingsDaoSqliteTest {
     final var result = settingsDao.findByName("name");
 
     // Assert
-    assertEquals(result, tSettings);
+    assertTrue(result.isPresent());
+    assertEquals(result.get(), tSettings);
   }
 
   @Test
@@ -111,7 +111,7 @@ class SettingsDaoSqliteTest {
     final var result = settingsDao.findByName("name");
 
     // Assert
-    assertNull(result);
+    assertTrue(result.isEmpty());
   }
 
   @AfterEach

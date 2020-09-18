@@ -1,6 +1,7 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
 import dagger.Lazy;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
@@ -9,7 +10,7 @@ import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
 @Singleton
-public class LoadSettings implements UseCase<String, Settings> {
+public class LoadSettings implements UseCase<String, Optional<Settings>> {
 
   final Lazy<SettingsRepository> repository;
 
@@ -19,7 +20,7 @@ public class LoadSettings implements UseCase<String, Settings> {
   }
 
   @Override
-  public @NotNull Settings execute(@NotNull String name) {
+  public @NotNull Optional<Settings> execute(@NotNull String name) {
     return repository.get().findByKey(name);
   }
 }

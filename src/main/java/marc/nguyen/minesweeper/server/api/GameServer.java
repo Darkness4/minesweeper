@@ -18,14 +18,16 @@ public class GameServer {
    * @param port TCP Port.
    * @throws IOException if an I/O error occurs when starting the server.
    */
-  public void start(int port) throws IOException {
-    serverSocket = new ServerSocket(port);
-
+  public void start(int port) {
     open(port);
+
+    System.out.format("Server is running on port %d\n", port);
 
     while (!isStopped()) {
       try {
         final var clientSocket = serverSocket.accept();
+        System.out.printf(
+            "Client %s accepted.\n", clientSocket.getInetAddress().getCanonicalHostName());
         this.threadPool.execute(new ClientWorkerRunnable(clientSocket));
       } catch (IOException e) {
         if (isStopped()) {

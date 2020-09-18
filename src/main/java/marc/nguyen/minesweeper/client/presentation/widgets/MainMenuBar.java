@@ -30,11 +30,13 @@ public class MainMenuBar extends JMenuBar implements ActionListener {
     menu = new JMenu("Game");
     menu.setMnemonic(KeyEvent.VK_G);
     menu.getAccessibleContext().setAccessibleDescription("Menu for setting up a game.");
+    menu.setToolTipText("Menu for setting up a game.");
     add(menu);
 
     final var newGameItem = new JMenuItem("New Game", KeyEvent.VK_N);
     newGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
     newGameItem.getAccessibleContext().setAccessibleDescription("Create a new game.");
+    newGameItem.setToolTipText("Create a new game.");
     newGameItem.setActionCommand(Action.CREATE.name());
     newGameItem.addActionListener(this);
     menu.add(newGameItem);
@@ -44,6 +46,7 @@ public class MainMenuBar extends JMenuBar implements ActionListener {
     final var quitItem = new JMenuItem("Quit", KeyEvent.VK_Q);
     quitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
     quitItem.getAccessibleContext().setAccessibleDescription("Quit the program.");
+    quitItem.setToolTipText("Quit the program.");
     quitItem.setActionCommand(Action.QUIT.name());
     quitItem.addActionListener(this);
     menu.add(quitItem);
