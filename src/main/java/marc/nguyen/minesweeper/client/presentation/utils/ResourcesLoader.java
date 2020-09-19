@@ -7,6 +7,11 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 
+/**
+ * Load in RAM the resources.
+ *
+ * <p>Since these tiles will be used non-stop, we will store them here during runtime.
+ */
 public class ResourcesLoader {
 
   private static int SIZE = 16;

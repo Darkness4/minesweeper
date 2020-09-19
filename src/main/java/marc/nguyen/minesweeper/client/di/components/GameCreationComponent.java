@@ -7,6 +7,7 @@ import marc.nguyen.minesweeper.client.di.modules.DomainModule;
 import marc.nguyen.minesweeper.client.di.modules.PresentationModule;
 import marc.nguyen.minesweeper.client.presentation.widgets.GameCreationDialog;
 
+/** Dagger Component used for the Game Creation Dialog. */
 @Singleton
 @Component(modules = {DataModule.class, DomainModule.class, PresentationModule.class})
 public interface GameCreationComponent {

@@ -16,7 +16,6 @@ public class GameServer {
    * Start the server at the desired port.
    *
    * @param port TCP Port.
-   * @throws IOException if an I/O error occurs when starting the server.
    */
   public void start(int port) {
     open(port);

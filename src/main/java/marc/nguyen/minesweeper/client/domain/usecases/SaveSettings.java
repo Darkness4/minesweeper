@@ -8,6 +8,7 @@ import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
+/** A user should be to save a new settings. */
 @Singleton
 public class SaveSettings implements UseCase<Settings, Void> {
   final Lazy<SettingsRepository> repository;

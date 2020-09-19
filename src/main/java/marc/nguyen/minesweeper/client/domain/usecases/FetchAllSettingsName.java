@@ -9,6 +9,7 @@ import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
+/** A user should be able to see all the settings available. */
 @Singleton
 public class FetchAllSettingsName implements UseCase<Void, List<String>> {
   final Lazy<SettingsRepository> repository;

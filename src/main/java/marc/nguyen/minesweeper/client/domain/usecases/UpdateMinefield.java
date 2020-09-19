@@ -6,6 +6,7 @@ import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import org.jetbrains.annotations.NotNull;
 
+/** A user should be to update the minefield of the server. */
 @Singleton
 public class UpdateMinefield implements UseCase<Minefield, Void> {
 

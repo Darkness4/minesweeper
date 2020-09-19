@@ -9,6 +9,11 @@ import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A user should be able to load a saved settings.
+ *
+ * <p>Optional.empty() is returned if not found.
+ */
 @Singleton
 public class LoadSettings implements UseCase<String, Optional<Settings>> {
 

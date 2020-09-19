@@ -6,6 +6,7 @@ import java.util.Objects;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
 
+/** Game Creation Settings. */
 public class Settings implements Serializable {
 
   @NotNull public final String name;

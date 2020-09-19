@@ -14,6 +14,7 @@ import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
+// TODO : SRP is broken. Split the listener.
 public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
   private final MainModel _model;

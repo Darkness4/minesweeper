@@ -3,6 +3,11 @@ package marc.nguyen.minesweeper.common.data.models;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * A simple Player object.
+ *
+ * <p>This is holding score, name, ...
+ */
 public class Player implements Serializable {
   final Counter score = new Counter();
 

@@ -10,6 +10,7 @@ import marc.nguyen.minesweeper.client.presentation.widgets.MainFrame;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
+/** Dagger Component used for the Main Frame. */
 @Singleton
 @Component(modules = {DataModule.class, DomainModule.class, PresentationModule.class})
 public interface MainComponent {

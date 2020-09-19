@@ -9,6 +9,7 @@ import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.data.datasources.ServerWorkerRunnable;
 import org.jetbrains.annotations.NotNull;
 
+/** A user should be able to connect to a TCP server based on a port and an IP address. */
 @Singleton
 public class Connect implements UseCase<Connect.Params, Void> {
 
@@ -17,8 +18,9 @@ public class Connect implements UseCase<Connect.Params, Void> {
 
   @Override
   public Void execute(@NotNull Params params) {
-    // TODO: implements
     try {
+      // TODO: Use Factory
+      // TODO: May want to add a Writer thread. Or return the output stream.
       new Thread(new ServerWorkerRunnable(new Socket(params.address, params.port))).start();
     } catch (IOException e) {
       e.printStackTrace();

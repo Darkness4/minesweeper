@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
+/** A simple message. */
 public class Message implements Serializable {
   @NotNull public final String message;
 

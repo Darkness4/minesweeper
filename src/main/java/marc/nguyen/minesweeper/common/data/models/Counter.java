@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/** A simple counter. */
 class Counter implements Serializable {
 
   private final AtomicInteger value = new AtomicInteger(0);

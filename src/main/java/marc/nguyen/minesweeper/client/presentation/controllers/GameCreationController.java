@@ -32,6 +32,7 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
+// TODO : SRP is broken. Split the listener.
 public class GameCreationController
     implements ActionListener,
         ItemListener,

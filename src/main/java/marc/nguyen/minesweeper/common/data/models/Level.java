@@ -1,5 +1,10 @@
 package marc.nguyen.minesweeper.common.data.models;
 
+/**
+ * Level of difficulties for a minesweeper.
+ *
+ * <p>The values of Level.CUSTOM shouldn't be handled.
+ */
 public enum Level {
   EASY(10, 10, 10),
   MEDIUM(16, 16, 40),

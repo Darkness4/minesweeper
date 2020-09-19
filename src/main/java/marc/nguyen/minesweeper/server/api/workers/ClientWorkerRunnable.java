@@ -8,6 +8,11 @@ import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
+/**
+ * ServerWorkerRunnable handles the input from the client.
+ *
+ * <p>This Runnable should be called in a new Thread or in a Thread Pool.
+ */
 public class ClientWorkerRunnable implements Runnable {
 
   private final Socket clientSocket;

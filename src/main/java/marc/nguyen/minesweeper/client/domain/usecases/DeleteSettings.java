@@ -7,6 +7,7 @@ import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
+/** A user should be able to delete a saved settings. */
 @Singleton
 public class DeleteSettings implements UseCase<String, Void> {
 

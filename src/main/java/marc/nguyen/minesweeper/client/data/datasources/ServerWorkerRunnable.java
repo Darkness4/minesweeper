@@ -9,6 +9,11 @@ import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
+/**
+ * ServerWorkerRunnable handles the input from the server.
+ *
+ * <p>This Runnable should be called in a new Thread or in a Thread Pool.
+ */
 @Singleton
 public class ServerWorkerRunnable implements Runnable {
 
