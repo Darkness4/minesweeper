@@ -9,11 +9,14 @@ import javax.inject.Inject;
 
 public class ResourcesLoader {
 
+  private static int SIZE = 16;
+
   private final BufferedImage tilemap;
 
   public final Image clear;
   public final Image flag;
-  public final Image mine;
+  public final Image hitMine;
+  public final Image exposedMine;
   public final Image exposed0;
   public final Image exposed1;
   public final Image exposed2;
@@ -23,29 +26,32 @@ public class ResourcesLoader {
   public final Image exposed6;
   public final Image exposed7;
   public final Image exposed8;
+  public final Image softwareLogo;
 
   public final List<Image> exposed;
 
   @Inject
   public ResourcesLoader() {
     try {
-      tilemap = ImageIO.read(getClass().getResource("/img/minesweeper_tiles.jpg"));
-      clear = tilemap.getSubimage(0, 0, 32, 32);
-      flag = tilemap.getSubimage(32, 0, 32, 32);
-      mine = tilemap.getSubimage(64, 0, 32, 32);
-      exposed0 = tilemap.getSubimage(96, 0, 32, 32);
-      exposed1 = tilemap.getSubimage(0, 32, 32, 32);
-      exposed2 = tilemap.getSubimage(32, 32, 32, 32);
-      exposed3 = tilemap.getSubimage(64, 32, 32, 32);
-      exposed4 = tilemap.getSubimage(96, 32, 32, 32);
-      exposed5 = tilemap.getSubimage(0, 64, 32, 32);
-      exposed6 = tilemap.getSubimage(32, 64, 32, 32);
-      exposed7 = tilemap.getSubimage(64, 64, 32, 32);
-      exposed8 = tilemap.getSubimage(96, 64, 32, 32);
+      tilemap = ImageIO.read(getClass().getResource("/img/tiles.png"));
+      clear = tilemap.getSubimage(0, 0, SIZE, SIZE);
+      flag = tilemap.getSubimage(SIZE, 0, SIZE, SIZE);
+      hitMine = tilemap.getSubimage(SIZE * 2, 0, SIZE, SIZE);
+      exposed0 = tilemap.getSubimage(SIZE * 3, 0, SIZE, SIZE);
+      exposed1 = tilemap.getSubimage(0, SIZE, SIZE, SIZE);
+      exposed2 = tilemap.getSubimage(SIZE, SIZE, SIZE, SIZE);
+      exposed3 = tilemap.getSubimage(SIZE * 2, SIZE, SIZE, SIZE);
+      exposed4 = tilemap.getSubimage(SIZE * 3, SIZE, SIZE, SIZE);
+      exposed5 = tilemap.getSubimage(0, SIZE * 2, SIZE, SIZE);
+      exposed6 = tilemap.getSubimage(SIZE, SIZE * 2, SIZE, SIZE);
+      exposed7 = tilemap.getSubimage(SIZE * 2, SIZE * 2, SIZE, SIZE);
+      exposed8 = tilemap.getSubimage(SIZE * 3, SIZE * 2, SIZE, SIZE);
+      exposedMine = tilemap.getSubimage(0, SIZE * 3, SIZE, SIZE);
       exposed =
           List.of(
               exposed0, exposed1, exposed2, exposed3, exposed4, exposed5, exposed6, exposed7,
               exposed8);
+      softwareLogo = ImageIO.read(getClass().getResource("/img/icon.ico"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -8,6 +8,7 @@ import marc.nguyen.minesweeper.client.di.modules.DomainModule;
 import marc.nguyen.minesweeper.client.di.modules.PresentationModule;
 import marc.nguyen.minesweeper.client.presentation.widgets.MainFrame;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import marc.nguyen.minesweeper.common.data.models.Player;
 
 @Singleton
 @Component(modules = {DataModule.class, DomainModule.class, PresentationModule.class})
@@ -18,6 +19,9 @@ public interface MainComponent {
   interface Builder {
     @BindsInstance
     Builder minefield(Minefield minefield);
+
+    @BindsInstance
+    Builder player(Player player);
 
     MainComponent build();
   }

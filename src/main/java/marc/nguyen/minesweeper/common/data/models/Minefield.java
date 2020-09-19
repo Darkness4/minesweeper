@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 import java.util.stream.Collectors;
+import marc.nguyen.minesweeper.common.data.models.Tile.State;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class Minefield implements Serializable {
 
   final Tile[][] _tiles;
+  long minesOnField = 0;
 
   /**
    * An empty minefield based on length and height.
@@ -57,6 +59,15 @@ public class Minefield implements Serializable {
   }
 
   /**
+   * Get the number of mines on the field.
+   *
+   * @return Number of mines on the field.
+   */
+  public long getMinesOnField() {
+    return minesOnField;
+  }
+
+  /**
    * Place the mines on the minefield.
    *
    * @param mines Number of mines to be placed.
@@ -68,7 +79,7 @@ public class Minefield implements Serializable {
     }
     final var randomizer = new Random();
 
-    var minesOnField = countMinesOnField();
+    minesOnField = countMinesOnField();
     while (minesOnField < mines) {
       final int x = randomizer.nextInt(_tiles.length);
       final int y = randomizer.nextInt(_tiles[0].length);
@@ -113,12 +124,12 @@ public class Minefield implements Serializable {
   public void expose(Tile tile) {
     if (tile instanceof Tile.Empty) {
       // TODO: Apply here tree-search
-      // treeSearchEmptyTile((Tile.Empty) tile);
-      if (tile.getState() != Tile.State.EXPOSED) {
-        synchronized (_tiles[tile.x][tile.y]) {
-          _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
-        }
-      }
+      treeSearchEmptyTile((Tile.Empty) tile);
+      //      if (tile.getState() != Tile.State.EXPOSED) {
+      //        synchronized (_tiles[tile.x][tile.y]) {
+      //          _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+      //        }
+      //      }
     } else if (tile instanceof Tile.Mine) {
       synchronized (_tiles[tile.x][tile.y]) {
         _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);
@@ -164,8 +175,14 @@ public class Minefield implements Serializable {
     return _tiles[x][y];
   }
 
-  /** @return Number of Mines on field. */
-  public long countMinesOnField() {
+  /**
+   * Calculate the number of mines.
+   *
+   * <p>Please use `getMinesOnField()`
+   *
+   * @return Number of Mines on field.
+   */
+  private long countMinesOnField() {
     return Arrays.stream(_tiles)
         .flatMap(Arrays::stream)
         .parallel()
@@ -183,16 +200,14 @@ public class Minefield implements Serializable {
         .count();
   }
 
-  /** @return Number of correct guesses and mine exposed. */
-  public long countCorrectGuessesAndVisibleBombs() {
-    return Arrays.stream(_tiles)
-        .flatMap(Arrays::stream)
-        .parallel()
-        .filter(
-            tile ->
-                (tile.getState() == Tile.State.FLAG && tile instanceof Tile.Mine)
-                    || tile.getState() == Tile.State.HIT_MINE)
-        .count();
+  public boolean hasEnded() {
+    final long exposedTiles =
+        Arrays.stream(_tiles)
+            .flatMap(Arrays::stream)
+            .parallel()
+            .filter(tile -> tile.getState() == State.EXPOSED && tile instanceof Tile.Empty)
+            .count();
+    return getHeight() * getHeight() - getMinesOnField() == exposedTiles;
   }
 
   private synchronized void incrementAdjacentCounters(@NotNull Tile tile) {

@@ -18,6 +18,7 @@ import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MainMenuBar;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import marc.nguyen.minesweeper.common.data.models.Player;
 
 @Module()
 public abstract class PresentationModule {
@@ -45,8 +46,8 @@ public abstract class PresentationModule {
   }
 
   @Provides
-  static MainModel provideMainModel(Minefield minefield) {
-    return new MainModel(minefield);
+  static MainModel provideMainModel(Minefield minefield, Player player) {
+    return new MainModel(minefield, player);
   }
 
   @Provides

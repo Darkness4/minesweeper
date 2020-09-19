@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.swing.JDialog;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
+import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 
 public class GameCreationDialog extends Dialog {
@@ -12,11 +13,13 @@ public class GameCreationDialog extends Dialog {
   public GameCreationDialog(
       GameCreationView view,
       GameCreationModel model,
-      GameCreationController.Factory gameCreationControllerFactory) {
+      GameCreationController.Factory gameCreationControllerFactory,
+      ResourcesLoader resourcesLoader) {
     super(view);
     gameCreationControllerFactory.create(model, view);
 
     setTitle("Minesweeper");
     setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    setIconImage(resourcesLoader.softwareLogo);
   }
 }

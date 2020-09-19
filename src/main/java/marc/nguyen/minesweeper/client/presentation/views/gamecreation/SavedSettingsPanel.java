@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 
 public class SavedSettingsPanel extends JPanel {
@@ -19,6 +20,10 @@ public class SavedSettingsPanel extends JPanel {
   public final JButton deleteButton;
 
   public SavedSettingsPanel() {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      throw new RuntimeException("View is running on unsafe thread!");
+    }
+
     setLayout(new BorderLayout());
 
     settingsList = new JList<>();

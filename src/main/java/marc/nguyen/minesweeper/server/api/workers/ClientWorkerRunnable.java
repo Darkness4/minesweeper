@@ -20,12 +20,10 @@ public class ClientWorkerRunnable implements Runnable {
   @Override
   public void run() {
     try {
-      final ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
       final ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
+      final ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
 
-      System.out.println("Listening to Client");
-
-      while (!isStopped) {
+      while (!isStopped()) {
         try {
           final var packet = input.readObject();
           handle(packet);
@@ -41,6 +39,10 @@ public class ClientWorkerRunnable implements Runnable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private synchronized boolean isStopped() {
+    return isStopped;
   }
 
   void handle(Object packet) {

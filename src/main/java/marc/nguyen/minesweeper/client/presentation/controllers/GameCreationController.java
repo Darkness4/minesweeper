@@ -30,6 +30,7 @@ import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import marc.nguyen.minesweeper.common.data.models.Player;
 
 public class GameCreationController
     implements ActionListener,
@@ -177,7 +178,12 @@ public class GameCreationController
 
       SwingUtilities.windowForComponent(_view).dispose();
       SwingUtilities.invokeLater(
-          () -> DaggerMainComponent.builder().minefield(minefield).build().mainFrame());
+          () ->
+              DaggerMainComponent.builder()
+                  .minefield(minefield)
+                  .player(new Player())
+                  .build()
+                  .mainFrame());
     } catch (UnknownHostException e) {
       SwingUtilities.invokeLater(
           () ->
@@ -315,6 +321,7 @@ public class GameCreationController
   }
 
   public static final class Factory {
+
     private final Lazy<Connect> _connect;
     private final Lazy<LoadSettings> _loadSettings;
     private final Lazy<SaveSettings> _saveSettings;

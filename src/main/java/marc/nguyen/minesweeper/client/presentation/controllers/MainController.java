@@ -12,6 +12,7 @@ import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
+import marc.nguyen.minesweeper.common.data.models.Tile;
 
 public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
@@ -31,7 +32,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
     new SwingWorker<Long, Void>() {
       @Override
       protected Long doInBackground() {
-        return _model.minefield.countMinesOnField()
+        return _model.minefield.getMinesOnField()
             - _model.minefield.countFlagsAndVisibleBombsOnField();
       }
 
@@ -59,6 +60,12 @@ public class MainController implements MouseListener, Controller<MainModel, Main
         });
   }
 
+  private void checkIfEndGame() {
+    if (_model.minefield.hasEnded()) {
+      System.out.println("Game has ended.");
+    }
+  }
+
   @Override
   public void mouseClicked(MouseEvent e) {}
 
@@ -76,15 +83,30 @@ public class MainController implements MouseListener, Controller<MainModel, Main
                 if (SwingUtilities.isRightMouseButton(e)) {
                   _model.minefield.flag(tile);
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                  _model.minefield.expose(tile);
+                  if (tile.getState() != Tile.State.FLAG) {
+                    _model.minefield.expose(tile);
+
+                    if (tile instanceof Tile.Empty) {
+                      _model.player.incrementScore();
+                    } else {
+                      _model.player.decrementScore();
+                    }
+                  }
                 }
 
                 updateBombLeft();
+                updatePlayerScore();
                 updateField();
+                checkIfEndGame();
                 _updateMinefield.get().execute(_model.minefield);
               }
             })
         .start();
+  }
+
+  private void updatePlayerScore() {
+    SwingUtilities.invokeLater(
+        () -> _view.displayPanel.playerScoreText.setText(String.valueOf(_model.player.getScore())));
   }
 
   @Override

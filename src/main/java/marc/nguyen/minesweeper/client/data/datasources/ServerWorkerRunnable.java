@@ -10,11 +10,12 @@ import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
 @Singleton
-public class ServerWorker extends Thread {
+public class ServerWorkerRunnable implements Runnable {
 
   private final Socket serverSocket;
+  private boolean isStopped = false;
 
-  public ServerWorker(Socket serverSocket) {
+  public ServerWorkerRunnable(Socket serverSocket) {
     this.serverSocket = serverSocket;
   }
 
@@ -26,14 +27,14 @@ public class ServerWorker extends Thread {
 
       output.writeObject(new Message("Hello server !"));
       output.flush();
-      while (!interrupted()) {
+      while (!isStopped()) {
         try {
           final var packet = input.readObject();
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
           // Server disconnected
           e.printStackTrace();
-          interrupt();
+          isStopped = true;
         }
       }
 
@@ -42,6 +43,10 @@ public class ServerWorker extends Thread {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private synchronized boolean isStopped() {
+    return isStopped;
   }
 
   void handle(Object packet) {

@@ -33,7 +33,7 @@ public class MinefieldTest {
     minefield.placeMines(3);
 
     // Assert
-    assertEquals(minefield.countMinesOnField(), 3);
+    assertEquals(minefield.getMinesOnField(), 3);
   }
 
   @Test
@@ -42,7 +42,7 @@ public class MinefieldTest {
     minefield.placeMines(1);
 
     // Assert
-    assertEquals(4 - minefield.countMinesOnField(), 3);
+    assertEquals(4 - minefield.getMinesOnField(), 3);
   }
 
   @Test

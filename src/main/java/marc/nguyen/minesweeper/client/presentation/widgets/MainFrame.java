@@ -28,5 +28,7 @@ public final class MainFrame extends JFrame {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setResizable(false);
     setVisible(true);
+    setIconImage(resourcesLoader.softwareLogo);
+    setTitle("Minesweeper");
   }
 }
