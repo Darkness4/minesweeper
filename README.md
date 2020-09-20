@@ -29,14 +29,11 @@ Client :
 #### Export
 
 ```sh
-# Server
-./gradlew serverJar
-
-# Client
-./gradlew clientJar
+# Server and Client
+./gradlew jar
 ```
 
-The fat JAR is stored in `./build/libs/minesweeper-*-server.jar` or `./build/libs/minesweeper-*-client.jar`
+The fat JARs are stored in `./build/libs/minesweeper-*-server.jar` and `./build/libs/minesweeper-*-client.jar`
 
 #### Executing
 

@@ -84,3 +84,8 @@ task clientJar(type: Jar) {
     }
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class')
 }
+
+jar {
+    dependsOn serverJar
+    dependsOn clientJar
+}

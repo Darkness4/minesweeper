@@ -26,9 +26,8 @@ public class ServerWorkerRunnable implements Runnable {
 
   @Override
   public void run() {
-    try {
-      final ObjectInputStream input = new ObjectInputStream(serverSocket.getInputStream());
-      final ObjectOutputStream output = new ObjectOutputStream(serverSocket.getOutputStream());
+    try (final var input = new ObjectInputStream(serverSocket.getInputStream());
+        final var output = new ObjectOutputStream(serverSocket.getOutputStream())) {
 
       output.writeObject(new Message("Hello server !"));
       output.flush();
@@ -42,9 +41,6 @@ public class ServerWorkerRunnable implements Runnable {
           isStopped = true;
         }
       }
-
-      output.close();
-      input.close();
     } catch (IOException e) {
       e.printStackTrace();
     }

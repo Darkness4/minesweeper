@@ -24,23 +24,21 @@ public class ClientWorkerRunnable implements Runnable {
 
   @Override
   public void run() {
-    try {
-      final ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
-      final ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
+    try (final var output = new ObjectOutputStream(clientSocket.getOutputStream());
+        final var input = new ObjectInputStream(clientSocket.getInputStream())) {
 
+      output.writeObject(new Message("Hello client !"));
+      output.flush();
       while (!isStopped()) {
         try {
           final var packet = input.readObject();
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
-          // Server disconnected
+          // Client disconnected
           e.printStackTrace();
           isStopped = true;
         }
       }
-
-      output.close();
-      input.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
