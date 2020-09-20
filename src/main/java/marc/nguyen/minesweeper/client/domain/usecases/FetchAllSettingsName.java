@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /** A user should be able to see all the settings available. */
 @Singleton
 public class FetchAllSettingsName implements UseCase<Void, List<String>> {
-  final Lazy<SettingsRepository> repository;
+  private final Lazy<SettingsRepository> repository;
 
   @Inject
   public FetchAllSettingsName(Lazy<SettingsRepository> repository) {

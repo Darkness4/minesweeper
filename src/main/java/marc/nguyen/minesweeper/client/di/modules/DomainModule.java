@@ -4,6 +4,8 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
+import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
+import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
@@ -11,33 +13,43 @@ import marc.nguyen.minesweeper.client.domain.usecases.FetchMinefield;
 import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
-import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
+import marc.nguyen.minesweeper.client.domain.usecases.WatchServerTiles;
 
 @Module
 public abstract class DomainModule {
 
   @Provides
   @Singleton
-  static Connect provideConnect() {
-    return new Connect();
+  static Connect provideConnect(
+      Lazy<ServerSocketDevice> deviceLazy,
+      Lazy<WatchServerTiles> watchServerTilesLazy,
+      Lazy<FetchMinefield> fetchMinefieldLazy) {
+    return new Connect(deviceLazy, watchServerTilesLazy, fetchMinefieldLazy);
   }
 
   @Provides
   @Singleton
-  static Quit provideQuit() {
-    return new Quit();
+  static Quit provideQuit(Lazy<ServerSocketDevice> deviceLazy) {
+    return new Quit(deviceLazy);
   }
 
   @Provides
   @Singleton
-  static UpdateMinefield provideUpdateMinefield() {
-    return new UpdateMinefield();
+  static UpdateServerTile provideUpdateMinefield(Lazy<MinefieldRepository> repositoryLazy) {
+    return new UpdateServerTile(repositoryLazy);
   }
 
   @Provides
   @Singleton
-  static FetchMinefield provideFetchMinefield() {
-    return new FetchMinefield();
+  static WatchServerTiles provideWatchServerTiles(Lazy<MinefieldRepository> repositoryLazy) {
+    return new WatchServerTiles(repositoryLazy);
+  }
+
+  @Provides
+  @Singleton
+  static FetchMinefield provideFetchMinefield(Lazy<MinefieldRepository> repositoryLazy) {
+    return new FetchMinefield(repositoryLazy);
   }
 
   @Provides

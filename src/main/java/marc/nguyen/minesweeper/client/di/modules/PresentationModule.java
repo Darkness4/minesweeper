@@ -8,7 +8,7 @@ import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
 import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
-import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.controllers.MainController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
@@ -36,7 +36,7 @@ public abstract class PresentationModule {
 
   @Provides
   static MainController.Factory provideMainControllerFactory(
-      Lazy<UpdateMinefield> updateMinefield) {
+      Lazy<UpdateServerTile> updateMinefield) {
     return new MainController.Factory(updateMinefield);
   }
 

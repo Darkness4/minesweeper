@@ -9,7 +9,8 @@ import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
 public class GamePanel extends JPanel {
-  final Minefield _minefield;
+
+  final Minefield minefield;
   public final MineButton[][] mineButtons;
 
   public GamePanel(Minefield minefield, ResourcesLoader resourcesLoader) {
@@ -17,14 +18,14 @@ public class GamePanel extends JPanel {
       throw new RuntimeException("View is running on unsafe thread!");
     }
 
-    _minefield = minefield;
-    mineButtons = new MineButton[_minefield.getLength()][_minefield.getHeight()];
+    this.minefield = minefield;
+    mineButtons = new MineButton[this.minefield.getLength()][this.minefield.getHeight()];
     final var mineButtonFactory = new MineButton.Factory(resourcesLoader);
 
-    setLayout(new GridLayout(_minefield.getLength(), _minefield.getHeight()));
+    setLayout(new GridLayout(this.minefield.getLength(), this.minefield.getHeight()));
 
-    for (int i = 0; i < _minefield.getLength(); i++) {
-      for (int j = 0; j < _minefield.getHeight(); j++) {
+    for (int i = 0; i < this.minefield.getLength(); i++) {
+      for (int j = 0; j < this.minefield.getHeight(); j++) {
         final var button = mineButtonFactory.create(i, j);
         add(button);
         mineButtons[i][j] = button;

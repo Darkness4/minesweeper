@@ -17,7 +17,7 @@ public abstract class Tile implements Serializable {
 
   public final int x;
   public final int y;
-  private final State _state;
+  private final State state;
 
   private Tile(int x, int y) {
     this(x, y, State.BLANK);
@@ -26,7 +26,7 @@ public abstract class Tile implements Serializable {
   private Tile(int x, int y, @NotNull State state) {
     this.x = x;
     this.y = y;
-    _state = state;
+    this.state = state;
   }
 
   /**
@@ -60,7 +60,7 @@ public abstract class Tile implements Serializable {
    */
   @NotNull
   public State getState() {
-    return _state;
+    return state;
   }
 
   @Override
@@ -72,17 +72,17 @@ public abstract class Tile implements Serializable {
       return false;
     }
     Tile tile = (Tile) o;
-    return x == tile.x && y == tile.y && _state == tile._state;
+    return x == tile.x && y == tile.y && state == tile.state;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(_state, x, y);
+    return Objects.hash(state, x, y);
   }
 
   @Override
   public String toString() {
-    return "Tile{" + "_state=" + _state + ", x=" + x + ", y=" + y + '}';
+    return "Tile{" + "_state=" + state + ", x=" + x + ", y=" + y + '}';
   }
 
   /**

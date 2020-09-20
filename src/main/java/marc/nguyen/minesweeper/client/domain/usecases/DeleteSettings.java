@@ -10,8 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /** A user should be able to delete a saved settings. */
 @Singleton
 public class DeleteSettings implements UseCase<String, Void> {
-
-  final Lazy<SettingsRepository> repository;
+  private final Lazy<SettingsRepository> repository;
 
   @Inject
   public DeleteSettings(Lazy<SettingsRepository> repository) {

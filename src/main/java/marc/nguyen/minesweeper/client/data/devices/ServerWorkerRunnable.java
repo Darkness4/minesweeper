@@ -1,10 +1,8 @@
-package marc.nguyen.minesweeper.client.data.datasources;
+package marc.nguyen.minesweeper.client.data.devices;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import javax.inject.Singleton;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
@@ -14,26 +12,24 @@ import marc.nguyen.minesweeper.common.data.models.Tile;
  *
  * <p>This Runnable should be called in a new Thread or in a Thread Pool.
  */
-@Singleton
 public class ServerWorkerRunnable implements Runnable {
 
   private final Socket serverSocket;
   private boolean isStopped = false;
 
+  // TODO : Add publisher
   public ServerWorkerRunnable(Socket serverSocket) {
     this.serverSocket = serverSocket;
   }
 
   @Override
   public void run() {
-    try (final var input = new ObjectInputStream(serverSocket.getInputStream());
-        final var output = new ObjectOutputStream(serverSocket.getOutputStream())) {
+    try (final var input = new ObjectInputStream(serverSocket.getInputStream())) {
 
-      output.writeObject(new Message("Hello server !"));
-      output.flush();
       while (!isStopped()) {
         try {
           final var packet = input.readObject();
+          // TODO : Move handler somewhere else and publish here
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
           // Server disconnected
@@ -44,6 +40,7 @@ public class ServerWorkerRunnable implements Runnable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    System.out.println("Server listener stopped.");
   }
 
   private synchronized boolean isStopped() {

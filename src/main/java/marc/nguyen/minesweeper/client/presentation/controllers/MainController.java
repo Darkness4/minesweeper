@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
-import marc.nguyen.minesweeper.client.domain.usecases.UpdateMinefield;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
@@ -19,9 +19,9 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   private final MainModel _model;
   private final MainView _view;
-  private final Lazy<UpdateMinefield> _updateMinefield;
+  private final Lazy<UpdateServerTile> _updateMinefield;
 
-  public MainController(Lazy<UpdateMinefield> updateMinefield, MainModel model, MainView view) {
+  public MainController(Lazy<UpdateServerTile> updateMinefield, MainModel model, MainView view) {
     _model = model;
     _view = view;
     _updateMinefield = updateMinefield;
@@ -99,7 +99,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
                 updatePlayerScore();
                 updateField();
                 checkIfEndGame();
-                _updateMinefield.get().execute(_model.minefield);
+                _updateMinefield.get().execute(tile);
               }
             })
         .start();
@@ -118,10 +118,10 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   public static final class Factory {
 
-    final Lazy<UpdateMinefield> updateMinefield;
+    final Lazy<UpdateServerTile> updateMinefield;
 
     @Inject
-    public Factory(Lazy<UpdateMinefield> updateMinefield) {
+    public Factory(Lazy<UpdateServerTile> updateMinefield) {
       this.updateMinefield = updateMinefield;
     }
 

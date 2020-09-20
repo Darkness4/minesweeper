@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Minefield implements Serializable {
 
-  final Tile[][] _tiles;
+  final Tile[][] tiles;
   long minesOnField = 0;
 
   /**
@@ -29,10 +29,10 @@ public class Minefield implements Serializable {
     if (length <= 0 || height <= 0) {
       throw new IllegalArgumentException("Length and Height should be > 0");
     }
-    _tiles = new Tile[length][height];
-    for (int i = 0; i < _tiles.length; i++) {
+    tiles = new Tile[length][height];
+    for (int i = 0; i < tiles.length; i++) {
       final int finalI = i;
-      Arrays.parallelSetAll(_tiles[i], j -> new Tile.Empty(finalI, j));
+      Arrays.parallelSetAll(tiles[i], j -> new Tile.Empty(finalI, j));
     }
   }
 
@@ -73,7 +73,7 @@ public class Minefield implements Serializable {
    * @param mines Number of mines to be placed.
    */
   public synchronized void placeMines(int mines) {
-    if (mines >= _tiles.length * _tiles[0].length) {
+    if (mines >= tiles.length * tiles[0].length) {
       throw new IllegalArgumentException(
           "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
     }
@@ -81,25 +81,25 @@ public class Minefield implements Serializable {
 
     minesOnField = countMinesOnField();
     while (minesOnField < mines) {
-      final int x = randomizer.nextInt(_tiles.length);
-      final int y = randomizer.nextInt(_tiles[0].length);
+      final int x = randomizer.nextInt(tiles.length);
+      final int y = randomizer.nextInt(tiles[0].length);
 
-      if (_tiles[x][y] instanceof Tile.Empty) {
-        _tiles[x][y] = new Tile.Mine(x, y);
+      if (tiles[x][y] instanceof Tile.Empty) {
+        tiles[x][y] = new Tile.Mine(x, y);
         minesOnField++;
-        incrementAdjacentCounters(_tiles[x][y]);
+        incrementAdjacentCounters(tiles[x][y]);
       }
     }
   }
 
   /** @return Length of the Minefield. */
   public int getLength() {
-    return _tiles.length;
+    return tiles.length;
   }
 
   /** @return Height of the Minefield. */
   public int getHeight() {
-    return _tiles[0].length;
+    return tiles[0].length;
   }
 
   /**
@@ -110,9 +110,9 @@ public class Minefield implements Serializable {
   public synchronized void flag(Tile tile) {
     final var state = tile.getState();
     if (state == Tile.State.BLANK) {
-      _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.FLAG);
+      tiles[tile.x][tile.y] = tile.copyWith(Tile.State.FLAG);
     } else if (state == Tile.State.FLAG) {
-      _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.BLANK);
+      tiles[tile.x][tile.y] = tile.copyWith(Tile.State.BLANK);
     }
   }
 
@@ -131,10 +131,9 @@ public class Minefield implements Serializable {
       //        }
       //      }
     } else if (tile instanceof Tile.Mine) {
-      synchronized (_tiles[tile.x][tile.y]) {
-        _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);
+      synchronized (tiles[tile.x][tile.y]) {
+        tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);
       }
-      // TODO: Minus score -1
     }
   }
 
@@ -152,12 +151,12 @@ public class Minefield implements Serializable {
       final var head = queue.poll();
 
       if (head.getState() != Tile.State.EXPOSED) {
-        synchronized (_tiles[head.x][head.y]) {
-          _tiles[head.x][head.y] = head.copyWith(Tile.State.EXPOSED);
+        synchronized (tiles[head.x][head.y]) {
+          tiles[head.x][head.y] = head.copyWith(Tile.State.EXPOSED);
         }
 
         if (head.getNeighborMinesCount() == 0) {
-          head.getNeighborsTilesIn(_tiles).forEach(neighbor -> queue.add((Tile.Empty) neighbor));
+          head.getNeighborsTilesIn(tiles).forEach(neighbor -> queue.add((Tile.Empty) neighbor));
         }
       }
     }
@@ -172,7 +171,7 @@ public class Minefield implements Serializable {
    */
   @NotNull
   public Tile get(int x, int y) {
-    return _tiles[x][y];
+    return tiles[x][y];
   }
 
   /**
@@ -183,7 +182,7 @@ public class Minefield implements Serializable {
    * @return Number of Mines on field.
    */
   private long countMinesOnField() {
-    return Arrays.stream(_tiles)
+    return Arrays.stream(tiles)
         .flatMap(Arrays::stream)
         .parallel()
         .filter(tile -> tile instanceof Tile.Mine)
@@ -192,7 +191,7 @@ public class Minefield implements Serializable {
 
   /** @return Number of flags and mine exposed. */
   public long countFlagsAndVisibleBombsOnField() {
-    return Arrays.stream(_tiles)
+    return Arrays.stream(tiles)
         .flatMap(Arrays::stream)
         .parallel()
         .filter(
@@ -202,7 +201,7 @@ public class Minefield implements Serializable {
 
   public boolean hasEnded() {
     final long exposedTiles =
-        Arrays.stream(_tiles)
+        Arrays.stream(tiles)
             .flatMap(Arrays::stream)
             .parallel()
             .filter(tile -> tile.getState() == State.EXPOSED && tile instanceof Tile.Empty)
@@ -211,12 +210,12 @@ public class Minefield implements Serializable {
   }
 
   private synchronized void incrementAdjacentCounters(@NotNull Tile tile) {
-    tile.getNeighborsTilesIn(_tiles)
+    tile.getNeighborsTilesIn(tiles)
         .parallel()
         .forEach(
             neighbor -> {
               if (neighbor instanceof Tile.Empty) {
-                _tiles[neighbor.x][neighbor.y] =
+                tiles[neighbor.x][neighbor.y] =
                     ((Tile.Empty) neighbor).copyAndIncrementAdjacentMines();
               }
             });
@@ -225,7 +224,7 @@ public class Minefield implements Serializable {
   @Override
   public String toString() {
     return "Minefield{\n_tiles="
-        + Arrays.stream(_tiles).map(Arrays::toString).collect(Collectors.joining(",\n  "))
+        + Arrays.stream(tiles).map(Arrays::toString).collect(Collectors.joining(",\n  "))
         + "\n}";
   }
 
@@ -238,11 +237,11 @@ public class Minefield implements Serializable {
       return false;
     }
     final Minefield minefield = (Minefield) o;
-    return Arrays.equals(_tiles, minefield._tiles);
+    return Arrays.equals(tiles, minefield.tiles);
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(_tiles);
+    return Arrays.hashCode(tiles);
   }
 }
