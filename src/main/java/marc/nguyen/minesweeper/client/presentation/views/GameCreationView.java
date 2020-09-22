@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.presentation.views;
 
 import java.awt.BorderLayout;
 import javax.inject.Inject;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.mvc.View;
@@ -28,12 +29,23 @@ public final class GameCreationView extends JPanel implements View {
   }
 
   public void loadSettings(Settings settings) {
-    savedSettingsPanel.settingsNameTextField.setText(settings.name);
-    editSettingsPanel.networkSettingsPanel.ipTextField.setText(settings.address.getHostAddress());
-    editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
-    editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
-    editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
-    editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
-    editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(settings.level);
+    SwingUtilities.invokeLater(
+        () -> {
+          savedSettingsPanel.settingsNameTextField.setText(settings.name);
+          editSettingsPanel.networkSettingsPanel.ipTextField.setText(
+              settings.address.getHostAddress());
+          editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
+          editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
+          editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
+          editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
+          editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(settings.level);
+        });
+  }
+
+  public void invokeErrorDialog(String message) {
+    SwingUtilities.invokeLater(
+        () ->
+            JOptionPane.showMessageDialog(
+                null, message, "Error Message", JOptionPane.ERROR_MESSAGE));
   }
 }

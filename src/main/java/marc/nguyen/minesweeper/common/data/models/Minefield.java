@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class Minefield implements Serializable {
 
   private final Tile[][] tiles;
+  private final boolean isSinglePlayer;
   private long minesOnField = 0;
 
   /**
@@ -24,11 +25,14 @@ public class Minefield implements Serializable {
    *
    * @param length Length of the minefield.
    * @param height Height of the minefield.
+   * @param isSinglePlayer Game is single player. This will change the discovering algorithm to a
+   *     tree search if enabled.
    */
-  public Minefield(int length, int height) {
+  public Minefield(int length, int height, boolean isSinglePlayer) {
     if (length <= 0 || height <= 0) {
       throw new IllegalArgumentException("Length and Height should be > 0");
     }
+    this.isSinglePlayer = isSinglePlayer;
     tiles = new Tile[length][height];
     for (int i = 0; i < tiles.length; i++) {
       final int finalI = i;
@@ -42,9 +46,11 @@ public class Minefield implements Serializable {
    * @param length Length of the minefield.
    * @param height Height of the minefield.
    * @param mines Number of mines.
+   * @param isSinglePlayer Game is single player. This will change the discovering algorithm to a
+   *     tree search if enabled.
    */
-  public Minefield(int length, int height, int mines) {
-    this(length, height);
+  public Minefield(int length, int height, int mines, boolean isSinglePlayer) {
+    this(length, height, isSinglePlayer);
     placeMines(mines);
   }
 
@@ -52,9 +58,11 @@ public class Minefield implements Serializable {
    * Generate a Minefield based on the difficulty.
    *
    * @param level Level of difficulty.
+   * @param isSinglePlayer Game is single player. This will change the discovering algorithm to a
+   *     tree search if enabled.
    */
-  public Minefield(@NotNull Level level) {
-    this(level.length, level.height);
+  public Minefield(@NotNull Level level, boolean isSinglePlayer) {
+    this(level.length, level.height, isSinglePlayer);
     placeMines(level.mines);
   }
 
@@ -123,11 +131,13 @@ public class Minefield implements Serializable {
    */
   public void expose(Tile tile) {
     if (tile instanceof Tile.Empty) {
-      // TODO: May want to add single player
-      // treeSearchEmptyTile((Tile.Empty) tile);
-      if (tile.getState() != Tile.State.EXPOSED) {
-        synchronized (tiles[tile.x][tile.y]) {
-          tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+      if (isSinglePlayer) {
+        treeSearchEmptyTile((Tile.Empty) tile);
+      } else {
+        if (tile.getState() != Tile.State.EXPOSED) {
+          synchronized (tiles[tile.x][tile.y]) {
+            tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+          }
         }
       }
     } else if (tile instanceof Tile.Mine) {

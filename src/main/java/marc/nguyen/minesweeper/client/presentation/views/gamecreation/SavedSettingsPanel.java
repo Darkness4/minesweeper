@@ -1,6 +1,7 @@
 package marc.nguyen.minesweeper.client.presentation.views.gamecreation;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -33,16 +34,32 @@ public class SavedSettingsPanel extends JPanel {
 
     settingsNameTextField = new JTextField(10);
     saveButton = new JButton("Save");
-    saveButton.setActionCommand("save_settings");
     loadButton = new JButton("Load");
-    loadButton.setActionCommand("load_settings");
     deleteButton = new JButton("Delete");
-    deleteButton.setActionCommand("delete_settings");
     bottomFlow.add(settingsNameTextField);
     bottomFlow.add(saveButton);
     bottomFlow.add(loadButton);
     bottomFlow.add(deleteButton);
 
     add(bottomFlow, BorderLayout.SOUTH);
+  }
+
+  public void enableLoadAndDeleteIfValid(boolean isValid) {
+    SwingUtilities.invokeLater(
+        () -> {
+          loadButton.setEnabled(isValid);
+          deleteButton.setEnabled(isValid);
+        });
+  }
+
+  public void enableSaveButtonIfValid(boolean isValid) {
+    SwingUtilities.invokeLater(() -> saveButton.setEnabled(isValid));
+  }
+
+  public void changeColorNameTextIfValid(boolean isValid) {
+    SwingUtilities.invokeLater(
+        () -> {
+          settingsNameTextField.setBackground(isValid ? Color.WHITE : Color.RED);
+        });
   }
 }

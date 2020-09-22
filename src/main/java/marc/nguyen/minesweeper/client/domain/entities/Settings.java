@@ -16,6 +16,7 @@ public class Settings implements Serializable {
   public final int height;
   public final int mines;
   @NotNull public final Level level;
+  @NotNull public final GameMode mode;
 
   public Settings(
       @NotNull String name,
@@ -24,7 +25,8 @@ public class Settings implements Serializable {
       int length,
       int height,
       int mines,
-      @NotNull Level level) {
+      @NotNull Level level,
+      @NotNull GameMode mode) {
     this.name = name;
     this.address = address;
     this.port = port;
@@ -32,6 +34,7 @@ public class Settings implements Serializable {
     this.height = height;
     this.mines = mines;
     this.level = level;
+    this.mode = mode;
   }
 
   @Override
@@ -52,6 +55,8 @@ public class Settings implements Serializable {
         + mines
         + ", level="
         + level
+        + ", mode="
+        + mode
         + '}';
   }
 
@@ -70,11 +75,12 @@ public class Settings implements Serializable {
         && mines == settings.mines
         && name.equals(settings.name)
         && address.equals(settings.address)
-        && level == settings.level;
+        && level == settings.level
+        && mode == settings.mode;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, address, port, length, height, mines, level);
+    return Objects.hash(name, address, port, length, height, mines, level, mode);
   }
 }

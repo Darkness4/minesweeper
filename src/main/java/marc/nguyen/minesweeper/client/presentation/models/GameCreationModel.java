@@ -2,18 +2,17 @@ package marc.nguyen.minesweeper.client.presentation.models;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Vector;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.mvc.Model;
+import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class GameCreationModel implements Model {
 
-  public static Vector<Level> levelChoices =
-      new Vector<>(Arrays.asList(Level.EASY, Level.MEDIUM, Level.HARD, Level.CUSTOM));
+  public static Level[] levelChoices = Level.values();
+  public static GameMode[] gameModeChoices = GameMode.values();
 
   @NotNull private Level level = Level.EASY;
   private int length = 10;
@@ -22,6 +21,7 @@ public class GameCreationModel implements Model {
   private String address = InetAddress.getLoopbackAddress().getHostName();
   private int port = 12345;
   private String settingsName = "My Settings";
+  @NotNull private GameMode mode = GameMode.SINGLEPLAYER;
 
   @Inject
   public GameCreationModel() {}
@@ -98,6 +98,11 @@ public class GameCreationModel implements Model {
     mines = settings.mines;
     level = settings.level;
     address = settings.address.getHostAddress();
+    mode = settings.mode;
+  }
+
+  public Boolean isSinglePlayer() {
+    return mode == GameMode.SINGLEPLAYER;
   }
 
   public Settings toEntity() throws UnknownHostException {
@@ -108,6 +113,15 @@ public class GameCreationModel implements Model {
         getLength(),
         getHeight(),
         getMines(),
-        getLevel());
+        getLevel(),
+        getMode());
+  }
+
+  public @NotNull GameMode getMode() {
+    return mode;
+  }
+
+  public void setMode(@NotNull GameMode mode) {
+    this.mode = mode;
   }
 }

@@ -1,20 +1,21 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
 import dagger.Lazy;
-import java.awt.Color;
+import io.reactivex.rxjava3.core.Observable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.di.components.MainComponent.Builder;
+import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
@@ -24,8 +25,10 @@ import marc.nguyen.minesweeper.client.presentation.controllers.listeners.OnUpdat
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.common.data.models.Level;
+import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
+// TODO : Move every "SwingUtilities" to view
 // TODO : SRP is broken. Split the listener.
 public class GameCreationController {
 
@@ -84,6 +87,7 @@ public class GameCreationController {
         });
     this.view.editSettingsPanel.gameSettingsPanel.levelComboBox.addItemListener(
         this::levelStateChanged);
+    this.view.editSettingsPanel.gameModeComboBox.addItemListener(this::gameModeStateChanged);
     this.view.editSettingsPanel.startButton.addActionListener((e) -> onStartButtonPushed());
     this.view
         .editSettingsPanel
@@ -128,13 +132,8 @@ public class GameCreationController {
     try {
       saveSettings.get().execute(model.toEntity()).subscribe(this::refreshListModel);
     } catch (UnknownHostException unknownHostException) {
-      SwingUtilities.invokeLater(
-          () ->
-              JOptionPane.showMessageDialog(
-                  null,
-                  String.format("Error: Incorrect Internet Address %s", model.getAddress()),
-                  "Error Message",
-                  JOptionPane.ERROR_MESSAGE));
+      view.invokeErrorDialog(
+          String.format("Error: Incorrect Internet Address %s", model.getAddress()));
     }
   }
 
@@ -156,40 +155,69 @@ public class GameCreationController {
         .subscribe(
             (settings) -> {
               model.fromEntity(settings);
-              SwingUtilities.invokeLater(() -> view.loadSettings(settings));
+              view.loadSettings(settings);
             },
             (throwable) -> System.out.println("Settings couldn't be loaded."));
   }
 
   private void onStartButtonPushed() {
     try {
-      connect
-          .get()
-          .execute(new Connect.Params(model.getInetAddress(), model.getPort()))
-          .subscribe(
-              result -> {
-                final var minefield = result.initialMinefield;
+      final var mode = model.getMode();
+      if (mode == GameMode.SINGLEPLAYER) {
+        final var level = model.getLevel();
+        final CompletableFuture<Minefield> minefield =
+            CompletableFuture.supplyAsync(
+                () -> {
+                  if (level == Level.CUSTOM) {
+                    return new Minefield(
+                        model.getLength(),
+                        model.getHeight(),
+                        model.getMines(),
+                        model.isSinglePlayer());
+                  } else {
+                    return new Minefield(level, model.isSinglePlayer());
+                  }
+                });
 
-                SwingUtilities.windowForComponent(view).dispose();
-                SwingUtilities.invokeLater(
-                    () ->
-                        mainComponentProvider
-                            .get()
-                            .minefield(minefield)
-                            .player(new Player())
-                            .updateTiles(result.tiles)
-                            .build()
-                            .mainFrame());
-              });
+        SwingUtilities.windowForComponent(view).dispose();
+        SwingUtilities.invokeLater(
+            () -> {
+              try {
+                mainComponentProvider
+                    .get()
+                    .minefield(minefield.get())
+                    .player(new Player())
+                    .updateTiles(Observable.empty())
+                    .build()
+                    .mainFrame();
+              } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+              }
+            });
 
+      } else if (mode == GameMode.MULTIPLAYER) {
+        connect
+            .get()
+            .execute(new Connect.Params(model.getInetAddress(), model.getPort()))
+            .subscribe(
+                result -> {
+                  final var minefield = result.initialMinefield;
+
+                  SwingUtilities.windowForComponent(view).dispose();
+                  SwingUtilities.invokeLater(
+                      () ->
+                          mainComponentProvider
+                              .get()
+                              .minefield(minefield)
+                              .player(new Player())
+                              .updateTiles(result.tiles)
+                              .build()
+                              .mainFrame());
+                });
+      }
     } catch (UnknownHostException e) {
-      SwingUtilities.invokeLater(
-          () ->
-              JOptionPane.showMessageDialog(
-                  null,
-                  String.format("Error: Incorrect Internet Address %s", model.getAddress()),
-                  "Error Message",
-                  JOptionPane.ERROR_MESSAGE));
+      view.invokeErrorDialog(
+          String.format("Error: Incorrect Internet Address %s", model.getAddress()));
     }
   }
 
@@ -204,16 +232,25 @@ public class GameCreationController {
       final Level level = (Level) item;
       model.setLevel(level);
       if (level == Level.CUSTOM) {
-        SwingUtilities.invokeLater(view.editSettingsPanel.gameSettingsPanel::enableCustomSettings);
+        view.editSettingsPanel.gameSettingsPanel.enableCustomSettings();
       } else {
-        SwingUtilities.invokeLater(
-            () -> {
-              view.editSettingsPanel.gameSettingsPanel.disableCustomSettings();
-              view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(level.length);
-              view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(level.height);
-              view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(level.mines);
-            });
+        view.editSettingsPanel.gameSettingsPanel.disableCustomSettings();
+        view.editSettingsPanel.gameSettingsPanel.setValueFromLevel(level);
       }
+    }
+  }
+
+  /**
+   * Handles GameMode Combo Box events
+   *
+   * @param e Events
+   */
+  private void gameModeStateChanged(ItemEvent e) {
+    final var item = e.getItem();
+    if (item instanceof GameMode) {
+      final GameMode mode = (GameMode) item;
+      model.setMode(mode);
+      view.editSettingsPanel.changeCard(e);
     }
   }
 
@@ -228,14 +265,9 @@ public class GameCreationController {
           final var text = view.savedSettingsPanel.settingsNameTextField.getText();
           model.setSettingsName(text);
           final var isValid = model.isSettingsNameValid();
-          SwingUtilities.invokeLater(
-              () -> {
-                view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
-                view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
-                view.savedSettingsPanel.saveButton.setEnabled(isValid);
-                view.savedSettingsPanel.settingsNameTextField.setBackground(
-                    isValid ? Color.WHITE : Color.RED);
-              });
+          view.savedSettingsPanel.enableLoadAndDeleteIfValid(listModel.contains(text));
+          view.savedSettingsPanel.enableLoadAndDeleteIfValid(isValid);
+          view.savedSettingsPanel.changeColorNameTextIfValid(isValid);
         },
         IO.executor);
     return null;

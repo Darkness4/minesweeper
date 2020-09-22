@@ -8,6 +8,7 @@ import io.reactivex.rxjava3.observers.TestObserver;
 import java.net.InetAddress;
 import java.util.List;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
+import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import marc.nguyen.minesweeper.common.data.models.Level;
@@ -37,7 +38,15 @@ class SettingsRepositoryImplTest {
   void save() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            12345,
+            10,
+            10,
+            10,
+            Level.EASY,
+            GameMode.SINGLEPLAYER);
     final TestObserver<Settings> observer = new TestObserver<>();
     // Act
     repository.save(tSettings).subscribe(observer);
@@ -50,7 +59,15 @@ class SettingsRepositoryImplTest {
   void findByKey_found() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            12345,
+            10,
+            10,
+            10,
+            Level.EASY,
+            GameMode.SINGLEPLAYER);
     when(settingsDao.findByName("name")).thenReturn(tSettings);
     final TestObserver<Settings> observer = new TestObserver<>();
 
@@ -82,7 +99,15 @@ class SettingsRepositoryImplTest {
     // Arrange
     final var tSettingsList =
         List.of(
-            new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY));
+            new Settings(
+                "name",
+                InetAddress.getLoopbackAddress(),
+                12345,
+                10,
+                10,
+                10,
+                Level.EASY,
+                GameMode.SINGLEPLAYER));
     when(settingsDao.findAll()).thenReturn(tSettingsList);
     final TestObserver<List<Settings>> observer = new TestObserver<>();
     // Act

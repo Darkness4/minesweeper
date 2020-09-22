@@ -29,7 +29,7 @@ public class ClientWorkerRunnable implements Runnable {
         final var output = new ObjectOutputStream(clientSocket.getOutputStream())) {
 
       output.writeObject(new Message("Hello client !"));
-      output.writeObject(new Minefield(Level.EASY));
+      output.writeObject(new Minefield(Level.EASY, false));
       while (!isStopped()) {
         try {
           final var packet = input.readObject();

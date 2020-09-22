@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
 import marc.nguyen.minesweeper.client.data.datasources.MockLocalDataSource;
+import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.junit.jupiter.api.AfterEach;
@@ -51,7 +52,15 @@ class SettingsDaoSqliteTest {
   void deleteByName() throws SQLException {
     // Arrange
     settingsDao.insert(
-        new Settings("name", InetAddress.getLoopbackAddress(), 1, 2, 3, 4, Level.EASY));
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            1,
+            2,
+            3,
+            4,
+            Level.EASY,
+            GameMode.SINGLEPLAYER));
 
     // Act
     settingsDao.deleteByName("name");
@@ -66,7 +75,15 @@ class SettingsDaoSqliteTest {
   void insert() throws SQLException {
     // Act
     settingsDao.insert(
-        new Settings("name", InetAddress.getLoopbackAddress(), 1, 2, 3, 4, Level.EASY));
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            1,
+            2,
+            3,
+            4,
+            Level.EASY,
+            GameMode.SINGLEPLAYER));
 
     // Assert
     final var statement = connection.prepareStatement("SELECT COUNT(*) FROM settings");
@@ -78,9 +95,25 @@ class SettingsDaoSqliteTest {
   void findAll() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 1, 2, 3, 4, Level.EASY);
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            1,
+            2,
+            3,
+            4,
+            Level.EASY,
+            GameMode.SINGLEPLAYER);
     final var tSettings2 =
-        new Settings("name2", InetAddress.getLoopbackAddress(), 1, 2, 3, 4, Level.EASY);
+        new Settings(
+            "name2",
+            InetAddress.getLoopbackAddress(),
+            1,
+            2,
+            3,
+            4,
+            Level.EASY,
+            GameMode.SINGLEPLAYER);
     settingsDao.insert(tSettings);
     settingsDao.insert(tSettings2);
 
@@ -95,7 +128,15 @@ class SettingsDaoSqliteTest {
   void findByName_found() {
     // Arrange
     final var tSettings =
-        new Settings("name", InetAddress.getLoopbackAddress(), 1, 2, 3, 4, Level.EASY);
+        new Settings(
+            "name",
+            InetAddress.getLoopbackAddress(),
+            1,
+            2,
+            3,
+            4,
+            Level.EASY,
+            GameMode.SINGLEPLAYER);
     settingsDao.insert(tSettings);
 
     // Act

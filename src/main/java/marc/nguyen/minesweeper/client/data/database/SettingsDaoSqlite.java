@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
+import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
@@ -31,13 +32,14 @@ public class SettingsDaoSqlite implements SettingsDao {
         final var statement =
             connection.prepareStatement(
                 "CREATE TABLE IF NOT EXISTS settings "
-                    + "(name           CHAR(128)    NOT NULL PRIMARY KEY,"
-                    + " address        CHAR(128)    NOT NULL,"
+                    + "(name           VARCHAR(128)    NOT NULL PRIMARY KEY,"
+                    + " address        VARCHAR(128)    NOT NULL,"
                     + " port           INT          NOT NULL,"
                     + " length         INT          NOT NULL,"
                     + " height         INT          NOT NULL,"
                     + " mines          INT          NOT NULL,"
-                    + " level          CHAR(20)     NOT NULL);")) {
+                    + " level          VARCHAR(20)     NOT NULL,"
+                    + " mode           VARCHAR(20)     NOT NULL);")) {
 
       statement.executeUpdate();
       System.out.println("Settings table initialized.");
@@ -65,8 +67,8 @@ public class SettingsDaoSqlite implements SettingsDao {
     try (final var connection = dataSource.get().getConnection();
         final var statement =
             connection.prepareStatement(
-                "REPLACE INTO settings (name, address, port, length, height, mines, level) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?);")) {
+                "REPLACE INTO settings (name, address, port, length, height, mines, level, mode) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?);")) {
       statement.setString(1, settings.name);
       statement.setString(2, settings.address.getHostAddress());
       statement.setInt(3, settings.port);
@@ -74,6 +76,7 @@ public class SettingsDaoSqlite implements SettingsDao {
       statement.setInt(5, settings.height);
       statement.setInt(6, settings.mines);
       statement.setString(7, settings.level.name());
+      statement.setString(8, settings.mode.name());
 
       final var result = statement.executeUpdate();
       System.out.printf("%d settings inserted.\n", result);
@@ -101,7 +104,8 @@ public class SettingsDaoSqlite implements SettingsDao {
                   result.getInt("length"),
                   result.getInt("height"),
                   result.getInt("mines"),
-                  Level.valueOf(result.getString("level"))));
+                  Level.valueOf(result.getString("level")),
+                  GameMode.valueOf(result.getString("mode"))));
         }
       }
     } catch (SQLException | UnknownHostException e) {
@@ -131,7 +135,8 @@ public class SettingsDaoSqlite implements SettingsDao {
                   result.getInt("length"),
                   result.getInt("height"),
                   result.getInt("mines"),
-                  Level.valueOf(result.getString("level")));
+                  Level.valueOf(result.getString("level")),
+                  GameMode.valueOf(result.getString("mode")));
         }
       }
     } catch (SQLException | UnknownHostException e) {

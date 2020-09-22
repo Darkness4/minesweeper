@@ -16,7 +16,7 @@ public class MinefieldTest {
   @Test
   void Constructor_IllegalSize0x0() {
     // Act
-    final Executable executable = () -> new Minefield(0, 0);
+    final Executable executable = () -> new Minefield(0, 0, false);
 
     // Assert
     assertThrows(IllegalArgumentException.class, executable);
@@ -25,7 +25,7 @@ public class MinefieldTest {
   @Test
   void PlaceMines_ShouldPlaceTheSpecifiedNumberOfMines() {
     // Act
-    minefield = new Minefield(LENGTH, HEIGHT, 3);
+    minefield = new Minefield(LENGTH, HEIGHT, 3, false);
 
     // Assert
     assertEquals(minefield.getMinesOnField(), 3);
@@ -34,7 +34,7 @@ public class MinefieldTest {
   @Test
   void PlaceMines_ExcessOfMines() {
     // Act
-    final Executable executable = () -> minefield = new Minefield(LENGTH, HEIGHT, 5);
+    final Executable executable = () -> minefield = new Minefield(LENGTH, HEIGHT, 5, false);
 
     // Assert
     assertThrows(IllegalArgumentException.class, executable);

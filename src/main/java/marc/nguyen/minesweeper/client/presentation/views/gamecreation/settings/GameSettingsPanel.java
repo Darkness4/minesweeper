@@ -33,6 +33,7 @@ public class GameSettingsPanel extends JPanel {
     /* Level settings */
     final var levelLabel = new JLabel("Level");
     levelComboBox = new JComboBox<>(GameCreationModel.levelChoices);
+    levelComboBox.setEditable(false);
     levelComboBox.setRenderer(
         new BasicComboBoxRenderer() {
           @Override
@@ -71,18 +72,33 @@ public class GameSettingsPanel extends JPanel {
   }
 
   public void enableCustomSettings() {
-    sizeLabel.setEnabled(true);
-    lengthSpinner.setEnabled(true);
-    heightSpinner.setEnabled(true);
-    minesSpinner.setEnabled(true);
-    minesLabel.setEnabled(true);
+    SwingUtilities.invokeLater(
+        () -> {
+          sizeLabel.setEnabled(true);
+          lengthSpinner.setEnabled(true);
+          heightSpinner.setEnabled(true);
+          minesSpinner.setEnabled(true);
+          minesLabel.setEnabled(true);
+        });
   }
 
   public void disableCustomSettings() {
-    sizeLabel.setEnabled(false);
-    lengthSpinner.setEnabled(false);
-    heightSpinner.setEnabled(false);
-    minesSpinner.setEnabled(false);
-    minesLabel.setEnabled(false);
+    SwingUtilities.invokeLater(
+        () -> {
+          sizeLabel.setEnabled(false);
+          lengthSpinner.setEnabled(false);
+          heightSpinner.setEnabled(false);
+          minesSpinner.setEnabled(false);
+          minesLabel.setEnabled(false);
+        });
+  }
+
+  public void setValueFromLevel(Level level) {
+    SwingUtilities.invokeLater(
+        () -> {
+          lengthSpinner.setValue(level.length);
+          heightSpinner.setValue(level.height);
+          minesSpinner.setValue(level.mines);
+        });
   }
 }
