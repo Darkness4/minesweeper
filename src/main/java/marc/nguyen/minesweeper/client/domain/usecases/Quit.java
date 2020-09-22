@@ -1,16 +1,18 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
 import dagger.Lazy;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.swing.SwingUtilities;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
 import org.jetbrains.annotations.NotNull;
 
 /** A user should be to exit the current server. */
 @Singleton
-public class Quit implements UseCase<Void, Void> {
+public class Quit implements UseCase<Void, Completable> {
 
   private final Lazy<ServerSocketDevice> deviceLazy;
 
@@ -19,13 +21,10 @@ public class Quit implements UseCase<Void, Void> {
     this.deviceLazy = deviceLazy;
   }
 
-  // TODO: May want to use future
   @Override
   @NotNull
-  public Void execute(Void params) {
-    assert !SwingUtilities.isEventDispatchThread() : "Domain method executed on UI Thread !";
-
-    deviceLazy.get().close();
-    return null;
+  public Completable execute(Void params) {
+    return Completable.fromAction(() -> deviceLazy.get().close())
+        .observeOn(Schedulers.from(IO.executor));
   }
 }

@@ -6,15 +6,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import marc.nguyen.minesweeper.client.core.IO;
-import marc.nguyen.minesweeper.client.di.components.DaggerMainComponent;
+import marc.nguyen.minesweeper.client.di.components.MainComponent.Builder;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
@@ -24,7 +24,6 @@ import marc.nguyen.minesweeper.client.presentation.controllers.listeners.OnUpdat
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.common.data.models.Level;
-import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
 // TODO : SRP is broken. Split the listener.
@@ -38,6 +37,7 @@ public class GameCreationController {
   private final Lazy<SaveSettings> saveSettings;
   private final Lazy<DeleteSettings> deleteSettings;
   private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
+  private final Provider<Builder> mainComponentProvider;
 
   public GameCreationController(
       Lazy<Connect> connect,
@@ -45,6 +45,7 @@ public class GameCreationController {
       Lazy<SaveSettings> saveSettings,
       Lazy<DeleteSettings> deleteSettings,
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
+      Provider<Builder> mainComponentProvider,
       GameCreationModel model,
       GameCreationView view) {
     this.model = model;
@@ -54,6 +55,7 @@ public class GameCreationController {
     this.saveSettings = saveSettings;
     this.deleteSettings = deleteSettings;
     this.fetchAllSettingsName = fetchAllSettingsName;
+    this.mainComponentProvider = mainComponentProvider;
 
     listModel = new DefaultListModel<>();
     this.view.savedSettingsPanel.settingsList.setModel(listModel);
@@ -166,36 +168,18 @@ public class GameCreationController {
           .execute(new Connect.Params(model.getInetAddress(), model.getPort()))
           .subscribe(
               result -> {
-                result.updates.subscribe(); // TODO
-                // TODO : Start a game here
-
-                final var level = model.getLevel();
-
-                final var minefield =
-                    CompletableFuture.supplyAsync(
-                        () -> {
-                          if (level == Level.CUSTOM) {
-                            return new Minefield(
-                                model.getLength(), model.getHeight(), model.getMines());
-                          } else {
-                            return new Minefield(level);
-                          }
-                        },
-                        IO.executor);
+                final var minefield = result.initialMinefield;
 
                 SwingUtilities.windowForComponent(view).dispose();
                 SwingUtilities.invokeLater(
-                    () -> {
-                      try {
-                        DaggerMainComponent.builder()
-                            .minefield(minefield.get())
+                    () ->
+                        mainComponentProvider
+                            .get()
+                            .minefield(minefield)
                             .player(new Player())
+                            .updateTiles(result.tiles)
                             .build()
-                            .mainFrame();
-                      } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                      }
-                    });
+                            .mainFrame());
               });
 
     } catch (UnknownHostException e) {
@@ -259,11 +243,12 @@ public class GameCreationController {
 
   public static final class Factory {
 
-    private final Lazy<Connect> _connect;
-    private final Lazy<LoadSettings> _loadSettings;
-    private final Lazy<SaveSettings> _saveSettings;
-    private final Lazy<DeleteSettings> _deleteSettings;
-    private final Lazy<FetchAllSettingsName> _fetchAllSettingsName;
+    private final Lazy<Connect> connect;
+    private final Lazy<LoadSettings> loadSettings;
+    private final Lazy<SaveSettings> saveSettings;
+    private final Lazy<DeleteSettings> deleteSettings;
+    private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
+    private final Provider<Builder> mainComponentProvider;
 
     @Inject
     public Factory(
@@ -271,21 +256,24 @@ public class GameCreationController {
         Lazy<LoadSettings> loadSettings,
         Lazy<SaveSettings> saveSettings,
         Lazy<DeleteSettings> deleteSettings,
-        Lazy<FetchAllSettingsName> fetchAllSettingsName) {
-      _connect = connect;
-      _loadSettings = loadSettings;
-      _saveSettings = saveSettings;
-      _deleteSettings = deleteSettings;
-      _fetchAllSettingsName = fetchAllSettingsName;
+        Lazy<FetchAllSettingsName> fetchAllSettingsName,
+        Provider<Builder> mainComponentProvider) {
+      this.connect = connect;
+      this.loadSettings = loadSettings;
+      this.saveSettings = saveSettings;
+      this.deleteSettings = deleteSettings;
+      this.fetchAllSettingsName = fetchAllSettingsName;
+      this.mainComponentProvider = mainComponentProvider;
     }
 
     public GameCreationController create(GameCreationModel model, GameCreationView view) {
       return new GameCreationController(
-          _connect,
-          _loadSettings,
-          _saveSettings,
-          _deleteSettings,
-          _fetchAllSettingsName,
+          connect,
+          loadSettings,
+          saveSettings,
+          deleteSettings,
+          fetchAllSettingsName,
+          mainComponentProvider,
           model,
           view);
     }

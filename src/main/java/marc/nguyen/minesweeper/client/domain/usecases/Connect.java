@@ -3,10 +3,12 @@ package marc.nguyen.minesweeper.client.domain.usecases;
 import dagger.Lazy;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.net.InetAddress;
 import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect.Result;
@@ -36,22 +38,23 @@ public class Connect implements UseCase<Connect.Params, Maybe<Result>> {
   @NotNull
   public Maybe<Result> execute(@NotNull Params params) {
     return Maybe.fromCallable(
-        () -> {
-          deviceLazy.get().connect(params.address, params.port);
-          final var minefield = fetchMinefieldLazy.get().execute(null);
-          final var updateStream = watchServerTilesLazy.get().execute(null);
+            () -> {
+              deviceLazy.get().connect(params.address, params.port);
+              final var minefield = fetchMinefieldLazy.get().execute(null);
+              final var updateStream = watchServerTilesLazy.get().execute(null);
 
-          return new Result(updateStream, Objects.requireNonNull(minefield.blockingGet()));
-        });
+              return new Result(updateStream, Objects.requireNonNull(minefield.blockingGet()));
+            })
+        .observeOn(Schedulers.from(IO.executor));
   }
 
   public static class Result {
 
-    @NotNull public final Observable<Tile> updates;
+    @NotNull public final Observable<Tile> tiles;
     @NotNull public final Minefield initialMinefield;
 
-    public Result(@NotNull Observable<Tile> updates, @NotNull Minefield initialMinefield) {
-      this.updates = updates;
+    public Result(@NotNull Observable<Tile> tiles, @NotNull Minefield initialMinefield) {
+      this.tiles = tiles;
       this.initialMinefield = initialMinefield;
     }
   }

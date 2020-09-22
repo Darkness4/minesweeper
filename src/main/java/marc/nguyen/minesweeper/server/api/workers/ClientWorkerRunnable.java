@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
@@ -24,18 +25,18 @@ public class ClientWorkerRunnable implements Runnable {
 
   @Override
   public void run() {
-    try (final var output = new ObjectOutputStream(clientSocket.getOutputStream());
-        final var input = new ObjectInputStream(clientSocket.getInputStream())) {
+    try (final var input = new ObjectInputStream(clientSocket.getInputStream());
+        final var output = new ObjectOutputStream(clientSocket.getOutputStream())) {
 
       output.writeObject(new Message("Hello client !"));
-      output.flush();
+      output.writeObject(new Minefield(Level.EASY));
       while (!isStopped()) {
         try {
           final var packet = input.readObject();
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
           // Client disconnected
-          e.printStackTrace();
+          System.out.println(e);
           isStopped = true;
         }
       }

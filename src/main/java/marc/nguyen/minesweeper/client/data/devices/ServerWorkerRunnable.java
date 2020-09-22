@@ -1,13 +1,11 @@
 package marc.nguyen.minesweeper.client.data.devices;
 
-import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.common.data.models.Message;
-import marc.nguyen.minesweeper.common.data.models.Minefield;
-import marc.nguyen.minesweeper.common.data.models.Tile;
 
 /**
  * ServerWorkerRunnable handles the input from the server.
@@ -17,10 +15,10 @@ import marc.nguyen.minesweeper.common.data.models.Tile;
 public class ServerWorkerRunnable implements Runnable {
 
   private final Socket serverSocket;
-  private final PublishSubject<Object> publisher;
+  private final Subject<Object> publisher;
   private final AtomicBoolean isStopped = new AtomicBoolean(false);
 
-  public ServerWorkerRunnable(Socket serverSocket, PublishSubject<Object> publisher) {
+  public ServerWorkerRunnable(Socket serverSocket, Subject<Object> publisher) {
     this.serverSocket = serverSocket;
     this.publisher = publisher;
   }
@@ -32,12 +30,14 @@ public class ServerWorkerRunnable implements Runnable {
       while (!isStopped.get()) {
         try {
           final var packet = input.readObject();
-          // TODO : Move handler somewhere else and publish here
           publisher.onNext(packet);
-          handle(packet);
+          if (packet instanceof Message) {
+            System.out.printf("Server said: %s\n", packet);
+          }
+
         } catch (IOException | ClassNotFoundException e) {
           // Server disconnected
-          e.printStackTrace();
+          System.out.println(e);
           isStopped.set(true);
         }
       }
@@ -46,17 +46,5 @@ public class ServerWorkerRunnable implements Runnable {
     }
     publisher.onComplete();
     System.out.println("Server listener stopped.");
-  }
-
-  void handle(Object packet) {
-    if (packet instanceof Tile) {
-      // TODO: Handle
-    } else if (packet instanceof Minefield) {
-
-    } else if (packet instanceof Message) {
-      System.out.printf("Server said: %s\n", packet);
-    } else {
-      System.out.format("Packet %s not handled\n", packet);
-    }
   }
 }
