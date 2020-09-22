@@ -8,17 +8,15 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
-import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.utils.SpringUtilities;
 
 public class NetworkSettingsPanel extends JPanel {
+
   public final JTextField ipTextField;
   public final JSpinner portSpinner;
 
   public NetworkSettingsPanel() {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     setLayout(new SpringLayout());
     setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -36,10 +34,5 @@ public class NetworkSettingsPanel extends JPanel {
     add(portSpinner);
 
     SpringUtilities.makeCompactGrid(this, 2, 2, 6, 6, 6, 6);
-  }
-
-  public void addListener(GameCreationController listener) {
-    ipTextField.getDocument().addDocumentListener(listener);
-    portSpinner.addChangeListener(listener);
   }
 }

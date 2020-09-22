@@ -1,8 +1,11 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
 import dagger.Lazy;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
@@ -10,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 /** A user should be to save a new settings. */
 @Singleton
-public class SaveSettings implements UseCase<Settings, Void> {
+public class SaveSettings implements UseCase<Settings, Completable> {
+
   private final Lazy<SettingsRepository> repository;
 
   @Inject
@@ -19,8 +23,8 @@ public class SaveSettings implements UseCase<Settings, Void> {
   }
 
   @Override
-  public Void execute(@NotNull Settings params) {
-    repository.get().save(params);
-    return null;
+  @NotNull
+  public Completable execute(@NotNull Settings params) {
+    return repository.get().save(params).observeOn(Schedulers.from(IO.executor));
   }
 }

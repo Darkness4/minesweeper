@@ -6,13 +6,13 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Singleton
 public class SettingsDaoSqlite implements SettingsDao {
@@ -111,8 +111,8 @@ public class SettingsDaoSqlite implements SettingsDao {
   }
 
   @Override
-  public @NotNull Optional<Settings> findByName(@NotNull String name) {
-    Optional<Settings> settings = Optional.empty();
+  public @Nullable Settings findByName(@NotNull String name) {
+    Settings settings = null;
 
     try (final var connection = dataSource.get().getConnection();
         final var statement =
@@ -124,15 +124,14 @@ public class SettingsDaoSqlite implements SettingsDao {
           System.out.println("No settings are stored.");
         } else {
           settings =
-              Optional.of(
-                  new Settings(
-                      result.getString("name"),
-                      InetAddress.getByName(result.getString("address")),
-                      result.getInt("port"),
-                      result.getInt("length"),
-                      result.getInt("height"),
-                      result.getInt("mines"),
-                      Level.valueOf(result.getString("level"))));
+              new Settings(
+                  result.getString("name"),
+                  InetAddress.getByName(result.getString("address")),
+                  result.getInt("port"),
+                  result.getInt("length"),
+                  result.getInt("height"),
+                  result.getInt("mines"),
+                  Level.valueOf(result.getString("level")));
         }
       }
     } catch (SQLException | UnknownHostException e) {

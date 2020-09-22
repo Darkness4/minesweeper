@@ -1,16 +1,17 @@
 package marc.nguyen.minesweeper.client.domain.repositories;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 import org.jetbrains.annotations.NotNull;
 
 public interface MinefieldRepository {
 
-  Optional<Minefield> fetch();
+  Maybe<Minefield> fetch();
 
-  Stream<Tile> watchTiles();
+  Observable<Tile> watchTiles();
 
-  void updateTile(@NotNull Tile tile);
+  Completable updateTile(@NotNull Tile tile);
 }

@@ -3,7 +3,7 @@ package marc.nguyen.minesweeper.common.data.models;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -12,11 +12,6 @@ public class MinefieldTest {
   static int LENGTH = 2;
   static int HEIGHT = 2;
   Minefield minefield;
-
-  @BeforeEach
-  void init() {
-    minefield = new Minefield(LENGTH, HEIGHT);
-  }
 
   @Test
   void Constructor_IllegalSize0x0() {
@@ -28,29 +23,25 @@ public class MinefieldTest {
   }
 
   @Test
-  void PlaceMines_3Mines_ShouldPlaceTheSpecifiedNumberOfMines() {
+  void PlaceMines_ShouldPlaceTheSpecifiedNumberOfMines() {
     // Act
-    minefield.placeMines(3);
+    minefield = new Minefield(LENGTH, HEIGHT, 3);
 
     // Assert
     assertEquals(minefield.getMinesOnField(), 3);
   }
 
   @Test
-  void PlaceMines_1Mine_AdjacentTileShouldBeEqualsToOne() {
-    // Act
-    minefield.placeMines(1);
-
-    // Assert
-    assertEquals(4 - minefield.getMinesOnField(), 3);
-  }
-
-  @Test
   void PlaceMines_ExcessOfMines() {
     // Act
-    final Executable executable = () -> minefield.placeMines(5);
+    final Executable executable = () -> minefield = new Minefield(LENGTH, HEIGHT, 5);
 
     // Assert
     assertThrows(IllegalArgumentException.class, executable);
+  }
+
+  @AfterEach
+  void dispose() {
+    minefield = null;
   }
 }

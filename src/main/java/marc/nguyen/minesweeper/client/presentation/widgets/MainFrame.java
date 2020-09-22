@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.presentation.widgets;
 
 import javax.inject.Inject;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.controllers.MainController;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
@@ -18,6 +19,7 @@ public final class MainFrame extends JFrame {
       MainView view,
       MainModel model,
       MainController.Factory mainControllerFactory) {
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
     controller = mainControllerFactory.create(model, view);
 
     setJMenuBar(mainMenuBar);

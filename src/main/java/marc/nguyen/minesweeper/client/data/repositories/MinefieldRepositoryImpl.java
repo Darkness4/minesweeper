@@ -1,7 +1,8 @@
 package marc.nguyen.minesweeper.client.data.repositories;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MinefieldRepositoryImpl implements MinefieldRepository {
 
-  final ServerSocketDevice serverSocketDevice;
+  private final ServerSocketDevice serverSocketDevice;
 
   @Inject
   public MinefieldRepositoryImpl(ServerSocketDevice serverSocketDevice) {
@@ -19,20 +20,28 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
   }
 
   @Override
-  public Optional<Minefield> fetch() {
-    // TODO: Not implemented yet.
-    // TODO: Consume here
-    return null;
+  public Maybe<Minefield> fetch() {
+    final var observable = serverSocketDevice.getObservable();
+    if (observable != null) {
+      return Maybe.fromObservable(
+          observable.filter((e) -> e instanceof Minefield).map((e) -> (Minefield) e));
+    } else {
+      return Maybe.empty();
+    }
   }
 
   @Override
-  public Stream<Tile> watchTiles() {
-    // TODO: Not implemented yet.
-    return null;
+  public Observable<Tile> watchTiles() {
+    final var observable = serverSocketDevice.getObservable();
+    if (observable != null) {
+      return observable.filter((e) -> e instanceof Tile).map((e) -> (Tile) e);
+    } else {
+      return Observable.empty();
+    }
   }
 
   @Override
-  public void updateTile(@NotNull Tile tile) {
-    serverSocketDevice.write(tile);
+  public Completable updateTile(@NotNull Tile tile) {
+    return Completable.fromAction(() -> serverSocketDevice.write(tile));
   }
 }

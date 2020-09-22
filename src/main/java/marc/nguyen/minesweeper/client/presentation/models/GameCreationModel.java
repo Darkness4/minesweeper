@@ -90,6 +90,16 @@ public class GameCreationModel implements Model {
     return settingsName != null && !settingsName.isEmpty();
   }
 
+  public void fromEntity(Settings settings) {
+    settingsName = settings.name;
+    height = settings.height;
+    length = settings.length;
+    port = settings.port;
+    mines = settings.mines;
+    level = settings.level;
+    address = settings.address.getHostAddress();
+  }
+
   public Settings toEntity() throws UnknownHostException {
     return new Settings(
         getSettingsName(),

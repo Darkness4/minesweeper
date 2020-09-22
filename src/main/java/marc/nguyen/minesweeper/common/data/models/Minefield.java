@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Minefield implements Serializable {
 
-  final Tile[][] tiles;
-  long minesOnField = 0;
+  private final Tile[][] tiles;
+  private long minesOnField = 0;
 
   /**
    * An empty minefield based on length and height.
@@ -72,7 +72,7 @@ public class Minefield implements Serializable {
    *
    * @param mines Number of mines to be placed.
    */
-  public synchronized void placeMines(int mines) {
+  private synchronized void placeMines(int mines) {
     if (mines >= tiles.length * tiles[0].length) {
       throw new IllegalArgumentException(
           "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
@@ -123,13 +123,13 @@ public class Minefield implements Serializable {
    */
   public void expose(Tile tile) {
     if (tile instanceof Tile.Empty) {
-      // TODO: Apply here tree-search
-      treeSearchEmptyTile((Tile.Empty) tile);
-      //      if (tile.getState() != Tile.State.EXPOSED) {
-      //        synchronized (_tiles[tile.x][tile.y]) {
-      //          _tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
-      //        }
-      //      }
+      // TODO: May want to add single player
+      // treeSearchEmptyTile((Tile.Empty) tile);
+      if (tile.getState() != Tile.State.EXPOSED) {
+        synchronized (tiles[tile.x][tile.y]) {
+          tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+        }
+      }
     } else if (tile instanceof Tile.Mine) {
       synchronized (tiles[tile.x][tile.y]) {
         tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);

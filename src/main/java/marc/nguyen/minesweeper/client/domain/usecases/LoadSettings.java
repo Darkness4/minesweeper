@@ -1,9 +1,11 @@
 package marc.nguyen.minesweeper.client.domain.usecases;
 
 import dagger.Lazy;
-import java.util.Optional;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
@@ -15,9 +17,9 @@ import org.jetbrains.annotations.NotNull;
  * <p>Optional.empty() is returned if not found.
  */
 @Singleton
-public class LoadSettings implements UseCase<String, Optional<Settings>> {
+public class LoadSettings implements UseCase<String, Maybe<Settings>> {
 
-  final Lazy<SettingsRepository> repository;
+  private final Lazy<SettingsRepository> repository;
 
   @Inject
   public LoadSettings(Lazy<SettingsRepository> repository) {
@@ -25,7 +27,8 @@ public class LoadSettings implements UseCase<String, Optional<Settings>> {
   }
 
   @Override
-  public @NotNull Optional<Settings> execute(@NotNull String name) {
-    return repository.get().findByKey(name);
+  @NotNull
+  public Maybe<Settings> execute(@NotNull String name) {
+    return repository.get().findByKey(name).observeOn(Schedulers.from(IO.executor));
   }
 }

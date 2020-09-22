@@ -1,8 +1,10 @@
 package marc.nguyen.minesweeper.client.data.repositories;
 
 import dagger.Lazy;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
@@ -13,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 @Singleton
 public class SettingsRepositoryImpl implements SettingsRepository {
 
-  final Lazy<SettingsDao> dao;
+  private final Lazy<SettingsDao> dao;
 
   @Inject
   public SettingsRepositoryImpl(Lazy<SettingsDao> dao) {
@@ -21,22 +23,31 @@ public class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @Override
-  public void save(@NotNull Settings settings) {
-    dao.get().insert(settings);
+  public @NotNull Completable save(@NotNull Settings settings) {
+    return Completable.fromAction(() -> dao.get().insert(settings));
   }
 
   @Override
-  public @NotNull Optional<Settings> findByKey(@NotNull String name) {
-    return dao.get().findByName(name);
+  public @NotNull Maybe<Settings> findByKey(@NotNull String name) {
+    return Maybe.just(dao.get())
+        .flatMap(
+            (dao) -> {
+              final var result = dao.findByName(name);
+              if (result != null) {
+                return Maybe.just(result);
+              } else {
+                return Maybe.empty();
+              }
+            });
   }
 
   @Override
-  public @NotNull List<Settings> findAll() {
-    return dao.get().findAll();
+  public @NotNull Single<List<Settings>> findAll() {
+    return Single.fromCallable(() -> dao.get().findAll());
   }
 
   @Override
-  public void delete(@NotNull String name) {
-    dao.get().deleteByName(name);
+  public @NotNull Completable delete(@NotNull String name) {
+    return Completable.fromAction(() -> dao.get().deleteByName(name));
   }
 }

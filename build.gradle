@@ -23,6 +23,9 @@ compileJava {
 apply from: rootProject.file('gradle/install-git-hooks.gradle')
 
 dependencies {
+    // Reactive Programming
+    implementation "io.reactivex.rxjava3:rxjava:3.0.6"
+
     // Persistent Cache
     implementation 'org.xerial:sqlite-jdbc:3.32.3.2'
 
@@ -64,6 +67,8 @@ task serverJar(type: Jar) {
 
 task runClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
+
+    enableAssertions = true
 
     main = 'marc.nguyen.minesweeper.client.Client'
 }

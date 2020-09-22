@@ -1,19 +1,23 @@
 package marc.nguyen.minesweeper.client.domain.repositories;
 
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import java.util.List;
-import java.util.Optional;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import org.jetbrains.annotations.NotNull;
 
 public interface SettingsRepository {
 
-  void save(@NotNull Settings settings);
+  @NotNull
+  Completable save(@NotNull Settings settings);
 
   @NotNull
-  Optional<Settings> findByKey(@NotNull String name);
+  Maybe<Settings> findByKey(@NotNull String name);
 
   @NotNull
-  List<Settings> findAll();
+  Single<List<Settings>> findAll();
 
-  void delete(@NotNull String name);
+  @NotNull
+  Completable delete(@NotNull String name);
 }

@@ -20,9 +20,7 @@ public class MineButton extends JPanel {
   private final ResourcesLoader resourcesLoader;
 
   public MineButton(int x, int y, ResourcesLoader resourcesLoader) {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     this.resourcesLoader = resourcesLoader;
     this.x = x;

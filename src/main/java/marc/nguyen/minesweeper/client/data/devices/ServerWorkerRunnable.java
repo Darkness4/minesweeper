@@ -1,8 +1,10 @@
 package marc.nguyen.minesweeper.client.data.devices;
 
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
@@ -15,36 +17,35 @@ import marc.nguyen.minesweeper.common.data.models.Tile;
 public class ServerWorkerRunnable implements Runnable {
 
   private final Socket serverSocket;
-  private boolean isStopped = false;
+  private final PublishSubject<Object> publisher;
+  private final AtomicBoolean isStopped = new AtomicBoolean(false);
 
-  // TODO : Add publisher
-  public ServerWorkerRunnable(Socket serverSocket) {
+  public ServerWorkerRunnable(Socket serverSocket, PublishSubject<Object> publisher) {
     this.serverSocket = serverSocket;
+    this.publisher = publisher;
   }
 
   @Override
   public void run() {
     try (final var input = new ObjectInputStream(serverSocket.getInputStream())) {
 
-      while (!isStopped()) {
+      while (!isStopped.get()) {
         try {
           final var packet = input.readObject();
           // TODO : Move handler somewhere else and publish here
+          publisher.onNext(packet);
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
           // Server disconnected
           e.printStackTrace();
-          isStopped = true;
+          isStopped.set(true);
         }
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
+    publisher.onComplete();
     System.out.println("Server listener stopped.");
-  }
-
-  private synchronized boolean isStopped() {
-    return isStopped;
   }
 
   void handle(Object packet) {

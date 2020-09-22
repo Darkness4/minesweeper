@@ -3,10 +3,12 @@ package marc.nguyen.minesweeper.client.presentation.controllers;
 import dagger.Lazy;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.presentation.models.MainModel;
@@ -14,7 +16,7 @@ import marc.nguyen.minesweeper.client.presentation.views.MainView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
-// TODO : SRP is broken. Split the listener.
+// TODO : Threading is broken. Use executor service.
 public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
   private final MainModel _model;
@@ -75,34 +77,34 @@ public class MainController implements MouseListener, Controller<MainModel, Main
 
   @Override
   public void mouseReleased(MouseEvent e) {
-    new Thread(
-            () -> {
-              final var source = e.getSource();
-              if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
-                final var mineButton = (MineButton) source;
-                final var tile = _model.minefield.get(mineButton.x, mineButton.y);
-                if (SwingUtilities.isRightMouseButton(e)) {
-                  _model.minefield.flag(tile);
-                } else if (SwingUtilities.isLeftMouseButton(e)) {
-                  if (tile.getState() != Tile.State.FLAG) {
-                    _model.minefield.expose(tile);
+    CompletableFuture.runAsync(
+        () -> {
+          final var source = e.getSource();
+          if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
+            final var mineButton = (MineButton) source;
+            final var tile = _model.minefield.get(mineButton.x, mineButton.y);
+            if (SwingUtilities.isRightMouseButton(e)) {
+              _model.minefield.flag(tile);
+            } else if (SwingUtilities.isLeftMouseButton(e)) {
+              if (tile.getState() != Tile.State.FLAG) {
+                _model.minefield.expose(tile);
 
-                    if (tile instanceof Tile.Empty) {
-                      _model.player.incrementScore();
-                    } else {
-                      _model.player.decrementScore();
-                    }
-                  }
+                if (tile instanceof Tile.Empty) {
+                  _model.player.incrementScore();
+                } else {
+                  _model.player.decrementScore();
                 }
-
-                updateBombLeft();
-                updatePlayerScore();
-                updateField();
-                checkIfEndGame();
-                _updateMinefield.get().execute(tile);
               }
-            })
-        .start();
+            }
+
+            updateBombLeft();
+            updatePlayerScore();
+            updateField();
+            checkIfEndGame();
+            _updateMinefield.get().execute(tile).subscribe();
+          }
+        },
+        IO.executor);
   }
 
   private void updatePlayerScore() {

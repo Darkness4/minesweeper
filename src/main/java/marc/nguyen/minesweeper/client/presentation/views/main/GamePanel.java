@@ -14,9 +14,7 @@ public class GamePanel extends JPanel {
   public final MineButton[][] mineButtons;
 
   public GamePanel(Minefield minefield, ResourcesLoader resourcesLoader) {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     this.minefield = minefield;
     mineButtons = new MineButton[this.minefield.getLength()][this.minefield.getHeight()];

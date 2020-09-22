@@ -1,14 +1,12 @@
 package marc.nguyen.minesweeper.client.data.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import dagger.Lazy;
+import io.reactivex.rxjava3.observers.TestObserver;
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Optional;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
@@ -40,9 +38,11 @@ class SettingsRepositoryImplTest {
     // Arrange
     final var tSettings =
         new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
+    final TestObserver<Settings> observer = new TestObserver<>();
     // Act
-    repository.save(tSettings);
+    repository.save(tSettings).subscribe(observer);
     // Assert
+    observer.assertComplete();
     verify(settingsDao).insert(tSettings);
   }
 
@@ -51,24 +51,30 @@ class SettingsRepositoryImplTest {
     // Arrange
     final var tSettings =
         new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY);
-    when(settingsDao.findByName("name")).thenReturn(Optional.of(tSettings));
+    when(settingsDao.findByName("name")).thenReturn(tSettings);
+    final TestObserver<Settings> observer = new TestObserver<>();
+
     // Act
-    final var result = repository.findByKey("name");
+    repository.findByKey("name").subscribe(observer);
+
     // Assert
+    observer.assertComplete();
+    observer.assertValue(tSettings);
     verify(settingsDao).findByName("name");
-    assertTrue(result.isPresent());
-    assertEquals(result.get(), tSettings);
   }
 
   @Test
   void findByKey_notFound() {
     // Arrange
-    when(settingsDao.findByName("name")).thenReturn(Optional.empty());
+    when(settingsDao.findByName("name")).thenReturn(null);
+    final TestObserver<Settings> observer = new TestObserver<>();
+
     // Act
-    final var result = repository.findByKey("name");
+    repository.findByKey("name").subscribe(observer);
+
     // Assert
     verify(settingsDao).findByName("name");
-    assertTrue(result.isEmpty());
+    observer.assertComplete();
   }
 
   @Test
@@ -78,19 +84,23 @@ class SettingsRepositoryImplTest {
         List.of(
             new Settings("name", InetAddress.getLoopbackAddress(), 12345, 10, 10, 10, Level.EASY));
     when(settingsDao.findAll()).thenReturn(tSettingsList);
+    final TestObserver<List<Settings>> observer = new TestObserver<>();
     // Act
-    final var result = repository.findAll();
+    repository.findAll().subscribe(observer);
     // Assert
     verify(settingsDao).findAll();
-    assertEquals(result, tSettingsList);
+    observer.assertComplete();
+    observer.assertValue(tSettingsList);
   }
 
   @Test
   void delete() {
     // Arrange
+    final TestObserver<List<Settings>> observer = new TestObserver<>();
     // Act
-    repository.delete("name");
+    repository.delete("name").subscribe(observer);
     // Assert
     verify(settingsDao).deleteByName("name");
+    observer.assertComplete();
   }
 }

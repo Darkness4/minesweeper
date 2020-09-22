@@ -23,9 +23,7 @@ public class MainMenuBar extends JMenuBar implements ActionListener {
 
   @Inject
   public MainMenuBar() {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     menu = new JMenu("Game");
     menu.setMnemonic(KeyEvent.VK_G);

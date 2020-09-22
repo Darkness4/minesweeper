@@ -1,9 +1,9 @@
 package marc.nguyen.minesweeper.client.data.database;
 
 import java.util.List;
-import java.util.Optional;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface SettingsDao {
 
@@ -13,6 +13,6 @@ public interface SettingsDao {
 
   List<Settings> findAll();
 
-  @NotNull
-  Optional<Settings> findByName(@NotNull String key);
+  @Nullable
+  Settings findByName(@NotNull String key);
 }

@@ -17,9 +17,7 @@ public final class MainView extends JPanel implements View {
 
   @Inject
   public MainView(Minefield minefield, ResourcesLoader resourcesLoader) {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     setLayout(new BorderLayout());
 

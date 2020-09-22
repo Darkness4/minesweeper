@@ -12,9 +12,7 @@ public class DisplayPanel extends JPanel {
   public final JLabel playerScoreText;
 
   public DisplayPanel(Minefield minefield) {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     final var layout = new SpringLayout();
     setLayout(layout);

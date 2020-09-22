@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.GameSettingsPanel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.NetworkSettingsPanel;
 
@@ -18,9 +17,7 @@ public class EditSettingsPanel extends JPanel {
   public final JButton startButton;
 
   public EditSettingsPanel() {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     final var layout = new BoxLayout(this, BoxLayout.Y_AXIS);
     setLayout(layout);
@@ -39,11 +36,5 @@ public class EditSettingsPanel extends JPanel {
     add(startButton);
 
     setOpaque(true);
-  }
-
-  public void addListener(GameCreationController listener) {
-    networkSettingsPanel.addListener(listener);
-    gameSettingsPanel.addListener(listener);
-    startButton.addActionListener(listener);
   }
 }

@@ -3,29 +3,24 @@ package marc.nguyen.minesweeper.client.presentation.controllers;
 import dagger.Lazy;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.di.components.DaggerMainComponent;
-import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
 import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
+import marc.nguyen.minesweeper.client.presentation.controllers.listeners.OnUpdate;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.common.data.models.Level;
@@ -33,21 +28,16 @@ import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
 // TODO : SRP is broken. Split the listener.
-public class GameCreationController
-    implements ActionListener,
-        ItemListener,
-        ChangeListener,
-        DocumentListener,
-        ListSelectionListener {
+public class GameCreationController {
 
-  private final GameCreationModel _model;
-  private final GameCreationView _view;
+  private final GameCreationModel model;
+  private final GameCreationView view;
   private final DefaultListModel<String> listModel;
-  private final Lazy<Connect> _connect;
-  private final Lazy<LoadSettings> _loadSettings;
-  private final Lazy<SaveSettings> _saveSettings;
-  private final Lazy<DeleteSettings> _deleteSettings;
-  private final Lazy<FetchAllSettingsName> _fetchAllSettingsName;
+  private final Lazy<Connect> connect;
+  private final Lazy<LoadSettings> loadSettings;
+  private final Lazy<SaveSettings> saveSettings;
+  private final Lazy<DeleteSettings> deleteSettings;
+  private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
 
   public GameCreationController(
       Lazy<Connect> connect,
@@ -57,140 +47,163 @@ public class GameCreationController
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
       GameCreationModel model,
       GameCreationView view) {
-    _model = model;
-    _view = view;
-    _connect = connect;
-    _loadSettings = loadSettings;
-    _saveSettings = saveSettings;
-    _deleteSettings = deleteSettings;
-    _fetchAllSettingsName = fetchAllSettingsName;
+    this.model = model;
+    this.view = view;
+    this.connect = connect;
+    this.loadSettings = loadSettings;
+    this.saveSettings = saveSettings;
+    this.deleteSettings = deleteSettings;
+    this.fetchAllSettingsName = fetchAllSettingsName;
 
     listModel = new DefaultListModel<>();
-    _view.savedSettingsPanel.settingsList.setModel(listModel);
-    _view.editSettingsPanel.addListener(this);
-    _view.savedSettingsPanel.addListener(this);
+    this.view.savedSettingsPanel.settingsList.setModel(listModel);
 
-    final List<String> settings = _fetchAllSettingsName.get().execute(null);
-    settings.forEach(listModel::addElement);
-    _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(_model.getAddress());
-    _view.savedSettingsPanel.settingsNameTextField.setText(_model.getSettingsName());
+    /* Game Settings Panel */
+    this.view.editSettingsPanel.gameSettingsPanel.heightSpinner.addChangeListener(
+        (e) -> {
+          final JSpinner source = (JSpinner) e.getSource();
+          model.setHeight((Integer) source.getValue());
+        });
+
+    this.view.editSettingsPanel.gameSettingsPanel.lengthSpinner.addChangeListener(
+        (e) -> {
+          final JSpinner source = (JSpinner) e.getSource();
+          model.setLength((Integer) source.getValue());
+        });
+    this.view.editSettingsPanel.gameSettingsPanel.minesSpinner.addChangeListener(
+        (e) -> {
+          final JSpinner source = (JSpinner) e.getSource();
+          model.setMines((Integer) source.getValue());
+        });
+    this.view.editSettingsPanel.networkSettingsPanel.portSpinner.addChangeListener(
+        (e) -> {
+          final JSpinner source = (JSpinner) e.getSource();
+          model.setPort((Integer) source.getValue());
+        });
+    this.view.editSettingsPanel.gameSettingsPanel.levelComboBox.addItemListener(
+        this::levelStateChanged);
+    this.view.editSettingsPanel.startButton.addActionListener((e) -> onStartButtonPushed());
+    this.view
+        .editSettingsPanel
+        .networkSettingsPanel
+        .ipTextField
+        .getDocument()
+        .addDocumentListener(new OnUpdate(this::onIpAddressInput));
+    this.view
+        .savedSettingsPanel
+        .settingsNameTextField
+        .getDocument()
+        .addDocumentListener(new OnUpdate(this::onNameSettingsInput));
+
+    /* Saved Settings Panel */
+    this.view.savedSettingsPanel.settingsList.addListSelectionListener(
+        (e) -> {
+          final var value = view.savedSettingsPanel.settingsList.getSelectedValue();
+          if (value != null) {
+            model.setSettingsName(value);
+            SwingUtilities.invokeLater(
+                () -> view.savedSettingsPanel.settingsNameTextField.setText(value));
+          }
+        });
+    this.view.savedSettingsPanel.saveButton.addActionListener(this::onSaveSettingsPushed);
+    this.view.savedSettingsPanel.loadButton.addActionListener(this::onLoadSettingsPushed);
+    this.view.savedSettingsPanel.deleteButton.addActionListener(this::onDeleteSettingsPushed);
+
+    this.fetchAllSettingsName
+        .get()
+        .execute(null)
+        .subscribe((settings) -> settings.forEach(listModel::addElement));
+
+    this.view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(this.model.getAddress());
+    this.view.savedSettingsPanel.settingsNameTextField.setText(this.model.getSettingsName());
   }
 
-  /**
-   * Handles JButtons events.
-   *
-   * @param e Events
-   */
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    new Thread(
-            () -> {
-              final String action = e.getActionCommand();
-
-              if (action != null) {
-                switch (action) {
-                  case "start":
-                    onStartButtonPushed();
-                    break;
-                  case "load_settings":
-                    onLoadSettingsPushed();
-                    break;
-                  case "save_settings":
-                    onSaveSettingsPushed();
-                    break;
-                  case "delete_settings":
-                    onDeleteSettingsPushed();
-                    break;
-                }
-              }
-            })
-        .start();
+  private void onDeleteSettingsPushed(ActionEvent e) {
+    deleteSettings.get().execute(model.getSettingsName()).subscribe(this::refreshListModel);
   }
 
-  private void onDeleteSettingsPushed() {
-    _deleteSettings.get().execute(_model.getSettingsName());
-    refreshListModel();
-  }
-
-  private void onSaveSettingsPushed() {
+  private void onSaveSettingsPushed(ActionEvent e) {
     try {
-      _saveSettings.get().execute(_model.toEntity());
-      refreshListModel();
+      saveSettings.get().execute(model.toEntity()).subscribe(this::refreshListModel);
     } catch (UnknownHostException unknownHostException) {
       SwingUtilities.invokeLater(
           () ->
               JOptionPane.showMessageDialog(
                   null,
-                  String.format("Error: Incorrect Internet Address %s", _model.getAddress()),
+                  String.format("Error: Incorrect Internet Address %s", model.getAddress()),
                   "Error Message",
                   JOptionPane.ERROR_MESSAGE));
     }
   }
 
   private void refreshListModel() {
-    final List<String> settings = _fetchAllSettingsName.get().execute(null);
-    listModel.clear();
-    settings.forEach(listModel::addElement);
+    fetchAllSettingsName
+        .get()
+        .execute(null)
+        .subscribe(
+            (settings) -> {
+              listModel.clear();
+              settings.forEach(listModel::addElement);
+            });
   }
 
-  private void onLoadSettingsPushed() {
-    final Optional<Settings> settingsOptional =
-        _loadSettings.get().execute(_view.savedSettingsPanel.settingsNameTextField.getText());
-
-    settingsOptional.ifPresentOrElse(
-        (settings) -> {
-          _model.setHeight(settings.height);
-          _model.setLength(settings.length);
-          _model.setPort(settings.port);
-          _model.setMines(settings.mines);
-          _model.setLevel(settings.level);
-          _model.setAddress(settings.address.getHostAddress());
-          SwingUtilities.invokeLater(
-              () -> {
-                _view.savedSettingsPanel.settingsNameTextField.setText(settings.name);
-                _view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(
-                    settings.address.getHostAddress());
-                _view.editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
-                _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(settings.length);
-                _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
-                _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
-                _view.editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(
-                    settings.level);
-              });
-        },
-        () -> {
-          System.out.println("Settings couldn't be loaded.");
-        });
+  private void onLoadSettingsPushed(ActionEvent e) {
+    loadSettings
+        .get()
+        .execute(view.savedSettingsPanel.settingsNameTextField.getText())
+        .subscribe(
+            (settings) -> {
+              model.fromEntity(settings);
+              SwingUtilities.invokeLater(() -> view.loadSettings(settings));
+            },
+            (throwable) -> System.out.println("Settings couldn't be loaded."));
   }
 
   private void onStartButtonPushed() {
-    // TODO: Connect
     try {
-      _connect.get().execute(new Connect.Params(_model.getInetAddress(), _model.getPort()));
-      final var level = _model.getLevel();
+      connect
+          .get()
+          .execute(new Connect.Params(model.getInetAddress(), model.getPort()))
+          .subscribe(
+              result -> {
+                result.updates.subscribe(); // TODO
+                // TODO : Start a game here
 
-      final Minefield minefield;
-      if (level == Level.CUSTOM) {
-        minefield = new Minefield(_model.getLength(), _model.getHeight());
-        minefield.placeMines(_model.getMines());
-      } else {
-        minefield = new Minefield(level);
-      }
+                final var level = model.getLevel();
 
-      SwingUtilities.windowForComponent(_view).dispose();
-      SwingUtilities.invokeLater(
-          () ->
-              DaggerMainComponent.builder()
-                  .minefield(minefield)
-                  .player(new Player())
-                  .build()
-                  .mainFrame());
+                final var minefield =
+                    CompletableFuture.supplyAsync(
+                        () -> {
+                          if (level == Level.CUSTOM) {
+                            return new Minefield(
+                                model.getLength(), model.getHeight(), model.getMines());
+                          } else {
+                            return new Minefield(level);
+                          }
+                        },
+                        IO.executor);
+
+                SwingUtilities.windowForComponent(view).dispose();
+                SwingUtilities.invokeLater(
+                    () -> {
+                      try {
+                        DaggerMainComponent.builder()
+                            .minefield(minefield.get())
+                            .player(new Player())
+                            .build()
+                            .mainFrame();
+                      } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                      }
+                    });
+              });
+
     } catch (UnknownHostException e) {
       SwingUtilities.invokeLater(
           () ->
               JOptionPane.showMessageDialog(
                   null,
-                  String.format("Error: Incorrect Internet Address %s", _model.getAddress()),
+                  String.format("Error: Incorrect Internet Address %s", model.getAddress()),
                   "Error Message",
                   JOptionPane.ERROR_MESSAGE));
     }
@@ -201,124 +214,47 @@ public class GameCreationController
    *
    * @param e Events
    */
-  @Override
-  public void itemStateChanged(ItemEvent e) {
+  private void levelStateChanged(ItemEvent e) {
     final var item = e.getItem();
     if (item instanceof Level) {
       final Level level = (Level) item;
-      _model.setLevel(level);
+      model.setLevel(level);
       if (level == Level.CUSTOM) {
-        SwingUtilities.invokeLater(_view.editSettingsPanel.gameSettingsPanel::enableCustomSettings);
+        SwingUtilities.invokeLater(view.editSettingsPanel.gameSettingsPanel::enableCustomSettings);
       } else {
         SwingUtilities.invokeLater(
             () -> {
-              _view.editSettingsPanel.gameSettingsPanel.disableCustomSettings();
-              _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(level.length);
-              _view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(level.height);
-              _view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(level.mines);
+              view.editSettingsPanel.gameSettingsPanel.disableCustomSettings();
+              view.editSettingsPanel.gameSettingsPanel.lengthSpinner.setValue(level.length);
+              view.editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(level.height);
+              view.editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(level.mines);
             });
       }
     }
   }
 
-  /**
-   * Handles spinners.
-   *
-   * @param e Events
-   */
-  @Override
-  public void stateChanged(ChangeEvent e) {
-    final var source = e.getSource();
-    if (source == _view.editSettingsPanel.gameSettingsPanel.lengthSpinner) {
-      _model.setLength(
-          (Integer) _view.editSettingsPanel.gameSettingsPanel.lengthSpinner.getValue());
-    } else if (source == _view.editSettingsPanel.gameSettingsPanel.heightSpinner) {
-      _model.setHeight(
-          (Integer) _view.editSettingsPanel.gameSettingsPanel.heightSpinner.getValue());
-    } else if (source == _view.editSettingsPanel.gameSettingsPanel.minesSpinner) {
-      _model.setMines((Integer) _view.editSettingsPanel.gameSettingsPanel.minesSpinner.getValue());
-    } else if (source == _view.editSettingsPanel.networkSettingsPanel.portSpinner) {
-      _model.setPort((Integer) _view.editSettingsPanel.networkSettingsPanel.portSpinner.getValue());
-    }
+  private Void onIpAddressInput(DocumentEvent e) {
+    model.setAddress(view.editSettingsPanel.networkSettingsPanel.ipTextField.getText());
+    return null;
   }
 
-  /**
-   * Handles TextField insert events.
-   *
-   * @param e Events.
-   */
-  @Override
-  public void insertUpdate(DocumentEvent e) {
-    final var doc = e.getDocument();
-    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
-      onIpAddressInput();
-    } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
-      onNameSettingsInput();
-    }
-  }
-
-  /**
-   * Handles TextField insert events.
-   *
-   * @param e Events.
-   */
-  @Override
-  public void removeUpdate(DocumentEvent e) {
-    final var doc = e.getDocument();
-    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
-      onIpAddressInput();
-    } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
-      onNameSettingsInput();
-    }
-  }
-
-  /**
-   * Handles TextField insert events.
-   *
-   * @param e Events.
-   */
-  @Override
-  public void changedUpdate(DocumentEvent e) {
-    final var doc = e.getDocument();
-    if (doc == _view.editSettingsPanel.networkSettingsPanel.ipTextField.getDocument()) {
-      onIpAddressInput();
-    } else if (doc == _view.savedSettingsPanel.settingsNameTextField.getDocument()) {
-      onNameSettingsInput();
-    }
-  }
-
-  private void onIpAddressInput() {
-    _model.setAddress(_view.editSettingsPanel.networkSettingsPanel.ipTextField.getText());
-  }
-
-  private void onNameSettingsInput() {
-    new Thread(
-            () -> {
-              final var text = _view.savedSettingsPanel.settingsNameTextField.getText();
-              _model.setSettingsName(text);
-              final var isValid = _model.isSettingsNameValid();
-              SwingUtilities.invokeLater(
-                  () -> {
-                    _view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
-                    _view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
-                    _view.savedSettingsPanel.saveButton.setEnabled(isValid);
-                    _view.savedSettingsPanel.settingsNameTextField.setBackground(
-                        isValid ? Color.WHITE : Color.RED);
-                  });
-            })
-        .start();
-  }
-
-  @Override
-  public void valueChanged(ListSelectionEvent e) {
-    if (e.getSource() == _view.savedSettingsPanel.settingsList) {
-      final var value = _view.savedSettingsPanel.settingsList.getSelectedValue();
-      if (value != null) {
-        _model.setSettingsName(value);
-        SwingUtilities.invokeLater(
-            () -> _view.savedSettingsPanel.settingsNameTextField.setText(value));
-      }
-    }
+  private Void onNameSettingsInput(DocumentEvent e) {
+    CompletableFuture.runAsync(
+        () -> {
+          final var text = view.savedSettingsPanel.settingsNameTextField.getText();
+          model.setSettingsName(text);
+          final var isValid = model.isSettingsNameValid();
+          SwingUtilities.invokeLater(
+              () -> {
+                view.savedSettingsPanel.loadButton.setEnabled(listModel.contains(text));
+                view.savedSettingsPanel.deleteButton.setEnabled(listModel.contains(text));
+                view.savedSettingsPanel.saveButton.setEnabled(isValid);
+                view.savedSettingsPanel.settingsNameTextField.setBackground(
+                    isValid ? Color.WHITE : Color.RED);
+              });
+        },
+        IO.executor);
+    return null;
   }
 
   public static final class Factory {

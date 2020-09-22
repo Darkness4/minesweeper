@@ -11,12 +11,12 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.utils.SpringUtilities;
 import marc.nguyen.minesweeper.common.data.models.Level;
 
 public class GameSettingsPanel extends JPanel {
+
   public final JComboBox<Level> levelComboBox;
   public final JLabel sizeLabel;
   public final JSpinner lengthSpinner;
@@ -25,9 +25,7 @@ public class GameSettingsPanel extends JPanel {
   public final JSpinner minesSpinner;
 
   public GameSettingsPanel() {
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new RuntimeException("View is running on unsafe thread!");
-    }
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     setLayout(new SpringLayout());
     setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -86,12 +84,5 @@ public class GameSettingsPanel extends JPanel {
     heightSpinner.setEnabled(false);
     minesSpinner.setEnabled(false);
     minesLabel.setEnabled(false);
-  }
-
-  public void addListener(GameCreationController listener) {
-    levelComboBox.addItemListener(listener);
-    lengthSpinner.addChangeListener(listener);
-    heightSpinner.addChangeListener(listener);
-    minesSpinner.addChangeListener(listener);
   }
 }
