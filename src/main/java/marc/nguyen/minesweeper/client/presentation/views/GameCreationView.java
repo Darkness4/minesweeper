@@ -32,6 +32,7 @@ public final class GameCreationView extends JPanel implements View {
     SwingUtilities.invokeLater(
         () -> {
           savedSettingsPanel.settingsNameTextField.setText(settings.name);
+          editSettingsPanel.gameModeComboBox.setSelectedItem(settings.mode);
           editSettingsPanel.networkSettingsPanel.ipTextField.setText(
               settings.address.getHostAddress());
           editSettingsPanel.networkSettingsPanel.portSpinner.setValue(settings.port);
