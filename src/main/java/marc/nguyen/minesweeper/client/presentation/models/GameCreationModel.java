@@ -9,10 +9,15 @@ import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The Game Creation Model.
+ *
+ * <p>Mutable. Mostly used for the form.
+ */
 public class GameCreationModel implements Model {
 
-  public static Level[] levelChoices = Level.values();
-  public static GameMode[] gameModeChoices = GameMode.values();
+  public static final Level[] levelChoices = Level.values();
+  public static final GameMode[] gameModeChoices = GameMode.values();
 
   @NotNull private Level level = Level.EASY;
   private int length = 10;

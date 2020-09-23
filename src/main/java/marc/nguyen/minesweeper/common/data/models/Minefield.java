@@ -209,6 +209,11 @@ public class Minefield implements Serializable {
         .count();
   }
 
+  /**
+   * Check Winning and Losing condition.
+   *
+   * @return If it has ended.
+   */
   public boolean hasEnded() {
     final long exposedTiles =
         Arrays.stream(tiles)
@@ -216,7 +221,20 @@ public class Minefield implements Serializable {
             .parallel()
             .filter(tile -> tile.getState() == State.EXPOSED && tile instanceof Tile.Empty)
             .count();
-    return getHeight() * getHeight() - getMinesOnField() == exposedTiles;
+    final var winningCondition = getHeight() * getHeight() - getMinesOnField() == exposedTiles;
+    if (isSinglePlayer) {
+      final long minesHit =
+          Arrays.stream(tiles)
+              .flatMap(Arrays::stream)
+              .parallel()
+              .filter(tile -> tile.getState() == State.HIT_MINE)
+              .count();
+      final var losingCondition = minesHit >= 1;
+
+      return losingCondition || winningCondition;
+    } else {
+      return winningCondition;
+    }
   }
 
   private synchronized void incrementAdjacentCounters(@NotNull Tile tile) {

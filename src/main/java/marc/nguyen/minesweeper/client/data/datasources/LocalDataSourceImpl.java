@@ -4,10 +4,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.sqlite.SQLiteDataSource;
 
+/** Implementation of a local datasource based of SQLite 3. */
 @Singleton
 public class LocalDataSourceImpl extends SQLiteDataSource implements LocalDataSource {
 
-  static String URL = "jdbc:sqlite:data.sqlite3";
+  static final String URL = "jdbc:sqlite:data.sqlite3";
 
   @Inject
   public LocalDataSourceImpl() {

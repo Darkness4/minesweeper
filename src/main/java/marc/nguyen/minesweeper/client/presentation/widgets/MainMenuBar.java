@@ -32,7 +32,7 @@ public class MainMenuBar extends JMenuBar {
     newGameItem.setToolTipText("Create a new game.");
     newGameItem.addActionListener(
         (e) -> {
-          quit.get().execute(null).blockingAwait();
+          quit.get().execute(null).blockingAwait(); // Will free every threads.
           SwingUtilities.windowForComponent(this).dispose();
           DaggerGameCreationComponent.builder().build().gameCreationDialog();
         });

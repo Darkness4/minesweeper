@@ -16,6 +16,11 @@ import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.domain.usecases.WatchServerTiles;
 
+/**
+ * Dependencies from the domain layer.
+ *
+ * <p>Should be all singleton, stateless and immutable.
+ */
 @Module
 public abstract class DomainModule {
 

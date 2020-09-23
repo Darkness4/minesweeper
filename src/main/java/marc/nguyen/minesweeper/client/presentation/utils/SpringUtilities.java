@@ -33,7 +33,6 @@ package marc.nguyen.minesweeper.client.presentation.utils;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.SpringLayout;
 
 /**
  * A 1.4 file that provides utility methods for creating form- or grid-style layouts with

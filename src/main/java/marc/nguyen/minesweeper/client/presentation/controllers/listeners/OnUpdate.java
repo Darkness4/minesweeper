@@ -1,29 +1,33 @@
 package marc.nguyen.minesweeper.client.presentation.controllers.listeners;
 
-import java.util.function.Function;
+import java.util.function.Consumer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * A Document listener that execute a comsumer of document events of every type (insert, remove,
+ * changed).
+ */
 public class OnUpdate implements DocumentListener {
 
-  final Function<DocumentEvent, Void> executable;
+  final Consumer<DocumentEvent> consumer;
 
-  public OnUpdate(Function<DocumentEvent, Void> executable) {
-    this.executable = executable;
+  public OnUpdate(Consumer<DocumentEvent> consumer) {
+    this.consumer = consumer;
   }
 
   @Override
   public void insertUpdate(DocumentEvent e) {
-    executable.apply(e);
+    consumer.accept(e);
   }
 
   @Override
   public void removeUpdate(DocumentEvent e) {
-    executable.apply(e);
+    consumer.accept(e);
   }
 
   @Override
   public void changedUpdate(DocumentEvent e) {
-    executable.apply(e);
+    consumer.accept(e);
   }
 }

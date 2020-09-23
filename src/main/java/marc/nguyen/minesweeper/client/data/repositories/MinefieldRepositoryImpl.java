@@ -10,6 +10,7 @@ import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 import org.jetbrains.annotations.NotNull;
 
+/** Implementation of the MinefieldRepository. */
 public class MinefieldRepositoryImpl implements MinefieldRepository {
 
   private final ServerSocketDevice serverSocketDevice;

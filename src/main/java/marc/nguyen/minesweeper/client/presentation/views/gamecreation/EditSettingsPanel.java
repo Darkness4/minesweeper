@@ -15,6 +15,7 @@ import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.GameSettingsPanel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.NetworkSettingsPanel;
 
+/** The panel where we edit the settings. */
 public class EditSettingsPanel extends JPanel {
 
   public final JComboBox<GameMode> gameModeComboBox;

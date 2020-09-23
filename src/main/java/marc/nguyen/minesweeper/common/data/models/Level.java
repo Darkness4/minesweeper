@@ -20,9 +20,4 @@ public enum Level {
     this.height = height;
     this.mines = mines;
   }
-
-  @Override
-  public String toString() {
-    return "Level{" + "length=" + length + ", height=" + height + ", mines=" + mines + '}';
-  }
 }

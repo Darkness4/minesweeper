@@ -12,6 +12,7 @@ import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 import org.jetbrains.annotations.NotNull;
 
+/** Implementation of SettingsRepository. */
 @Singleton
 public class SettingsRepositoryImpl implements SettingsRepository {
 

@@ -1,6 +1,5 @@
 package marc.nguyen.minesweeper.client.presentation.widgets;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -51,9 +50,9 @@ public class MineButton extends JPanel {
               break;
             case FLAG:
               image = resourcesLoader.flag;
+              repaint();
               break;
             case EXPOSED:
-              setBackground(Color.GRAY);
               if (tile instanceof Tile.Empty) {
                 final int neighbors = ((Empty) tile).getNeighborMinesCount();
                 image = resourcesLoader.exposed.get(neighbors);
@@ -62,14 +61,15 @@ public class MineButton extends JPanel {
               break;
             case BLANK:
               image = resourcesLoader.clear;
+              repaint();
               break;
             case MINE_EXPOSED:
               image = resourcesLoader.exposedMine;
+              repaint();
               break;
             default:
               break;
           }
-          repaint();
         });
   }
 

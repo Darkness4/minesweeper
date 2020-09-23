@@ -23,6 +23,9 @@ compileJava {
 apply from: rootProject.file('gradle/install-git-hooks.gradle')
 
 dependencies {
+    // Args Parser
+    implementation "com.beust:jcommander:1.71"
+
     // Reactive Programming
     implementation "io.reactivex.rxjava3:rxjava:3.0.6"
 

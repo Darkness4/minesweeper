@@ -14,6 +14,11 @@ import marc.nguyen.minesweeper.client.data.repositories.SettingsRepositoryImpl;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 
+/**
+ * Dependencies from the Data Layer.
+ *
+ * <p>Should preferably be singleton.
+ */
 @Module
 public abstract class DataModule {
 

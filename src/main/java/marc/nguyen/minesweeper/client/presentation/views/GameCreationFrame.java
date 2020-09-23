@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.client.presentation.widgets;
+package marc.nguyen.minesweeper.client.presentation.views;
 
 import javax.inject.Inject;
 import javax.swing.JFrame;
@@ -6,8 +6,8 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
-import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 
+/** The Game Creation Frame. */
 public class GameCreationFrame extends JFrame {
 
   @Inject

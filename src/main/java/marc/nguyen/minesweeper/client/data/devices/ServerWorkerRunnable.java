@@ -30,6 +30,8 @@ public class ServerWorkerRunnable implements Runnable {
       while (!isStopped.get()) {
         try {
           final var packet = input.readObject();
+
+          // Publish packet
           publisher.onNext(packet);
           if (packet instanceof Message) {
             System.out.printf("Server said: %s\n", packet);

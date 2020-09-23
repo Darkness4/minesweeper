@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.client.presentation.views.main;
+package marc.nguyen.minesweeper.client.presentation.views.game;
 
 import java.awt.GridLayout;
 import java.awt.event.MouseListener;
@@ -8,6 +8,7 @@ import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
+/** THE game panel. */
 public class GamePanel extends JPanel {
 
   final Minefield minefield;

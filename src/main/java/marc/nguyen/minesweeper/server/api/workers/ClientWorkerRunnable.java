@@ -5,7 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import marc.nguyen.minesweeper.common.data.models.Level;
+import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
@@ -14,19 +14,24 @@ import org.jetbrains.annotations.Nullable;
 /**
  * ServerWorkerRunnable handles the input from the client.
  *
- * <p>This Runnable should be called in a new Thread or in a Thread Pool.
+ * <p>This Runnable should be called in a new Thread or in a Thread Pool. Communication made between
+ * Client-Server follow Request-Response model.
  */
 public class ClientWorkerRunnable implements Runnable {
 
   private final Socket clientSocket;
-  private boolean isStopped = false;
-  private @Nullable ObjectOutputStream output = null;
   private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams;
+  private final AtomicBoolean isStopped = new AtomicBoolean(false);
+  private final Minefield minefield;
+  private @Nullable ObjectOutputStream output = null;
 
   public ClientWorkerRunnable(
-      Socket clientSocket, ConcurrentLinkedQueue<ObjectOutputStream> outputStreams) {
+      Socket clientSocket,
+      ConcurrentLinkedQueue<ObjectOutputStream> outputStreams,
+      Minefield minefield) {
     this.clientSocket = clientSocket;
     this.outputStreams = outputStreams;
+    this.minefield = minefield;
   }
 
   @Override
@@ -38,15 +43,15 @@ public class ClientWorkerRunnable implements Runnable {
       outputStreams.add(output);
 
       output.writeObject(new Message("Hello client !"));
-      output.writeObject(new Minefield(Level.EASY, false));
-      while (!isStopped()) {
+      output.writeObject(minefield);
+      while (!isStopped.get()) {
         try {
           final var packet = input.readObject();
           handle(packet);
         } catch (IOException | ClassNotFoundException e) {
           // Client disconnected
           System.out.println(e);
-          isStopped = true;
+          isStopped.set(true);
         }
       }
 
@@ -56,12 +61,9 @@ public class ClientWorkerRunnable implements Runnable {
     }
   }
 
-  private synchronized boolean isStopped() {
-    return isStopped;
-  }
-
   void handle(Object packet) {
     if (packet instanceof Tile) {
+      minefield.expose((Tile) packet);
       outputStreams.parallelStream()
           .filter(s -> s != output)
           .forEach(

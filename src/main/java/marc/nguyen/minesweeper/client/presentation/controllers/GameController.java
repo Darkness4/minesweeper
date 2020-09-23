@@ -9,22 +9,45 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
-import marc.nguyen.minesweeper.client.presentation.models.MainModel;
-import marc.nguyen.minesweeper.client.presentation.views.MainView;
+import marc.nguyen.minesweeper.client.presentation.models.GameModel;
+import marc.nguyen.minesweeper.client.presentation.views.GameView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
-// TODO : Threading is broken. Use executor service.
-public class MainController implements MouseListener, Controller<MainModel, MainView> {
+/**
+ * The Game Controller.
+ *
+ * <p>Mutate the game model (local minefield, server's minefield, score...) and notify the game
+ * view.
+ *
+ * <p>Factory should be used as the primary constructor. The Frame should assist the injection to
+ * avoid using Singletons with the presentation dependencies (model and view must NOT be
+ * singletons). (Note that we could have used member injection using a setter or a builder.)
+ *
+ * @see GameModel
+ * @see GameView
+ * @see Factory
+ */
+public class GameController implements MouseListener, Controller<GameModel, GameView> {
 
-  private final MainModel model;
-  private final MainView view;
+  private final GameModel model;
+  private final GameView view;
   private final Lazy<UpdateServerTile> updateMinefield;
 
-  public MainController(Lazy<UpdateServerTile> updateMinefield, MainModel model, MainView view) {
+  public GameController(Lazy<UpdateServerTile> updateMinefield, GameModel model, GameView view) {
     this.model = model;
     this.view = view;
     this.updateMinefield = updateMinefield;
+
+    // Initial update
+    update();
+
+    // Listen to remote changes
+    this.model.tiles.subscribe(
+        (tile) -> {
+          this.model.minefield.expose(tile);
+          update();
+        });
 
     this.view.gamePanel.addButtonListener(this);
   }
@@ -47,6 +70,11 @@ public class MainController implements MouseListener, Controller<MainModel, Main
   @Override
   public void mousePressed(MouseEvent e) {}
 
+  /**
+   * Flag a tile on right click. Discover a tile on left click.
+   *
+   * @param e A mouse event.
+   */
   @Override
   public void mouseReleased(MouseEvent e) {
     CompletableFuture.runAsync(
@@ -60,23 +88,27 @@ public class MainController implements MouseListener, Controller<MainModel, Main
             } else if (SwingUtilities.isLeftMouseButton(e)) {
               if (tile.getState() != Tile.State.FLAG) {
                 model.minefield.expose(tile);
+                updateMinefield.get().execute(tile).subscribe();
 
                 if (tile instanceof Tile.Empty) {
                   model.player.incrementScore();
-                } else {
+                } else if (tile instanceof Tile.Mine) {
                   model.player.decrementScore();
                 }
               }
             }
 
-            updateBombLeft();
             view.displayPanel.updatePlayerScore(model.player.getScore());
-            view.gamePanel.updateField(model.minefield);
-            checkIfEndGame();
-            updateMinefield.get().execute(tile).blockingAwait();
+            update();
           }
         },
         IO.executor);
+  }
+
+  private void update() {
+    updateBombLeft();
+    view.gamePanel.updateField(model.minefield);
+    checkIfEndGame();
   }
 
   @Override
@@ -85,6 +117,7 @@ public class MainController implements MouseListener, Controller<MainModel, Main
   @Override
   public void mouseExited(MouseEvent e) {}
 
+  /** Factory used for assisted dependencies injection. */
   public static final class Factory {
 
     final Lazy<UpdateServerTile> updateMinefield;
@@ -94,8 +127,8 @@ public class MainController implements MouseListener, Controller<MainModel, Main
       this.updateMinefield = updateMinefield;
     }
 
-    public MainController create(MainModel model, MainView view) {
-      return new MainController(updateMinefield, model, view);
+    public GameController create(GameModel model, GameView view) {
+      return new GameController(updateMinefield, model, view);
     }
   }
 }

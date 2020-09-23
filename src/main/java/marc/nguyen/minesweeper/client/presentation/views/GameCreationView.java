@@ -10,6 +10,12 @@ import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.EditSettingsPanel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.SavedSettingsPanel;
 
+/**
+ * The Game Creation View.
+ *
+ * @see marc.nguyen.minesweeper.client.presentation.models.GameCreationModel
+ * @see marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController
+ */
 public final class GameCreationView extends JPanel implements View {
 
   public final EditSettingsPanel editSettingsPanel;

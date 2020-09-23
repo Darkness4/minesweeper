@@ -9,8 +9,8 @@ import org.junit.jupiter.api.function.Executable;
 
 public class MinefieldTest {
 
-  static int LENGTH = 2;
-  static int HEIGHT = 2;
+  static final int LENGTH = 2;
+  static final int HEIGHT = 2;
   Minefield minefield;
 
   @Test

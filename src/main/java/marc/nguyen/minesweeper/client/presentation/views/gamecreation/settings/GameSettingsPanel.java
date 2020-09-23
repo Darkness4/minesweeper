@@ -15,6 +15,7 @@ import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.utils.SpringUtilities;
 import marc.nguyen.minesweeper.common.data.models.Level;
 
+/** Settings Form about the game to be created. */
 public class GameSettingsPanel extends JPanel {
 
   public final JComboBox<Level> levelComboBox;

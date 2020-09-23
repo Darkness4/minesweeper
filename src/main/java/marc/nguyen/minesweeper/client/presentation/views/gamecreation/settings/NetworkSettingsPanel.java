@@ -10,6 +10,7 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.utils.SpringUtilities;
 
+/** Network Form about the server to be connected. */
 public class NetworkSettingsPanel extends JPanel {
 
   public final JTextField ipTextField;

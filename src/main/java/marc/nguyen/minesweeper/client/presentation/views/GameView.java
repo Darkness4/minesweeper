@@ -6,17 +6,23 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.mvc.View;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
-import marc.nguyen.minesweeper.client.presentation.views.main.DisplayPanel;
-import marc.nguyen.minesweeper.client.presentation.views.main.GamePanel;
+import marc.nguyen.minesweeper.client.presentation.views.game.DisplayPanel;
+import marc.nguyen.minesweeper.client.presentation.views.game.GamePanel;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
-public final class MainView extends JPanel implements View {
+/**
+ * The Game View.
+ *
+ * @see marc.nguyen.minesweeper.client.presentation.models.GameModel
+ * @see marc.nguyen.minesweeper.client.presentation.controllers.GameController
+ */
+public final class GameView extends JPanel implements View {
 
   public final GamePanel gamePanel;
   public final DisplayPanel displayPanel;
 
   @Inject
-  public MainView(Minefield minefield, ResourcesLoader resourcesLoader) {
+  public GameView(Minefield minefield, ResourcesLoader resourcesLoader) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     setLayout(new BorderLayout());

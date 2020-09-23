@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.di.modules.DataModule;
 import marc.nguyen.minesweeper.client.di.modules.DomainModule;
 import marc.nguyen.minesweeper.client.di.modules.GameCreationModule;
-import marc.nguyen.minesweeper.client.presentation.widgets.GameCreationFrame;
+import marc.nguyen.minesweeper.client.presentation.views.GameCreationFrame;
 
 /** Dagger Component used for the Game Creation Dialog. */
 @Singleton

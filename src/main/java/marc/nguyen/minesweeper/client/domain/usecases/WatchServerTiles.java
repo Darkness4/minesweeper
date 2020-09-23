@@ -11,6 +11,7 @@ import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 import org.jetbrains.annotations.NotNull;
 
+/** A User should be able to listen to changes from the server. */
 @Singleton
 public class WatchServerTiles implements UseCase<Void, Observable<Tile>> {
 

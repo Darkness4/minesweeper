@@ -11,6 +11,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+/** The panel where we CRUD the settings. */
 public class SavedSettingsPanel extends JPanel {
 
   public final JList<String> settingsList;

@@ -1,26 +1,27 @@
-package marc.nguyen.minesweeper.client.presentation.widgets;
+package marc.nguyen.minesweeper.client.presentation.views;
 
 import javax.inject.Inject;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import marc.nguyen.minesweeper.client.presentation.controllers.MainController;
-import marc.nguyen.minesweeper.client.presentation.models.MainModel;
+import marc.nguyen.minesweeper.client.presentation.controllers.GameController;
+import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
-import marc.nguyen.minesweeper.client.presentation.views.MainView;
+import marc.nguyen.minesweeper.client.presentation.widgets.MainMenuBar;
 
-public final class MainFrame extends JFrame {
+/** The Game Frame. */
+public final class GameFrame extends JFrame {
 
-  final MainController controller;
+  final GameController controller;
 
   @Inject
-  public MainFrame(
+  public GameFrame(
       ResourcesLoader resourcesLoader,
       MainMenuBar mainMenuBar,
-      MainView view,
-      MainModel model,
-      MainController.Factory mainControllerFactory) {
+      GameView view,
+      GameModel model,
+      GameController.Factory gameControllerFactory) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
-    controller = mainControllerFactory.create(model, view);
+    controller = gameControllerFactory.create(model, view);
 
     setJMenuBar(mainMenuBar);
     setContentPane(view);

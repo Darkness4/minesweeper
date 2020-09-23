@@ -14,7 +14,7 @@ import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import marc.nguyen.minesweeper.client.core.IO;
-import marc.nguyen.minesweeper.client.di.components.MainComponent.Builder;
+import marc.nguyen.minesweeper.client.di.components.GameComponent.Builder;
 import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
@@ -28,8 +28,19 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
-// TODO : Move every "SwingUtilities" to view
-// TODO : SRP is broken. Split the listener.
+/**
+ * The Game Creation Controller.
+ *
+ * <p>Mutate the game creation model (form) and notify the game creation view (validation).
+ *
+ * <p>Factory should be used as the primary constructor. The Frame should assist the injection to
+ * avoid using Singletons with the presentation dependencies (model and view must NOT be
+ * singletons). (Note that we could have used member injection using a setter or a builder.)
+ *
+ * @see GameCreationModel
+ * @see GameCreationView
+ * @see Factory
+ */
 public class GameCreationController {
 
   private final GameCreationModel model;
@@ -40,7 +51,7 @@ public class GameCreationController {
   private final Lazy<SaveSettings> saveSettings;
   private final Lazy<DeleteSettings> deleteSettings;
   private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
-  private final Provider<Builder> mainComponentProvider;
+  private final Provider<Builder> gameComponentProvider;
 
   public GameCreationController(
       Lazy<Connect> connect,
@@ -48,7 +59,7 @@ public class GameCreationController {
       Lazy<SaveSettings> saveSettings,
       Lazy<DeleteSettings> deleteSettings,
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
-      Provider<Builder> mainComponentProvider,
+      Provider<Builder> gameComponentProvider,
       GameCreationModel model,
       GameCreationView view) {
     this.model = model;
@@ -58,7 +69,7 @@ public class GameCreationController {
     this.saveSettings = saveSettings;
     this.deleteSettings = deleteSettings;
     this.fetchAllSettingsName = fetchAllSettingsName;
-    this.mainComponentProvider = mainComponentProvider;
+    this.gameComponentProvider = gameComponentProvider;
 
     listModel = new DefaultListModel<>();
     this.view.savedSettingsPanel.settingsList.setModel(listModel);
@@ -137,6 +148,11 @@ public class GameCreationController {
     }
   }
 
+  /**
+   * This refreshes the list.
+   *
+   * <p>This is called in any CRUD operation around the list (besides Read).
+   */
   private void refreshListModel() {
     fetchAllSettingsName
         .get()
@@ -160,6 +176,7 @@ public class GameCreationController {
             (throwable) -> System.out.println("Settings couldn't be loaded."));
   }
 
+  /** Create or fetch a minefield and create the Game Frame. */
   private void onStartButtonPushed() {
     try {
       final var mode = model.getMode();
@@ -183,13 +200,13 @@ public class GameCreationController {
         SwingUtilities.invokeLater(
             () -> {
               try {
-                mainComponentProvider
+                gameComponentProvider
                     .get()
                     .minefield(minefield.get())
                     .player(new Player())
                     .updateTiles(Observable.empty())
                     .build()
-                    .mainFrame();
+                    .gameFrame();
               } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
               }
@@ -206,13 +223,13 @@ public class GameCreationController {
                   SwingUtilities.windowForComponent(view).dispose();
                   SwingUtilities.invokeLater(
                       () ->
-                          mainComponentProvider
+                          gameComponentProvider
                               .get()
                               .minefield(minefield)
                               .player(new Player())
                               .updateTiles(result.tiles)
                               .build()
-                              .mainFrame());
+                              .gameFrame());
                 });
       }
     } catch (UnknownHostException e) {
@@ -254,12 +271,11 @@ public class GameCreationController {
     }
   }
 
-  private Void onIpAddressInput(DocumentEvent e) {
+  private void onIpAddressInput(DocumentEvent e) {
     model.setAddress(view.editSettingsPanel.networkSettingsPanel.ipTextField.getText());
-    return null;
   }
 
-  private Void onNameSettingsInput(DocumentEvent e) {
+  private void onNameSettingsInput(DocumentEvent e) {
     CompletableFuture.runAsync(
         () -> {
           final var text = view.savedSettingsPanel.settingsNameTextField.getText();
@@ -270,9 +286,9 @@ public class GameCreationController {
           view.savedSettingsPanel.changeColorNameTextIfValid(isValid);
         },
         IO.executor);
-    return null;
   }
 
+  /** Factory used for assisted dependencies injection. */
   public static final class Factory {
 
     private final Lazy<Connect> connect;

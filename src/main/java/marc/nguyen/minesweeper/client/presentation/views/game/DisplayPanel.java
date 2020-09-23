@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.client.presentation.views.main;
+package marc.nguyen.minesweeper.client.presentation.views.game;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -6,6 +6,7 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 
+/** The panel with the score and mines. */
 public class DisplayPanel extends JPanel {
 
   public final JLabel bombLeftText;

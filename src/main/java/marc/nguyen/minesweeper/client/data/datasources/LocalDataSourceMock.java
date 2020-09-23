@@ -12,13 +12,18 @@ import org.sqlite.SQLiteDataSource;
  */
 public class LocalDataSourceMock extends SQLiteDataSource implements LocalDataSource {
 
-  static String URL = "jdbc:sqlite:testdata.sqlite3";
+  static final String URL = "jdbc:sqlite:testdata.sqlite3";
 
   @Inject
   public LocalDataSourceMock() {
     setUrl(URL);
   }
 
+  /**
+   * Delete the file DB.
+   *
+   * @return isSuccess?
+   */
   public boolean purge() {
     final var file = new File("testdata.sqlite3");
     return file.delete();

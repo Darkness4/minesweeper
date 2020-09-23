@@ -86,7 +86,7 @@ public class SettingsDaoSqlite implements SettingsDao {
   }
 
   @Override
-  public List<Settings> findAll() {
+  public @NotNull List<Settings> findAll() {
     final List<Settings> settings = new ArrayList<>();
 
     try (final var connection = dataSource.get().getConnection();

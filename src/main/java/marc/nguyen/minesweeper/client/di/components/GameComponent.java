@@ -3,17 +3,21 @@ package marc.nguyen.minesweeper.client.di.components;
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 import io.reactivex.rxjava3.core.Observable;
-import marc.nguyen.minesweeper.client.di.modules.MainModule;
-import marc.nguyen.minesweeper.client.presentation.widgets.MainFrame;
+import marc.nguyen.minesweeper.client.di.modules.GameModule;
+import marc.nguyen.minesweeper.client.presentation.views.GameFrame;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 
-/** Dagger Component used for the Main Frame. */
-@Subcomponent(modules = {MainModule.class})
-public interface MainComponent {
+/**
+ * Dagger Component used for the Game Frame.
+ *
+ * <p>Should be a subcomponent of a component which already have the DataModule and DomainModule.
+ */
+@Subcomponent(modules = {GameModule.class})
+public interface GameComponent {
 
-  MainFrame mainFrame();
+  GameFrame gameFrame();
 
   @Subcomponent.Builder
   interface Builder {
@@ -27,6 +31,6 @@ public interface MainComponent {
     @BindsInstance
     Builder player(Player player);
 
-    MainComponent build();
+    GameComponent build();
   }
 }

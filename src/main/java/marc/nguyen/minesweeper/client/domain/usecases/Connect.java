@@ -16,7 +16,16 @@ import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 import org.jetbrains.annotations.NotNull;
 
-/** A user should be able to connect to a TCP server based on a port and an IP address. */
+/**
+ * A user should be able to connect to a Minesweeper server based on a port and an IP address.
+ *
+ * <p>The result should be :
+ *
+ * <ul>
+ *   <li>The minefield of the server.
+ *   <li>An observable to listen changes.
+ * </ul>
+ */
 @Singleton
 public class Connect implements UseCase<Connect.Params, Maybe<Result>> {
 

@@ -8,15 +8,15 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 
 /**
- * Load in RAM the resources.
+ * Load the resources in RAM.
  *
- * <p>Since these tiles will be used non-stop, we will store them here during runtime.
+ * <p>Since these tiles will be used non-stop, we will store them here during the game runtime.
+ *
+ * <p>Do not use the Singleton Pattern to avoid any performance issue during the entire runtime.
  */
 public class ResourcesLoader {
 
-  private static int SIZE = 16;
-
-  private final BufferedImage tilemap;
+  private static final int SIZE = 16;
 
   public final Image clear;
   public final Image flag;
@@ -38,7 +38,7 @@ public class ResourcesLoader {
   @Inject
   public ResourcesLoader() {
     try {
-      tilemap = ImageIO.read(getClass().getResource("/img/tiles.png"));
+      final BufferedImage tilemap = ImageIO.read(getClass().getResource("/img/tiles.png"));
       clear = tilemap.getSubimage(0, 0, SIZE, SIZE);
       flag = tilemap.getSubimage(SIZE, 0, SIZE, SIZE);
       hitMine = tilemap.getSubimage(SIZE * 2, 0, SIZE, SIZE);
