@@ -34,10 +34,10 @@ public class SettingsDaoSqlite implements SettingsDao {
                 "CREATE TABLE IF NOT EXISTS settings "
                     + "(name           VARCHAR(128)    NOT NULL PRIMARY KEY,"
                     + " address        VARCHAR(128)    NOT NULL,"
-                    + " port           INT          NOT NULL,"
-                    + " length         INT          NOT NULL,"
-                    + " height         INT          NOT NULL,"
-                    + " mines          INT          NOT NULL,"
+                    + " port           INT             NOT NULL,"
+                    + " length         INT             NOT NULL,"
+                    + " height         INT             NOT NULL,"
+                    + " mines          INT             NOT NULL,"
                     + " level          VARCHAR(20)     NOT NULL,"
                     + " mode           VARCHAR(20)     NOT NULL);")) {
 

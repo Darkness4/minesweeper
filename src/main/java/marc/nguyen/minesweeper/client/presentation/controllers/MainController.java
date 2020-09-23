@@ -4,10 +4,8 @@ import dagger.Lazy;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
@@ -19,52 +17,26 @@ import marc.nguyen.minesweeper.common.data.models.Tile;
 // TODO : Threading is broken. Use executor service.
 public class MainController implements MouseListener, Controller<MainModel, MainView> {
 
-  private final MainModel _model;
-  private final MainView _view;
-  private final Lazy<UpdateServerTile> _updateMinefield;
+  private final MainModel model;
+  private final MainView view;
+  private final Lazy<UpdateServerTile> updateMinefield;
 
   public MainController(Lazy<UpdateServerTile> updateMinefield, MainModel model, MainView view) {
-    _model = model;
-    _view = view;
-    _updateMinefield = updateMinefield;
+    this.model = model;
+    this.view = view;
+    this.updateMinefield = updateMinefield;
 
-    _view.gamePanel.addButtonListener(this);
+    this.view.gamePanel.addButtonListener(this);
   }
 
   private void updateBombLeft() {
-    new SwingWorker<Long, Void>() {
-      @Override
-      protected Long doInBackground() {
-        return _model.minefield.getMinesOnField()
-            - _model.minefield.countFlagsAndVisibleBombsOnField();
-      }
-
-      @Override
-      protected void done() {
-        try {
-          _view.displayPanel.bombLeftText.setText(String.valueOf(get()));
-        } catch (InterruptedException | ExecutionException e) {
-          e.printStackTrace();
-        }
-      }
-    }.execute();
-  }
-
-  private void updateField() {
-    SwingUtilities.invokeLater(
-        () -> {
-          for (int i = 0; i < _model.minefield.getLength(); i++) {
-            for (int j = 0; j < _model.minefield.getHeight(); j++) {
-              final var tile = _model.minefield.get(i, j);
-              final var mineButton = _view.gamePanel.mineButtons[i][j];
-              mineButton.updateValueFromTile(tile);
-            }
-          }
-        });
+    final var minesLeft =
+        model.minefield.getMinesOnField() - model.minefield.countFlagsAndVisibleBombsOnField();
+    view.displayPanel.updateMinesLeft(minesLeft);
   }
 
   private void checkIfEndGame() {
-    if (_model.minefield.hasEnded()) {
+    if (model.minefield.hasEnded()) {
       System.out.println("Game has ended.");
     }
   }
@@ -82,34 +54,29 @@ public class MainController implements MouseListener, Controller<MainModel, Main
           final var source = e.getSource();
           if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
             final var mineButton = (MineButton) source;
-            final var tile = _model.minefield.get(mineButton.x, mineButton.y);
+            final var tile = model.minefield.get(mineButton.x, mineButton.y);
             if (SwingUtilities.isRightMouseButton(e)) {
-              _model.minefield.flag(tile);
+              model.minefield.flag(tile);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
               if (tile.getState() != Tile.State.FLAG) {
-                _model.minefield.expose(tile);
+                model.minefield.expose(tile);
 
                 if (tile instanceof Tile.Empty) {
-                  _model.player.incrementScore();
+                  model.player.incrementScore();
                 } else {
-                  _model.player.decrementScore();
+                  model.player.decrementScore();
                 }
               }
             }
 
             updateBombLeft();
-            updatePlayerScore();
-            updateField();
+            view.displayPanel.updatePlayerScore(model.player.getScore());
+            view.gamePanel.updateField(model.minefield);
             checkIfEndGame();
-            _updateMinefield.get().execute(tile).subscribe();
+            updateMinefield.get().execute(tile).blockingAwait();
           }
         },
         IO.executor);
-  }
-
-  private void updatePlayerScore() {
-    SwingUtilities.invokeLater(
-        () -> _view.displayPanel.playerScoreText.setText(String.valueOf(_model.player.getScore())));
   }
 
   @Override

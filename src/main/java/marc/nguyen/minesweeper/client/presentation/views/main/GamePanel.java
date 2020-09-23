@@ -38,4 +38,17 @@ public class GamePanel extends JPanel {
       }
     }
   }
+
+  public void updateField(Minefield minefield) {
+    SwingUtilities.invokeLater(
+        () -> {
+          for (int i = 0; i < minefield.getLength(); i++) {
+            for (int j = 0; j < minefield.getHeight(); j++) {
+              final var tile = minefield.get(i, j);
+              final var mineButton = mineButtons[i][j];
+              mineButton.updateValueFromTile(tile);
+            }
+          }
+        });
+  }
 }

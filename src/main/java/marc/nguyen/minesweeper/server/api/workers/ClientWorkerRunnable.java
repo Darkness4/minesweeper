@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * ServerWorkerRunnable handles the input from the client.
@@ -18,15 +20,22 @@ public class ClientWorkerRunnable implements Runnable {
 
   private final Socket clientSocket;
   private boolean isStopped = false;
+  private @Nullable ObjectOutputStream output = null;
+  private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams;
 
-  public ClientWorkerRunnable(Socket clientSocket) {
+  public ClientWorkerRunnable(
+      Socket clientSocket, ConcurrentLinkedQueue<ObjectOutputStream> outputStreams) {
     this.clientSocket = clientSocket;
+    this.outputStreams = outputStreams;
   }
 
   @Override
   public void run() {
     try (final var input = new ObjectInputStream(clientSocket.getInputStream());
         final var output = new ObjectOutputStream(clientSocket.getOutputStream())) {
+
+      this.output = output;
+      outputStreams.add(output);
 
       output.writeObject(new Message("Hello client !"));
       output.writeObject(new Minefield(Level.EASY, false));
@@ -40,6 +49,8 @@ public class ClientWorkerRunnable implements Runnable {
           isStopped = true;
         }
       }
+
+      outputStreams.remove(output);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -51,9 +62,17 @@ public class ClientWorkerRunnable implements Runnable {
 
   void handle(Object packet) {
     if (packet instanceof Tile) {
-      // TODO: Handle
-    } else if (packet instanceof Minefield) {
-
+      outputStreams.parallelStream()
+          .filter(s -> s != output)
+          .forEach(
+              s -> {
+                try {
+                  s.writeObject(packet);
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              });
+      System.out.println(packet);
     } else if (packet instanceof Message) {
       System.out.printf("Client said: %s\n", packet);
     } else {

@@ -38,4 +38,12 @@ public class DisplayPanel extends JPanel {
     layout.putConstraint(SpringLayout.EAST, this, 5, SpringLayout.EAST, playerScoreText);
     layout.putConstraint(SpringLayout.SOUTH, this, 5, SpringLayout.SOUTH, bombLeftText);
   }
+
+  public void updatePlayerScore(int score) {
+    SwingUtilities.invokeLater(() -> playerScoreText.setText(String.valueOf(score)));
+  }
+
+  public void updateMinesLeft(long mines) {
+    SwingUtilities.invokeLater(() -> bombLeftText.setText(String.valueOf(mines)));
+  }
 }

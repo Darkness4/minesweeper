@@ -11,7 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
-import marc.nguyen.minesweeper.client.data.datasources.MockLocalDataSource;
+import marc.nguyen.minesweeper.client.data.datasources.LocalDataSourceMock;
 import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.common.data.models.Level;
@@ -26,18 +26,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SettingsDaoSqliteTest {
 
   SettingsDao settingsDao;
-  MockLocalDataSource mockLocalDataSource;
+  LocalDataSourceMock localDataSourceMock;
   Lazy<LocalDataSource> localDataSourceLazy;
   Connection connection;
 
   @BeforeEach
   void setUp(@Mock Lazy<LocalDataSource> localDataSourceLazy) throws SQLException {
-    this.mockLocalDataSource = new MockLocalDataSource();
+    this.localDataSourceMock = new LocalDataSourceMock();
     this.localDataSourceLazy = localDataSourceLazy;
-    when(localDataSourceLazy.get()).thenReturn(mockLocalDataSource);
+    when(localDataSourceLazy.get()).thenReturn(localDataSourceMock);
     settingsDao = new SettingsDaoSqlite(localDataSourceLazy);
 
-    connection = mockLocalDataSource.getConnection();
+    connection = localDataSourceMock.getConnection();
   }
 
   @Test
@@ -158,6 +158,6 @@ class SettingsDaoSqliteTest {
   @AfterEach
   void cleanUp() throws SQLException {
     connection.close();
-    mockLocalDataSource.purge();
+    localDataSourceMock.purge();
   }
 }

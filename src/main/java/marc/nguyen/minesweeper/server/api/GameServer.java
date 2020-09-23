@@ -1,16 +1,22 @@
 package marc.nguyen.minesweeper.server.api;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.server.api.workers.ClientWorkerRunnable;
+import marc.nguyen.minesweeper.server.core.IO;
+import org.jetbrains.annotations.Nullable;
 
 /** Implementation of the Server. */
 public class GameServer {
-  private ServerSocket serverSocket = null;
-  private boolean isStopped = false;
-  private final ExecutorService threadPool = Executors.newFixedThreadPool(10);
+
+  private final AtomicBoolean isStopped = new AtomicBoolean(false);
+  private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams =
+      new ConcurrentLinkedQueue<>();
+  private @Nullable ServerSocket serverSocket = null;
 
   /**
    * Start the server at the desired port.
@@ -22,39 +28,24 @@ public class GameServer {
 
     System.out.format("Server is running on port %d\n", port);
 
-    while (!isStopped()) {
+    while (!isStopped.get()) {
       try {
+        assert serverSocket != null;
         final var clientSocket = serverSocket.accept();
         System.out.printf(
             "Client %s accepted.\n", clientSocket.getInetAddress().getCanonicalHostName());
-        this.threadPool.execute(new ClientWorkerRunnable(clientSocket));
+        CompletableFuture.runAsync(
+            new ClientWorkerRunnable(clientSocket, outputStreams), IO.executor);
       } catch (IOException e) {
-        if (isStopped()) {
+        if (isStopped.get()) {
           System.out.println("Server Stopped.");
           break;
         }
         throw new RuntimeException("Error accepting client connection", e);
       }
     }
-    this.threadPool.shutdown();
+    close();
     System.out.println("Server Stopped.");
-  }
-
-  private synchronized boolean isStopped() {
-    return isStopped;
-  }
-
-  /** Close the server. */
-  public synchronized void close() {
-    try {
-      if (serverSocket != null) {
-        isStopped = true;
-        serverSocket.close();
-        serverSocket = null;
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Cannot stop server. Cannot close port.", e);
-    }
   }
 
   private void open(int port) {
@@ -63,5 +54,27 @@ public class GameServer {
     } catch (IOException e) {
       throw new RuntimeException("Cannot open port.", e);
     }
+  }
+
+  private synchronized void close() {
+    IO.executor.shutdown();
+
+    if (serverSocket != null) {
+      try {
+        serverSocket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    outputStreams.parallelStream()
+        .forEach(
+            s -> {
+              try {
+                s.close();
+              } catch (IOException ioException) {
+                ioException.printStackTrace();
+              }
+            });
   }
 }

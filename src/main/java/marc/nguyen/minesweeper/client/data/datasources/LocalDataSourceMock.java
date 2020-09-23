@@ -10,12 +10,12 @@ import org.sqlite.SQLiteDataSource;
  * <p>This class create a SQLite 3 database. After each test, this class should call <code>purge()
  * </code>.
  */
-public class MockLocalDataSource extends SQLiteDataSource implements LocalDataSource {
+public class LocalDataSourceMock extends SQLiteDataSource implements LocalDataSource {
 
   static String URL = "jdbc:sqlite:testdata.sqlite3";
 
   @Inject
-  public MockLocalDataSource() {
+  public LocalDataSourceMock() {
     setUrl(URL);
   }
 

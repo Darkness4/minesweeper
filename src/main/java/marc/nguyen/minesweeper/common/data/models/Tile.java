@@ -82,7 +82,7 @@ public abstract class Tile implements Serializable {
 
   @Override
   public String toString() {
-    return "Tile{" + "_state=" + state + ", x=" + x + ", y=" + y + '}';
+    return "Tile{" + "state=" + state + ", x=" + x + ", y=" + y + '}';
   }
 
   /**
@@ -116,7 +116,7 @@ public abstract class Tile implements Serializable {
 
     @Override
     public String toString() {
-      return "Tile{" + "_state=" + getState() + ", x=" + x + ", y=" + y + '}';
+      return "Mine{" + "state=" + getState() + ", x=" + x + ", y=" + y + '}';
     }
 
     /**
@@ -135,16 +135,16 @@ public abstract class Tile implements Serializable {
   /** An empty <code>Tile</code>. */
   public static final class Empty extends Tile {
 
-    private final int _adjacentMines;
+    private final int adjacentMines;
 
     public Empty(int x, int y) {
       super(x, y);
-      _adjacentMines = 0;
+      adjacentMines = 0;
     }
 
     private Empty(int x, int y, @NotNull State state, int adjacentMines) {
       super(x, y, state);
-      _adjacentMines = adjacentMines;
+      this.adjacentMines = adjacentMines;
     }
 
     /**
@@ -153,20 +153,20 @@ public abstract class Tile implements Serializable {
      * @return The adjacent mines.
      */
     public int getNeighborMinesCount() {
-      return _adjacentMines;
+      return adjacentMines;
     }
 
     @Override
     public String toString() {
       return "Empty{"
-          + "_state="
+          + "state="
           + getState()
           + ", x="
           + x
           + ", y="
           + y
-          + ", _adjacentMines="
-          + _adjacentMines
+          + ", adjacentMines="
+          + adjacentMines
           + '}';
     }
 
@@ -179,7 +179,7 @@ public abstract class Tile implements Serializable {
     @Override
     @NotNull
     public Empty copyWith(@NotNull State state) {
-      return new Empty(x, y, state, this._adjacentMines);
+      return new Empty(x, y, state, this.adjacentMines);
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class Tile implements Serializable {
      */
     @NotNull
     public Empty copyAndIncrementAdjacentMines() {
-      return new Empty(x, y, this.getState(), this._adjacentMines + 1);
+      return new Empty(x, y, this.getState(), this.adjacentMines + 1);
     }
 
     @Override
@@ -204,12 +204,12 @@ public abstract class Tile implements Serializable {
         return false;
       }
       final Empty empty = (Empty) o;
-      return _adjacentMines == empty._adjacentMines;
+      return adjacentMines == empty.adjacentMines;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), _adjacentMines);
+      return Objects.hash(super.hashCode(), adjacentMines);
     }
   }
 }
