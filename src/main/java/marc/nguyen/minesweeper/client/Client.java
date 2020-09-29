@@ -6,7 +6,6 @@ import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
 
 /** Main Client Entrypoint. */
 public final class Client {
-  // TODO: Log the shit out
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(

@@ -59,8 +59,6 @@ public class SavedSettingsPanel extends JPanel {
 
   public void changeColorNameTextIfValid(boolean isValid) {
     SwingUtilities.invokeLater(
-        () -> {
-          settingsNameTextField.setBackground(isValid ? Color.WHITE : Color.RED);
-        });
+        () -> settingsNameTextField.setBackground(isValid ? Color.WHITE : Color.RED));
   }
 }

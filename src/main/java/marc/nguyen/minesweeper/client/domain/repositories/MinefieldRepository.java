@@ -10,10 +10,18 @@ import org.jetbrains.annotations.NotNull;
 /** Minefield Repository. */
 public interface MinefieldRepository {
 
-  /** @return Maybe get a Minefield. */
+  /**
+   * Fetch a minefield.
+   *
+   * @return Maybe a Minefield.
+   */
   Maybe<Minefield> fetch();
 
-  /** @return Stream of tiles from the server. */
+  /**
+   * Watch the incoming tiles updates.
+   *
+   * @return Stream of tiles from the server.
+   */
   Observable<Tile> watchTiles();
 
   /**

@@ -20,6 +20,11 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
     this.serverSocketDevice = serverSocketDevice;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return Maybe a Minefield.
+   */
   @Override
   public Maybe<Minefield> fetch() {
     final var observable = serverSocketDevice.getObservable();
@@ -31,6 +36,11 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return Stream of tiles from the server.
+   */
   @Override
   public Observable<Tile> watchTiles() {
     final var observable = serverSocketDevice.getObservable();
@@ -41,6 +51,12 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param tile New Tile.
+   * @return A completable.
+   */
   @Override
   public Completable updateTile(@NotNull Tile tile) {
     return Completable.fromAction(() -> serverSocketDevice.write(tile));

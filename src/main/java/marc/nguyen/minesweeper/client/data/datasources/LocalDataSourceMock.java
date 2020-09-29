@@ -19,13 +19,9 @@ public class LocalDataSourceMock extends SQLiteDataSource implements LocalDataSo
     setUrl(URL);
   }
 
-  /**
-   * Delete the file DB.
-   *
-   * @return isSuccess?
-   */
-  public boolean purge() {
+  /** Delete the file DB. */
+  public void purge() {
     final var file = new File("testdata.sqlite3");
-    return file.delete();
+    file.delete();
   }
 }

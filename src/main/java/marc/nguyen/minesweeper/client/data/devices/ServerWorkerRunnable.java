@@ -23,6 +23,7 @@ public class ServerWorkerRunnable implements Runnable {
     this.publisher = publisher;
   }
 
+  /** Read the input and publish the packets in the Publisher. */
   @Override
   public void run() {
     try (final var input = new ObjectInputStream(serverSocket.getInputStream())) {

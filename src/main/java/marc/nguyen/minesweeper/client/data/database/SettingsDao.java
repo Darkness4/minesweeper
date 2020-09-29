@@ -26,7 +26,11 @@ public interface SettingsDao {
    */
   void insert(@NotNull Settings settings);
 
-  /** @return A List of Settings. Empty if not found. */
+  /**
+   * Find all the Settings.
+   *
+   * @return A List of Settings. Empty if not found.
+   */
   @NotNull
   List<Settings> findAll();
 

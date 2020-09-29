@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.IO;
@@ -59,7 +58,7 @@ public class ServerSocketDevice {
       output = new ObjectOutputStream(serverSocket.getOutputStream());
       publisher = BehaviorSubject.create();
       write(new Message("Hello server !"));
-      CompletableFuture.runAsync(new ServerWorkerRunnable(serverSocket, publisher), IO.executor);
+      IO.executor.execute(new ServerWorkerRunnable(serverSocket, publisher));
     } catch (IOException e) {
       close();
       throw e;

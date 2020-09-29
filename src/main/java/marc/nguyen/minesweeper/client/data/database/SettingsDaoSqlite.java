@@ -27,6 +27,7 @@ public class SettingsDaoSqlite implements SettingsDao {
     createTable();
   }
 
+  /** Create "settings" SQL table. */
   public void createTable() {
     try (final var connection = dataSource.get().getConnection();
         final var statement =
@@ -48,6 +49,11 @@ public class SettingsDaoSqlite implements SettingsDao {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param name Name of the settings. Primary Key.
+   */
   @Override
   public void deleteByName(@NotNull String name) {
     try (final var connection = dataSource.get().getConnection();
@@ -62,6 +68,11 @@ public class SettingsDaoSqlite implements SettingsDao {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param settings Settings to be inserted.
+   */
   @Override
   public void insert(@NotNull Settings settings) {
     try (final var connection = dataSource.get().getConnection();
@@ -85,8 +96,14 @@ public class SettingsDaoSqlite implements SettingsDao {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return A List of Settings. Empty if not found
+   */
   @Override
-  public @NotNull List<Settings> findAll() {
+  @NotNull
+  public List<Settings> findAll() {
     final List<Settings> settings = new ArrayList<>();
 
     try (final var connection = dataSource.get().getConnection();
@@ -114,6 +131,12 @@ public class SettingsDaoSqlite implements SettingsDao {
     return settings;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param name Name of the settings. Primary Key.
+   * @return A Settings. If not found, is null.
+   */
   @Override
   public @Nullable Settings findByName(@NotNull String name) {
     Settings settings = null;

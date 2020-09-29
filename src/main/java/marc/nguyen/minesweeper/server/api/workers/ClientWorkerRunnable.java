@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Tile;
+import marc.nguyen.minesweeper.server.core.IO;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -61,24 +62,46 @@ public class ClientWorkerRunnable implements Runnable {
     }
   }
 
-  void handle(Object packet) {
+  private void handle(Object packet) {
     if (packet instanceof Tile) {
       minefield.expose((Tile) packet);
-      outputStreams.parallelStream()
-          .filter(s -> s != output)
-          .forEach(
-              s -> {
-                try {
-                  s.writeObject(packet);
-                } catch (IOException e) {
-                  e.printStackTrace();
-                }
-              });
+      IO.executor.execute(
+          () -> {
+            if (minefield.hasEnded()) {
+              broadcast(new Message("Game has ended")); // TODO: Share score + handle player.
+            }
+          });
+      broadcastExcluding(packet);
       System.out.println(packet);
     } else if (packet instanceof Message) {
       System.out.printf("Client said: %s\n", packet);
     } else {
       System.out.format("Packet %s not handled\n", packet);
     }
+  }
+
+  private void broadcast(Object packet) {
+    outputStreams.parallelStream()
+        .forEach(
+            s -> {
+              try {
+                s.writeObject(packet);
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
+  }
+
+  private void broadcastExcluding(Object packet) {
+    outputStreams.parallelStream()
+        .filter(s -> s != output)
+        .forEach(
+            s -> {
+              try {
+                s.writeObject(packet);
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
   }
 }

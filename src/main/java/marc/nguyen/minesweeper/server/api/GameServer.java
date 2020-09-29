@@ -3,7 +3,6 @@ package marc.nguyen.minesweeper.server.api;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import marc.nguyen.minesweeper.common.data.models.Level;
@@ -50,8 +49,7 @@ public class GameServer {
         final var clientSocket = serverSocket.accept();
         System.out.printf(
             "Client %s accepted.\n", clientSocket.getInetAddress().getCanonicalHostName());
-        CompletableFuture.runAsync(
-            new ClientWorkerRunnable(clientSocket, outputStreams, minefield), IO.executor);
+        IO.executor.execute(new ClientWorkerRunnable(clientSocket, outputStreams, minefield));
       } catch (IOException e) {
         if (isStopped.get()) {
           break;

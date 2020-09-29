@@ -23,11 +23,23 @@ public class SettingsRepositoryImpl implements SettingsRepository {
     this.dao = dao;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param settings Settings to be saved.
+   * @return A completable.
+   */
   @Override
   public @NotNull Completable save(@NotNull Settings settings) {
     return Completable.fromAction(() -> dao.get().insert(settings));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param name Name of the settings.
+   * @return Maybe the settings.
+   */
   @Override
   public @NotNull Maybe<Settings> findByKey(@NotNull String name) {
     return Maybe.just(dao.get())
@@ -42,11 +54,22 @@ public class SettingsRepositoryImpl implements SettingsRepository {
             });
   }
 
+  /**
+   * Get the list of Settings.
+   *
+   * @return A Single List of Settings.
+   */
   @Override
   public @NotNull Single<List<Settings>> findAll() {
     return Single.fromCallable(() -> dao.get().findAll());
   }
 
+  /**
+   * Delete the settings by name.
+   *
+   * @param name Name of the settings.
+   * @return A completable.
+   */
   @Override
   public @NotNull Completable delete(@NotNull String name) {
     return Completable.fromAction(() -> dao.get().deleteByName(name));

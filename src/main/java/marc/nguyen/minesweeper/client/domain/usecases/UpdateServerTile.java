@@ -22,7 +22,6 @@ public class UpdateServerTile implements UseCase<Tile, Completable> {
     this.repository = repository;
   }
 
-  // TODO: May want to use future
   @Override
   public Completable execute(@NotNull Tile params) {
     return repository.get().updateTile(params).observeOn(Schedulers.from(IO.executor));
