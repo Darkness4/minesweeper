@@ -147,6 +147,19 @@ public class Minefield implements Serializable {
     }
   }
 
+  public synchronized void exposeAllMines() {
+    Arrays.stream(tiles)
+        .parallel()
+        .forEach(
+            column -> {
+              for (int i = 0; i < column.length; i++) {
+                if (column[i] instanceof Tile.Mine && column[i].getState() != State.HIT_MINE) {
+                  column[i] = column[i].copyWith(State.EXPOSED_MINE);
+                }
+              }
+            });
+  }
+
   /**
    * Use BFS Tree Search Algorithm to reveal tiles.
    *

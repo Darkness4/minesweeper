@@ -34,7 +34,8 @@ public class MainMenuBar extends JMenuBar {
         (e) -> {
           quit.get().execute(null).blockingAwait(); // Will free every threads.
           SwingUtilities.windowForComponent(this).dispose();
-          DaggerGameCreationComponent.builder().build().gameCreationDialog();
+          SwingUtilities.invokeLater(
+              () -> DaggerGameCreationComponent.builder().build().gameCreationDialog());
         });
     menu.add(newGameItem);
 

@@ -51,8 +51,9 @@ public class GameCreationModule {
   static GameController.Factory provideGameControllerFactory(
       Lazy<UpdateServerTile> updateMinefield,
       Lazy<UpdateServerPlayer> updateServerPlayer,
-      Lazy<SaveScore> saveScore) {
-    return new GameController.Factory(updateMinefield, updateServerPlayer, saveScore);
+      Lazy<SaveScore> saveScore,
+      Lazy<Quit> quit) {
+    return new GameController.Factory(updateMinefield, updateServerPlayer, saveScore, quit);
   }
 
   @Provides

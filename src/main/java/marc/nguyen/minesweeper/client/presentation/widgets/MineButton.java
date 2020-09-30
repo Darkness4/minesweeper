@@ -63,7 +63,7 @@ public class MineButton extends JPanel {
               image = resourcesLoader.clear;
               repaint();
               break;
-            case MINE_EXPOSED:
+            case EXPOSED_MINE:
               image = resourcesLoader.exposedMine;
               repaint();
               break;

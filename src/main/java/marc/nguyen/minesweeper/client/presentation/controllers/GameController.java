@@ -9,6 +9,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
+import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
+import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
@@ -38,17 +40,20 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   private final Lazy<UpdateServerTile> updateMinefield;
   private final Timer timer;
   private final Lazy<SaveScore> saveScore;
+  private final Lazy<Quit> quit;
 
   public GameController(
       Lazy<UpdateServerTile> updateMinefield,
       Lazy<UpdateServerPlayer> updateServerPlayer,
       Lazy<SaveScore> saveScore,
+      Lazy<Quit> quit,
       GameModel model,
       GameView view) {
     this.model = model;
     this.view = view;
     this.updateMinefield = updateMinefield;
     this.saveScore = saveScore;
+    this.quit = quit;
 
     // Initial update
     update();
@@ -80,11 +85,29 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
   private void checkIfEndGame() {
     if (model.minefield.hasEnded()) {
-      // TODO: Handle end game.
+      // TODO: Show show winning player.
+      // Stop the timer
       this.timer.stop();
+
+      // Save the personal score
       this.saveScore.get().execute(this.model.player).subscribe();
+
+      // Expose all the mines (show the solution)
+      this.model.minefield.exposeAllMines();
+      view.gamePanel.updateField(model.minefield);
+
+      // Invoke dialog (blocking IO thread)
+      this.view.invokeGameEndedDialog();
+      onExitButtonPushed();
       System.out.println("Game has ended.");
     }
+  }
+
+  private void onExitButtonPushed() {
+    this.quit.get().execute(null).blockingAwait(); // Will free every threads.
+    SwingUtilities.windowForComponent(this.view).dispose();
+    SwingUtilities.invokeLater(
+        () -> DaggerGameCreationComponent.builder().build().gameCreationDialog());
   }
 
   @Override
@@ -149,19 +172,22 @@ public class GameController implements MouseListener, Controller<GameModel, Game
     final Lazy<UpdateServerTile> updateMinefield;
     final Lazy<UpdateServerPlayer> updateServerPlayer;
     final Lazy<SaveScore> saveScore;
+    final Lazy<Quit> quit;
 
     @Inject
     public Factory(
         Lazy<UpdateServerTile> updateMinefield,
         Lazy<UpdateServerPlayer> updateServerPlayer,
-        Lazy<SaveScore> saveScore) {
+        Lazy<SaveScore> saveScore,
+        Lazy<Quit> quit) {
       this.updateMinefield = updateMinefield;
       this.updateServerPlayer = updateServerPlayer;
       this.saveScore = saveScore;
+      this.quit = quit;
     }
 
     public GameController create(GameModel model, GameView view) {
-      return new GameController(updateMinefield, updateServerPlayer, saveScore, model, view);
+      return new GameController(updateMinefield, updateServerPlayer, saveScore, quit, model, view);
     }
   }
 }

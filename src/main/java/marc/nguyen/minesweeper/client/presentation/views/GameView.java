@@ -1,7 +1,9 @@
 package marc.nguyen.minesweeper.client.presentation.views;
 
 import java.awt.BorderLayout;
+import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.core.mvc.View;
@@ -32,5 +34,17 @@ public final class GameView extends JPanel implements View {
 
     gamePanel = new GamePanel(minefield, resourcesLoader);
     add(gamePanel, BorderLayout.CENTER);
+  }
+
+  public void invokeGameEndedDialog() {
+    // TODO: Show scores
+    try {
+      SwingUtilities.invokeAndWait(
+          () ->
+              JOptionPane.showMessageDialog(
+                  null, "Game ended.", "Thank you for playing !", JOptionPane.INFORMATION_MESSAGE));
+    } catch (InterruptedException | InvocationTargetException e) {
+      e.printStackTrace();
+    }
   }
 }
