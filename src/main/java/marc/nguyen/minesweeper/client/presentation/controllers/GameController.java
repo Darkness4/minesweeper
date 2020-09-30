@@ -6,8 +6,11 @@ import java.awt.event.MouseListener;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
+import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameView;
@@ -33,14 +36,23 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   private final GameModel model;
   private final GameView view;
   private final Lazy<UpdateServerTile> updateMinefield;
+  private final Timer timer;
+  private final Lazy<SaveScore> saveScore;
 
-  public GameController(Lazy<UpdateServerTile> updateMinefield, GameModel model, GameView view) {
+  public GameController(
+      Lazy<UpdateServerTile> updateMinefield,
+      Lazy<UpdateServerPlayer> updateServerPlayer,
+      Lazy<SaveScore> saveScore,
+      GameModel model,
+      GameView view) {
     this.model = model;
     this.view = view;
     this.updateMinefield = updateMinefield;
+    this.saveScore = saveScore;
 
     // Initial update
     update();
+    updateServerPlayer.get().execute(this.model.player).subscribe();
 
     // Listen to remote changes
     this.model.tiles.subscribe(
@@ -50,6 +62,14 @@ public class GameController implements MouseListener, Controller<GameModel, Game
         });
 
     this.view.gamePanel.addButtonListener(this);
+
+    this.timer =
+        new Timer(
+            1000,
+            (e) -> {
+              this.model.incrementTime();
+              this.view.displayPanel.updateTimeLeft(this.model.getTime());
+            });
   }
 
   private void updateBombLeft() {
@@ -60,6 +80,9 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
   private void checkIfEndGame() {
     if (model.minefield.hasEnded()) {
+      // TODO: Handle end game.
+      this.timer.stop();
+      this.saveScore.get().execute(this.model.player).subscribe();
       System.out.println("Game has ended.");
     }
   }
@@ -87,6 +110,9 @@ public class GameController implements MouseListener, Controller<GameModel, Game
               model.minefield.flag(tile);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
               if (tile.getState() != Tile.State.FLAG) {
+                if (!timer.isRunning()) {
+                  timer.start();
+                }
                 model.minefield.expose(tile);
                 updateMinefield.get().execute(tile).subscribe();
 
@@ -121,14 +147,21 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   public static final class Factory {
 
     final Lazy<UpdateServerTile> updateMinefield;
+    final Lazy<UpdateServerPlayer> updateServerPlayer;
+    final Lazy<SaveScore> saveScore;
 
     @Inject
-    public Factory(Lazy<UpdateServerTile> updateMinefield) {
+    public Factory(
+        Lazy<UpdateServerTile> updateMinefield,
+        Lazy<UpdateServerPlayer> updateServerPlayer,
+        Lazy<SaveScore> saveScore) {
       this.updateMinefield = updateMinefield;
+      this.updateServerPlayer = updateServerPlayer;
+      this.saveScore = saveScore;
     }
 
     public GameController create(GameModel model, GameView view) {
-      return new GameController(updateMinefield, model, view);
+      return new GameController(updateMinefield, updateServerPlayer, saveScore, model, view);
     }
   }
 }

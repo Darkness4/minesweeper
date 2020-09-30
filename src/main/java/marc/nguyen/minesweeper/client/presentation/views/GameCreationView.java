@@ -46,6 +46,7 @@ public final class GameCreationView extends JPanel implements View {
           editSettingsPanel.gameSettingsPanel.heightSpinner.setValue(settings.height);
           editSettingsPanel.gameSettingsPanel.minesSpinner.setValue(settings.mines);
           editSettingsPanel.gameSettingsPanel.levelComboBox.setSelectedItem(settings.level);
+          editSettingsPanel.playerTextField.setText(settings.playerName);
         });
   }
 

@@ -46,7 +46,8 @@ class SettingsRepositoryImplTest {
             10,
             10,
             Level.EASY,
-            GameMode.SINGLEPLAYER);
+            GameMode.SINGLEPLAYER,
+            "playerName");
     final TestObserver<Settings> observer = new TestObserver<>();
     // Act
     repository.save(tSettings).subscribe(observer);
@@ -67,7 +68,8 @@ class SettingsRepositoryImplTest {
             10,
             10,
             Level.EASY,
-            GameMode.SINGLEPLAYER);
+            GameMode.SINGLEPLAYER,
+            "playerName");
     when(settingsDao.findByName("name")).thenReturn(tSettings);
     final TestObserver<Settings> observer = new TestObserver<>();
 
@@ -107,7 +109,8 @@ class SettingsRepositoryImplTest {
                 10,
                 10,
                 Level.EASY,
-                GameMode.SINGLEPLAYER));
+                GameMode.SINGLEPLAYER,
+                "playerName"));
     when(settingsDao.findAll()).thenReturn(tSettingsList);
     final TestObserver<List<Settings>> observer = new TestObserver<>();
     // Act

@@ -4,14 +4,18 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
+import marc.nguyen.minesweeper.client.data.database.PlayerDao;
+import marc.nguyen.minesweeper.client.data.database.PlayerDaoSqlite;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
 import marc.nguyen.minesweeper.client.data.database.SettingsDaoSqlite;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSource;
 import marc.nguyen.minesweeper.client.data.datasources.LocalDataSourceImpl;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
 import marc.nguyen.minesweeper.client.data.repositories.MinefieldRepositoryImpl;
+import marc.nguyen.minesweeper.client.data.repositories.PlayerRepositoryImpl;
 import marc.nguyen.minesweeper.client.data.repositories.SettingsRepositoryImpl;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
+import marc.nguyen.minesweeper.client.domain.repositories.PlayerRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
 
 /**
@@ -24,11 +28,15 @@ public abstract class DataModule {
 
   @Binds
   @Singleton
-  abstract LocalDataSource bindsSettingsDataSource(LocalDataSourceImpl impl);
+  abstract LocalDataSource bindLocalDataSource(LocalDataSourceImpl impl);
 
   @Binds
   @Singleton
   abstract SettingsDao bindSettingsDao(SettingsDaoSqlite impl);
+
+  @Binds
+  @Singleton
+  abstract PlayerDao bindPlayerDao(PlayerDaoSqlite impl);
 
   @Binds
   @Singleton
@@ -37,6 +45,10 @@ public abstract class DataModule {
   @Binds
   @Singleton
   abstract MinefieldRepository bindMinefieldRepository(MinefieldRepositoryImpl impl);
+
+  @Binds
+  @Singleton
+  abstract PlayerRepository bindPlayerRepository(PlayerRepositoryImpl impl);
 
   @Provides
   @Singleton

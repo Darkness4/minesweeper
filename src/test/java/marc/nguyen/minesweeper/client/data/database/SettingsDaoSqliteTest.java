@@ -60,7 +60,8 @@ class SettingsDaoSqliteTest {
             3,
             4,
             Level.EASY,
-            GameMode.SINGLEPLAYER));
+            GameMode.SINGLEPLAYER,
+            "playerName"));
 
     // Act
     settingsDao.deleteByName("name");
@@ -83,7 +84,8 @@ class SettingsDaoSqliteTest {
             3,
             4,
             Level.EASY,
-            GameMode.SINGLEPLAYER));
+            GameMode.SINGLEPLAYER,
+            "playerName"));
 
     // Assert
     final var statement = connection.prepareStatement("SELECT COUNT(*) FROM settings");
@@ -103,7 +105,8 @@ class SettingsDaoSqliteTest {
             3,
             4,
             Level.EASY,
-            GameMode.SINGLEPLAYER);
+            GameMode.SINGLEPLAYER,
+            "playerName");
     final var tSettings2 =
         new Settings(
             "name2",
@@ -113,7 +116,8 @@ class SettingsDaoSqliteTest {
             3,
             4,
             Level.EASY,
-            GameMode.SINGLEPLAYER);
+            GameMode.SINGLEPLAYER,
+            "playerName");
     settingsDao.insert(tSettings);
     settingsDao.insert(tSettings2);
 
@@ -136,7 +140,8 @@ class SettingsDaoSqliteTest {
             3,
             4,
             Level.EASY,
-            GameMode.SINGLEPLAYER);
+            GameMode.SINGLEPLAYER,
+            "playerName");
     settingsDao.insert(tSettings);
 
     // Act

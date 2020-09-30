@@ -40,7 +40,8 @@ public class SettingsDaoSqlite implements SettingsDao {
                     + " height         INT             NOT NULL,"
                     + " mines          INT             NOT NULL,"
                     + " level          VARCHAR(20)     NOT NULL,"
-                    + " mode           VARCHAR(20)     NOT NULL);")) {
+                    + " mode           VARCHAR(20)     NOT NULL,"
+                    + " player_name    VARCHAR(128)    NOT NULL);")) {
 
       statement.executeUpdate();
       System.out.println("Settings table initialized.");
@@ -78,8 +79,8 @@ public class SettingsDaoSqlite implements SettingsDao {
     try (final var connection = dataSource.get().getConnection();
         final var statement =
             connection.prepareStatement(
-                "REPLACE INTO settings (name, address, port, length, height, mines, level, mode) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?);")) {
+                "REPLACE INTO settings (name, address, port, length, height, mines, level, mode, player_name) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
       statement.setString(1, settings.name);
       statement.setString(2, settings.address.getHostAddress());
       statement.setInt(3, settings.port);
@@ -88,6 +89,7 @@ public class SettingsDaoSqlite implements SettingsDao {
       statement.setInt(6, settings.mines);
       statement.setString(7, settings.level.name());
       statement.setString(8, settings.mode.name());
+      statement.setString(9, settings.playerName);
 
       final var result = statement.executeUpdate();
       System.out.printf("%d settings inserted.\n", result);
@@ -122,7 +124,8 @@ public class SettingsDaoSqlite implements SettingsDao {
                   result.getInt("height"),
                   result.getInt("mines"),
                   Level.valueOf(result.getString("level")),
-                  GameMode.valueOf(result.getString("mode"))));
+                  GameMode.valueOf(result.getString("mode")),
+                  result.getString("player_name")));
         }
       }
     } catch (SQLException | UnknownHostException e) {
@@ -159,7 +162,8 @@ public class SettingsDaoSqlite implements SettingsDao {
                   result.getInt("height"),
                   result.getInt("mines"),
                   Level.valueOf(result.getString("level")),
-                  GameMode.valueOf(result.getString("mode")));
+                  GameMode.valueOf(result.getString("mode")),
+                  result.getString("player_name"));
         }
       }
     } catch (SQLException | UnknownHostException e) {

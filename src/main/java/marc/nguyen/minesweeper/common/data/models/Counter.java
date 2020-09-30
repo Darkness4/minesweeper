@@ -7,7 +7,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** A simple counter. */
 class Counter implements Serializable {
 
-  private final AtomicInteger value = new AtomicInteger(0);
+  public Counter() {
+    this.value = new AtomicInteger(0);
+  }
+
+  public Counter(int initialValue) {
+    this.value = new AtomicInteger(initialValue);
+  }
+
+  private final AtomicInteger value;
 
   public int increment() {
     return value.incrementAndGet();

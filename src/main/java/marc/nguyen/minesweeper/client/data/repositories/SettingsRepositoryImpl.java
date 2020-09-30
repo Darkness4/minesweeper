@@ -5,6 +5,7 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.database.SettingsDao;
@@ -46,11 +47,7 @@ public class SettingsRepositoryImpl implements SettingsRepository {
         .flatMap(
             (dao) -> {
               final var result = dao.findByName(name);
-              if (result != null) {
-                return Maybe.just(result);
-              } else {
-                return Maybe.empty();
-              }
+              return Maybe.fromOptional(Optional.ofNullable(result));
             });
   }
 

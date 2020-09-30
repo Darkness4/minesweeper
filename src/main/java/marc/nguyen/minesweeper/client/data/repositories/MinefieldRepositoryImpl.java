@@ -1,5 +1,6 @@
 package marc.nguyen.minesweeper.client.data.repositories;
 
+import dagger.Lazy;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -13,10 +14,10 @@ import org.jetbrains.annotations.NotNull;
 /** Implementation of the MinefieldRepository. */
 public class MinefieldRepositoryImpl implements MinefieldRepository {
 
-  private final ServerSocketDevice serverSocketDevice;
+  private final Lazy<ServerSocketDevice> serverSocketDevice;
 
   @Inject
-  public MinefieldRepositoryImpl(ServerSocketDevice serverSocketDevice) {
+  public MinefieldRepositoryImpl(Lazy<ServerSocketDevice> serverSocketDevice) {
     this.serverSocketDevice = serverSocketDevice;
   }
 
@@ -27,7 +28,7 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
    */
   @Override
   public Maybe<Minefield> fetch() {
-    final var observable = serverSocketDevice.getObservable();
+    final var observable = serverSocketDevice.get().getObservable();
     if (observable != null) {
       return Maybe.fromObservable(
           observable.filter((e) -> e instanceof Minefield).map((e) -> (Minefield) e));
@@ -43,7 +44,7 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
    */
   @Override
   public Observable<Tile> watchTiles() {
-    final var observable = serverSocketDevice.getObservable();
+    final var observable = serverSocketDevice.get().getObservable();
     if (observable != null) {
       return observable.filter((e) -> e instanceof Tile).map((e) -> (Tile) e);
     } else {
@@ -59,6 +60,6 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
    */
   @Override
   public Completable updateTile(@NotNull Tile tile) {
-    return Completable.fromAction(() -> serverSocketDevice.write(tile));
+    return Completable.fromAction(() -> serverSocketDevice.get().write(tile));
   }
 }

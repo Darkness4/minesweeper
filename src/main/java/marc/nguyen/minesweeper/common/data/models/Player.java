@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.common.data.models;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A simple Player object.
@@ -9,7 +10,19 @@ import java.util.Objects;
  * <p>This is holding score, name, ...
  */
 public class Player implements Serializable {
-  final Counter score = new Counter();
+
+  @NotNull private final Counter score;
+  @NotNull public final String name;
+
+  public Player(@NotNull String name) {
+    this.name = name;
+    this.score = new Counter();
+  }
+
+  public Player(@NotNull String name, int score) {
+    this.name = name;
+    this.score = new Counter(score);
+  }
 
   public int incrementScore() {
     return score.increment();
@@ -29,7 +42,7 @@ public class Player implements Serializable {
 
   @Override
   public String toString() {
-    return "Player{" + "score=" + score + '}';
+    return "Player{" + "score=" + score + ", name='" + name + '\'' + '}';
   }
 
   @Override
@@ -41,11 +54,11 @@ public class Player implements Serializable {
       return false;
     }
     Player player = (Player) o;
-    return score.equals(player.score);
+    return score.equals(player.score) && name.equals(player.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(score);
+    return Objects.hash(score, name);
   }
 }

@@ -1,5 +1,6 @@
 package marc.nguyen.minesweeper.client.presentation.views.game;
 
+import java.time.LocalTime;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
@@ -11,6 +12,7 @@ public class DisplayPanel extends JPanel {
 
   public final JLabel bombLeftText;
   public final JLabel playerScoreText;
+  public final JLabel timeText;
 
   public DisplayPanel(Minefield minefield) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
@@ -36,7 +38,16 @@ public class DisplayPanel extends JPanel {
     layout.putConstraint(SpringLayout.WEST, playerScoreText, 5, SpringLayout.EAST, scoreLabel);
     layout.putConstraint(SpringLayout.NORTH, playerScoreText, 5, SpringLayout.NORTH, this);
 
-    layout.putConstraint(SpringLayout.EAST, this, 5, SpringLayout.EAST, playerScoreText);
+    final var timeLabel = new JLabel("Time: ");
+    timeText = new JLabel(LocalTime.MIN.toString());
+    add(timeLabel);
+    add(timeText);
+    layout.putConstraint(SpringLayout.WEST, timeLabel, 20, SpringLayout.EAST, playerScoreText);
+    layout.putConstraint(SpringLayout.NORTH, timeLabel, 5, SpringLayout.NORTH, this);
+    layout.putConstraint(SpringLayout.WEST, timeText, 5, SpringLayout.EAST, timeLabel);
+    layout.putConstraint(SpringLayout.NORTH, timeText, 5, SpringLayout.NORTH, this);
+
+    layout.putConstraint(SpringLayout.EAST, this, 5, SpringLayout.EAST, timeText);
     layout.putConstraint(SpringLayout.SOUTH, this, 5, SpringLayout.SOUTH, bombLeftText);
   }
 
@@ -46,5 +57,9 @@ public class DisplayPanel extends JPanel {
 
   public void updateMinesLeft(long mines) {
     SwingUtilities.invokeLater(() -> bombLeftText.setText(String.valueOf(mines)));
+  }
+
+  public void updateTimeLeft(LocalTime time) {
+    SwingUtilities.invokeLater(() -> timeText.setText(time.toString()));
   }
 }

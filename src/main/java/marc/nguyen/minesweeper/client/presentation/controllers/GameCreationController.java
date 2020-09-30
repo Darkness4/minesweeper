@@ -74,6 +74,13 @@ public class GameCreationController {
     listModel = new DefaultListModel<>();
     this.view.savedSettingsPanel.settingsList.setModel(listModel);
 
+    /* Player JTextView */
+    this.view
+        .editSettingsPanel
+        .playerTextField
+        .getDocument()
+        .addDocumentListener(new OnUpdate(this::onPlayerNameInput));
+
     /* Game Settings Panel */
     this.view.editSettingsPanel.gameSettingsPanel.heightSpinner.addChangeListener(
         (e) -> {
@@ -203,7 +210,7 @@ public class GameCreationController {
                 gameComponentProvider
                     .get()
                     .minefield(minefield.get())
-                    .player(new Player())
+                    .player(new Player(model.getPlayerName()))
                     .updateTiles(Observable.empty())
                     .build()
                     .gameFrame();
@@ -226,7 +233,7 @@ public class GameCreationController {
                           gameComponentProvider
                               .get()
                               .minefield(minefield)
-                              .player(new Player())
+                              .player(new Player(model.getPlayerName()))
                               .updateTiles(result.tiles)
                               .build()
                               .gameFrame());
@@ -269,6 +276,10 @@ public class GameCreationController {
       model.setMode(mode);
       view.editSettingsPanel.changeCard(e);
     }
+  }
+
+  private void onPlayerNameInput(DocumentEvent e) {
+    model.setPlayerName(view.editSettingsPanel.playerTextField.getText());
   }
 
   private void onIpAddressInput(DocumentEvent e) {

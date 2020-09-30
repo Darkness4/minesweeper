@@ -23,10 +23,11 @@ public class GameCreationModel implements Model {
   private int length = 10;
   private int height = 10;
   private int mines = 10;
-  private String address = InetAddress.getLoopbackAddress().getHostName();
+  @NotNull private String address = InetAddress.getLoopbackAddress().getHostName();
   private int port = 12345;
-  private String settingsName = "My Settings";
+  @NotNull private String settingsName = "My Settings";
   @NotNull private GameMode mode = GameMode.SINGLEPLAYER;
+  @NotNull private String playerName = "Player";
 
   @Inject
   public GameCreationModel() {}
@@ -39,11 +40,11 @@ public class GameCreationModel implements Model {
     this.port = port;
   }
 
-  public String getSettingsName() {
+  public @NotNull String getSettingsName() {
     return settingsName;
   }
 
-  public void setSettingsName(String settingsName) {
+  public void setSettingsName(@NotNull String settingsName) {
     this.settingsName = settingsName;
   }
 
@@ -79,11 +80,11 @@ public class GameCreationModel implements Model {
     this.level = level;
   }
 
-  public String getAddress() {
+  public @NotNull String getAddress() {
     return address;
   }
 
-  public void setAddress(String address) {
+  public void setAddress(@NotNull String address) {
     this.address = address;
   }
 
@@ -92,7 +93,7 @@ public class GameCreationModel implements Model {
   }
 
   public boolean isSettingsNameValid() {
-    return settingsName != null && !settingsName.isEmpty();
+    return !settingsName.isEmpty();
   }
 
   public void fromEntity(Settings settings) {
@@ -112,14 +113,7 @@ public class GameCreationModel implements Model {
 
   public Settings toEntity() throws UnknownHostException {
     return new Settings(
-        getSettingsName(),
-        getInetAddress(),
-        getPort(),
-        getLength(),
-        getHeight(),
-        getMines(),
-        getLevel(),
-        getMode());
+        settingsName, getInetAddress(), port, length, height, mines, level, mode, playerName);
   }
 
   public @NotNull GameMode getMode() {
@@ -128,5 +122,13 @@ public class GameCreationModel implements Model {
 
   public void setMode(@NotNull GameMode mode) {
     this.mode = mode;
+  }
+
+  public @NotNull String getPlayerName() {
+    return playerName;
+  }
+
+  public void setPlayerName(@NotNull String playerName) {
+    this.playerName = playerName;
   }
 }

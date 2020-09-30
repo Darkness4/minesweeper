@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import marc.nguyen.minesweeper.client.domain.entities.GameMode;
@@ -19,6 +20,7 @@ import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.N
 public class EditSettingsPanel extends JPanel {
 
   public final JComboBox<GameMode> gameModeComboBox;
+  public final JTextField playerTextField;
   public final GameSettingsPanel gameSettingsPanel;
   public final NetworkSettingsPanel networkSettingsPanel;
   public final JButton startButton;
@@ -49,16 +51,19 @@ public class EditSettingsPanel extends JPanel {
           }
         });
 
+    playerTextField = new JTextField("Player");
+
     gameSettingsPanel = new GameSettingsPanel();
     networkSettingsPanel = new NetworkSettingsPanel();
 
     cards.add(gameSettingsPanel, GameMode.SINGLEPLAYER.name());
     cards.add(networkSettingsPanel, GameMode.MULTIPLAYER.name());
 
-    startButton = new JButton("Create game !");
+    startButton = new JButton("Play !");
     startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
     add(gameModeComboBox);
+    add(playerTextField);
     add(cards);
     add(startButton);
 

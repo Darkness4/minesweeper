@@ -11,7 +11,9 @@ import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
 import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
+import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
+import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameController;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
@@ -47,8 +49,10 @@ public class GameCreationModule {
 
   @Provides
   static GameController.Factory provideGameControllerFactory(
-      Lazy<UpdateServerTile> updateMinefield) {
-    return new GameController.Factory(updateMinefield);
+      Lazy<UpdateServerTile> updateMinefield,
+      Lazy<UpdateServerPlayer> updateServerPlayer,
+      Lazy<SaveScore> saveScore) {
+    return new GameController.Factory(updateMinefield, updateServerPlayer, saveScore);
   }
 
   @Provides

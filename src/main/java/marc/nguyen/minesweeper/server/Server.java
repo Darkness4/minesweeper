@@ -16,7 +16,7 @@ public final class Server {
   private int port = 12345;
 
   @Parameter(
-      names = {"-l", "--Level"},
+      names = {"-l", "--level"},
       description = "Level of difficulty")
   private LevelParams level = LevelParams.EASY;
 
@@ -24,7 +24,7 @@ public final class Server {
       names = {"-s", "--settings"},
       arity = 3,
       description =
-          "Settings of the mine field. Format `-s length height mines`. Overrides --Level.")
+          "Settings of the mine field. Format `-s length height mines`. Overrides --level.")
   private List<Integer> settings;
 
   @Parameter(
