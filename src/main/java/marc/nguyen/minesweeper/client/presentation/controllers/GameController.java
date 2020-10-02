@@ -1,6 +1,7 @@
 package marc.nguyen.minesweeper.client.presentation.controllers;
 
 import dagger.Lazy;
+import io.reactivex.rxjava3.disposables.Disposable;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +15,7 @@ import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
+import marc.nguyen.minesweeper.client.domain.usecases.WatchEndGameMessages;
 import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
@@ -41,12 +43,16 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   private final Timer timer;
   private final Lazy<SaveScore> saveScore;
   private final Lazy<Quit> quit;
+  private final Disposable updateTilesListener;
+  private final Disposable watchEndGameMessagesListener;
+  private final Disposable updateServerPlayerListener;
 
   public GameController(
       Lazy<UpdateServerTile> updateMinefield,
       Lazy<UpdateServerPlayer> updateServerPlayer,
       Lazy<SaveScore> saveScore,
       Lazy<Quit> quit,
+      Lazy<WatchEndGameMessages> watchEndGameMessages,
       GameModel model,
       GameView view) {
     this.model = model;
@@ -57,24 +63,44 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
     // Initial update
     update();
-    updateServerPlayer.get().execute(this.model.player).subscribe();
+    updateServerPlayerListener = updateServerPlayer.get().execute(this.model.player).subscribe();
+    watchEndGameMessagesListener =
+        watchEndGameMessages
+            .get()
+            .execute(null)
+            .subscribe(
+                m -> {
+                  onEndGame();
+                  this.view.invokeGameEndedDialog(m.toString());
+                  onExitButtonPushed();
+                  System.out.println("Game has ended.");
+                });
 
     // Listen to remote changes
-    this.model.tiles.subscribe(
-        (tile) -> {
-          this.model.minefield.expose(tile);
-          update();
-        });
+    updateTilesListener =
+        this.model.tiles.subscribe(
+            tile -> {
+              this.model.minefield.expose(tile);
+              update();
+            });
 
     this.view.gamePanel.addButtonListener(this);
 
+    // Visible clock
     this.timer =
         new Timer(
             1000,
-            (e) -> {
+            e -> {
               this.model.incrementTime();
               this.view.displayPanel.updateTimeLeft(this.model.getTime());
             });
+  }
+
+  /** Closes every listeners */
+  public void dispose() {
+    updateServerPlayerListener.dispose();
+    watchEndGameMessagesListener.dispose();
+    updateTilesListener.dispose();
   }
 
   private void updateBombLeft() {
@@ -85,22 +111,23 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
   private void checkIfEndGame() {
     if (model.minefield.hasEnded()) {
-      // TODO: Show show winning player.
-      // Stop the timer
-      this.timer.stop();
-
-      // Save the personal score
-      this.saveScore.get().execute(this.model.player).subscribe();
-
-      // Expose all the mines (show the solution)
-      this.model.minefield.exposeAllMines();
-      view.gamePanel.updateField(model.minefield);
-
-      // Invoke dialog (blocking IO thread)
+      onEndGame();
       this.view.invokeGameEndedDialog();
       onExitButtonPushed();
       System.out.println("Game has ended.");
     }
+  }
+
+  private void onEndGame() {
+    // Stop the timer
+    this.timer.stop();
+
+    // Save the personal score
+    this.saveScore.get().execute(this.model.player).subscribe();
+
+    // Expose all the mines (show the solution)
+    this.model.minefield.exposeAllMines();
+    view.gamePanel.updateField(model.minefield);
   }
 
   private void onExitButtonPushed() {
@@ -157,7 +184,11 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   private void update() {
     updateBombLeft();
     view.gamePanel.updateField(model.minefield);
-    checkIfEndGame();
+
+    // Only check end game if is singleplayer
+    if (this.model.minefield.isSinglePlayer) {
+      checkIfEndGame();
+    }
   }
 
   @Override
@@ -173,21 +204,25 @@ public class GameController implements MouseListener, Controller<GameModel, Game
     final Lazy<UpdateServerPlayer> updateServerPlayer;
     final Lazy<SaveScore> saveScore;
     final Lazy<Quit> quit;
+    final Lazy<WatchEndGameMessages> watchEndGameMessages;
 
     @Inject
     public Factory(
         Lazy<UpdateServerTile> updateMinefield,
         Lazy<UpdateServerPlayer> updateServerPlayer,
         Lazy<SaveScore> saveScore,
-        Lazy<Quit> quit) {
+        Lazy<Quit> quit,
+        Lazy<WatchEndGameMessages> watchEndGameMessages) {
       this.updateMinefield = updateMinefield;
       this.updateServerPlayer = updateServerPlayer;
       this.saveScore = saveScore;
       this.quit = quit;
+      this.watchEndGameMessages = watchEndGameMessages;
     }
 
     public GameController create(GameModel model, GameView view) {
-      return new GameController(updateMinefield, updateServerPlayer, saveScore, quit, model, view);
+      return new GameController(
+          updateMinefield, updateServerPlayer, saveScore, quit, watchEndGameMessages, model, view);
     }
   }
 }

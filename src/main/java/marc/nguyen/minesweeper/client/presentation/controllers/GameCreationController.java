@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.presentation.controllers;
 
 import dagger.Lazy;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.net.UnknownHostException;
@@ -52,6 +53,7 @@ public class GameCreationController {
   private final Lazy<DeleteSettings> deleteSettings;
   private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
   private final Provider<Builder> gameComponentProvider;
+  private final Disposable fetchAllSettingsNameListener;
 
   public GameCreationController(
       Lazy<Connect> connect,
@@ -122,33 +124,43 @@ public class GameCreationController {
     /* Saved Settings Panel */
     this.view.savedSettingsPanel.settingsList.addListSelectionListener(
         (e) -> {
-          final var value = view.savedSettingsPanel.settingsList.getSelectedValue();
+          final var value = this.view.savedSettingsPanel.settingsList.getSelectedValue();
           if (value != null) {
-            model.setSettingsName(value);
+            this.model.setSettingsName(value);
             SwingUtilities.invokeLater(
-                () -> view.savedSettingsPanel.settingsNameTextField.setText(value));
+                () -> this.view.savedSettingsPanel.settingsNameTextField.setText(value));
           }
         });
     this.view.savedSettingsPanel.saveButton.addActionListener(this::onSaveSettingsPushed);
     this.view.savedSettingsPanel.loadButton.addActionListener(this::onLoadSettingsPushed);
     this.view.savedSettingsPanel.deleteButton.addActionListener(this::onDeleteSettingsPushed);
 
-    this.fetchAllSettingsName
-        .get()
-        .execute(null)
-        .subscribe((settings) -> settings.forEach(listModel::addElement));
+    fetchAllSettingsNameListener =
+        this.fetchAllSettingsName
+            .get()
+            .execute(null)
+            .subscribe((settings) -> settings.forEach(listModel::addElement));
 
     this.view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(this.model.getAddress());
     this.view.savedSettingsPanel.settingsNameTextField.setText(this.model.getSettingsName());
   }
 
+  /** Closes every listeners */
+  public void dispose() {
+    fetchAllSettingsNameListener.dispose();
+  }
+
   private void onDeleteSettingsPushed(ActionEvent e) {
-    deleteSettings.get().execute(model.getSettingsName()).subscribe(this::refreshListModel);
+    deleteSettings
+        .get()
+        .execute(model.getSettingsName())
+        .doFinally(this::refreshListModel)
+        .subscribe();
   }
 
   private void onSaveSettingsPushed(ActionEvent e) {
     try {
-      saveSettings.get().execute(model.toEntity()).subscribe(this::refreshListModel);
+      saveSettings.get().execute(model.toEntity()).doFinally(this::refreshListModel).subscribe();
     } catch (UnknownHostException unknownHostException) {
       view.invokeErrorDialog(
           String.format("Error: Incorrect Internet Address %s", model.getAddress()));
@@ -165,10 +177,11 @@ public class GameCreationController {
         .get()
         .execute(null)
         .subscribe(
-            (settings) -> {
+            settings -> {
               listModel.clear();
               settings.forEach(listModel::addElement);
-            });
+            },
+            throwable -> System.out.println("Settings couldn't be loaded."));
   }
 
   private void onLoadSettingsPushed(ActionEvent e) {
@@ -176,11 +189,11 @@ public class GameCreationController {
         .get()
         .execute(view.savedSettingsPanel.settingsNameTextField.getText())
         .subscribe(
-            (settings) -> {
+            settings -> {
               model.fromEntity(settings);
               view.loadSettings(settings);
             },
-            (throwable) -> System.out.println("Settings couldn't be loaded."));
+            throwable -> System.out.println("Settings couldn't be loaded."));
   }
 
   /** Create or fetch a minefield and create the Game Frame. */

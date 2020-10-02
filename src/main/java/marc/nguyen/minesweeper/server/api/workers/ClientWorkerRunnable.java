@@ -3,9 +3,11 @@ package marc.nguyen.minesweeper.server.api.workers;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import marc.nguyen.minesweeper.common.data.models.EndGameMessage;
 import marc.nguyen.minesweeper.common.data.models.Message;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
@@ -22,19 +24,22 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ClientWorkerRunnable implements Runnable {
 
-  private final ClientModel clientModel = new ClientModel();
+  private final ClientModel clientModel;
   private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams;
+  private final ConcurrentLinkedQueue<ClientModel> clientModels;
   private final AtomicBoolean isStopped = new AtomicBoolean(false);
   private final Minefield minefield;
   private @Nullable ObjectOutputStream output = null;
 
   public ClientWorkerRunnable(
-      Socket clientSocket,
+      ClientModel clientModel,
       ConcurrentLinkedQueue<ObjectOutputStream> outputStreams,
+      ConcurrentLinkedQueue<ClientModel> clientModels,
       Minefield minefield) {
-    this.clientModel.setClientSocket(clientSocket);
+    this.clientModel = clientModel;
     this.outputStreams = outputStreams;
     this.minefield = minefield;
+    this.clientModels = clientModels;
   }
 
   @Override
@@ -68,18 +73,42 @@ public class ClientWorkerRunnable implements Runnable {
   }
 
   private void handle(Object packet) {
+    final var player = clientModel.getPlayer();
+
     if (packet instanceof Tile) {
       minefield.expose((Tile) packet);
+      if (player != null) {
+        if (packet instanceof Tile.Mine) {
+          player.decrementScore();
+        } else if (packet instanceof Tile.Empty) {
+          player.incrementScore();
+        }
+      }
       IO.executor.execute(
           () -> {
             if (minefield.hasEnded()) {
-              broadcast(new Message("Game has ended")); // TODO: Share score + handle player.
+              fetchBestPlayer()
+                  .ifPresentOrElse(
+                      (bestPlayer) ->
+                          broadcast(
+                              new EndGameMessage(
+                                  "Game has ended. Best player was "
+                                      + bestPlayer.name
+                                      + " with "
+                                      + bestPlayer.getScore()
+                                      + " score.")),
+                      () -> broadcast(new Message("Game has ended.")));
+              // TODO: Share score + handle player.
+              // Kick All players
+
+              // Restart server with same config.
             }
           });
       broadcastExcluding(packet);
       System.out.println(packet);
     } else if (packet instanceof Player) {
       System.out.format("Client is identified as %s!\n", ((Player) packet).name);
+      broadcastExcluding(String.format("%s logged in the server.\n", ((Player) packet).name));
       this.clientModel.setPlayer((Player) packet);
     } else if (packet instanceof Message) {
       System.out.printf("Client said: %s\n", packet);
@@ -111,5 +140,12 @@ public class ClientWorkerRunnable implements Runnable {
                 e.printStackTrace();
               }
             });
+  }
+
+  private Optional<Player> fetchBestPlayer() {
+    return clientModels.stream()
+        .map(ClientModel::getPlayer)
+        .filter(Objects::nonNull)
+        .min((a, b) -> b.getScore() - a.getScore());
   }
 }

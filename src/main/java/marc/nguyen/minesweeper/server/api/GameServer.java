@@ -9,6 +9,7 @@ import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.server.api.workers.ClientWorkerRunnable;
 import marc.nguyen.minesweeper.server.core.IO;
+import marc.nguyen.minesweeper.server.models.ClientModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +19,7 @@ public class GameServer {
   private final AtomicBoolean isStopped = new AtomicBoolean(false);
   private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams =
       new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<ClientModel> clientModels = new ConcurrentLinkedQueue<>();
   private @Nullable ServerSocket serverSocket = null;
 
   private final Minefield minefield;
@@ -44,12 +46,17 @@ public class GameServer {
         minefield.getLength(), minefield.getHeight(), minefield.getMinesOnField());
 
     while (!isStopped.get()) {
+      // TODO: Server lobby
       try {
         assert serverSocket != null;
         final var clientSocket = serverSocket.accept();
         System.out.printf(
             "Client %s accepted.\n", clientSocket.getInetAddress().getCanonicalHostName());
-        IO.executor.execute(new ClientWorkerRunnable(clientSocket, outputStreams, minefield));
+        final var clientModel = new ClientModel();
+        clientModel.setClientSocket(clientSocket);
+        clientModels.add(clientModel);
+        IO.executor.execute(
+            new ClientWorkerRunnable(clientModel, outputStreams, clientModels, minefield));
       } catch (IOException e) {
         if (isStopped.get()) {
           break;

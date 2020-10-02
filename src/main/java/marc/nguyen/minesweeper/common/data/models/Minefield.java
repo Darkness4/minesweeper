@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class Minefield implements Serializable {
 
   private final Tile[][] tiles;
-  private final boolean isSinglePlayer;
+  public final boolean isSinglePlayer;
   private long minesOnField = 0;
 
   /**

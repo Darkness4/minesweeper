@@ -45,7 +45,12 @@ public class MainMenuBar extends JMenuBar {
     quitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
     quitItem.getAccessibleContext().setAccessibleDescription("Quit the program.");
     quitItem.setToolTipText("Quit the program.");
-    quitItem.addActionListener((e) -> SwingUtilities.windowForComponent(this).dispose());
+    quitItem.addActionListener(
+        (e) -> {
+          quit.get().execute(null).blockingAwait(); // Will free every threads.
+          SwingUtilities.windowForComponent(this).dispose();
+          System.exit(0);
+        });
     menu.add(quitItem);
   }
 }

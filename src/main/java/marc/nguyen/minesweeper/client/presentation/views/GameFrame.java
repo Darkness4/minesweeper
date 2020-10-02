@@ -1,5 +1,7 @@
 package marc.nguyen.minesweeper.client.presentation.views;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.inject.Inject;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -22,6 +24,14 @@ public final class GameFrame extends JFrame {
       GameController.Factory gameControllerFactory) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
     controller = gameControllerFactory.create(model, view);
+
+    addWindowListener(
+        new WindowAdapter() {
+          @Override
+          public void windowClosed(WindowEvent windowEvent) {
+            controller.dispose();
+          }
+        });
 
     setJMenuBar(mainMenuBar);
     setContentPane(view);

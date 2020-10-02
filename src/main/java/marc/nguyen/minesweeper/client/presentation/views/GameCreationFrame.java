@@ -1,5 +1,7 @@
 package marc.nguyen.minesweeper.client.presentation.views;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.inject.Inject;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -10,6 +12,8 @@ import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 /** The Game Creation Frame. */
 public class GameCreationFrame extends JFrame {
 
+  final GameCreationController controller;
+
   @Inject
   public GameCreationFrame(
       GameCreationView view,
@@ -17,7 +21,17 @@ public class GameCreationFrame extends JFrame {
       GameCreationController.Factory gameCreationControllerFactory,
       ResourcesLoader resourcesLoader) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
-    gameCreationControllerFactory.create(model, view);
+
+    controller = gameCreationControllerFactory.create(model, view);
+
+    // Remove every listener on close
+    addWindowListener(
+        new WindowAdapter() {
+          @Override
+          public void windowClosed(WindowEvent windowEvent) {
+            controller.dispose();
+          }
+        });
 
     setContentPane(view);
 

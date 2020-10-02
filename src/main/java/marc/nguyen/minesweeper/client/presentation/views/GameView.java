@@ -37,12 +37,22 @@ public final class GameView extends JPanel implements View {
   }
 
   public void invokeGameEndedDialog() {
-    // TODO: Show scores
     try {
       SwingUtilities.invokeAndWait(
           () ->
               JOptionPane.showMessageDialog(
                   null, "Game ended.", "Thank you for playing !", JOptionPane.INFORMATION_MESSAGE));
+    } catch (InterruptedException | InvocationTargetException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void invokeGameEndedDialog(String message) {
+    try {
+      SwingUtilities.invokeAndWait(
+          () ->
+              JOptionPane.showMessageDialog(
+                  null, message, "Thank you for playing !", JOptionPane.INFORMATION_MESSAGE));
     } catch (InterruptedException | InvocationTargetException e) {
       e.printStackTrace();
     }

@@ -18,6 +18,7 @@ import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
+import marc.nguyen.minesweeper.client.domain.usecases.WatchEndGameMessages;
 import marc.nguyen.minesweeper.client.domain.usecases.WatchServerTiles;
 
 /**
@@ -95,5 +96,11 @@ public abstract class DomainModule {
   @Singleton
   static FetchAllScores provideFetchAllScores(Lazy<PlayerRepository> repository) {
     return new FetchAllScores(repository);
+  }
+
+  @Provides
+  @Singleton
+  static WatchEndGameMessages provideWatchEndGameMessages(Lazy<ServerSocketDevice> device) {
+    return new WatchEndGameMessages(device);
   }
 }
