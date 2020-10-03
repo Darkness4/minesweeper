@@ -11,33 +11,33 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Player implements Serializable {
 
-  @NotNull private final Counter score;
+  private int score;
   @NotNull public final String name;
 
   public Player(@NotNull String name) {
     this.name = name;
-    this.score = new Counter();
+    this.score = 0;
   }
 
   public Player(@NotNull String name, int score) {
     this.name = name;
-    this.score = new Counter(score);
+    this.score = score;
   }
 
-  public int incrementScore() {
-    return score.increment();
+  public synchronized void incrementScore() {
+    score++;
   }
 
-  public int decrementScore() {
-    return score.decrement();
+  public synchronized void decrementScore() {
+    score--;
   }
 
-  public int addScore(int delta) {
-    return score.add(delta);
+  public Player copyWith(int score) {
+    return new Player(name, score);
   }
 
-  public int getScore() {
-    return score.getValue();
+  public synchronized int getScore() {
+    return score;
   }
 
   @Override
@@ -54,7 +54,7 @@ public class Player implements Serializable {
       return false;
     }
     Player player = (Player) o;
-    return score.equals(player.score) && name.equals(player.name);
+    return score == player.score && name.equals(player.name);
   }
 
   @Override

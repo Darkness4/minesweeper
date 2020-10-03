@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.domain.repositories;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import java.util.List;
 import marc.nguyen.minesweeper.common.data.models.Player;
@@ -42,4 +43,7 @@ public interface PlayerRepository {
    */
   @NotNull
   Maybe<Player> fetchByName(@NotNull String name);
+
+  @NotNull
+  Observable<List<Player>> fetchServerPlayerList();
 }

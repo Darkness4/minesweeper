@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
-import marc.nguyen.minesweeper.common.data.models.Tile;
+import marc.nguyen.minesweeper.common.data.models.Position;
 import org.jetbrains.annotations.NotNull;
 
 /** Implementation of the MinefieldRepository. */
@@ -43,10 +43,10 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
    * @return Stream of tiles from the server.
    */
   @Override
-  public Observable<Tile> watchTiles() {
+  public Observable<Position> watchTiles() {
     final var observable = serverSocketDevice.get().getObservable();
     if (observable != null) {
-      return observable.filter((e) -> e instanceof Tile).map((e) -> (Tile) e);
+      return observable.filter((e) -> e instanceof Position).map((e) -> (Position) e);
     } else {
       return Observable.empty();
     }
@@ -55,11 +55,11 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
   /**
    * {@inheritDoc}
    *
-   * @param tile New Tile.
+   * @param position New Position.
    * @return A completable.
    */
   @Override
-  public Completable updateTile(@NotNull Tile tile) {
-    return Completable.fromAction(() -> serverSocketDevice.get().write(tile));
+  public Completable updateTile(@NotNull Position position) {
+    return Completable.fromAction(() -> serverSocketDevice.get().write(position));
   }
 }

@@ -8,12 +8,12 @@ import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
-import marc.nguyen.minesweeper.common.data.models.Tile;
+import marc.nguyen.minesweeper.common.data.models.Position;
 import org.jetbrains.annotations.NotNull;
 
 /** A user should be to update the minefield of the server. */
 @Singleton
-public class UpdateServerTile implements UseCase<Tile, Completable> {
+public class UpdateServerTile implements UseCase<Position, Completable> {
 
   private final Lazy<MinefieldRepository> repository;
 
@@ -23,7 +23,7 @@ public class UpdateServerTile implements UseCase<Tile, Completable> {
   }
 
   @Override
-  public Completable execute(@NotNull Tile params) {
+  public Completable execute(@NotNull Position params) {
     return repository.get().updateTile(params).observeOn(Schedulers.from(IO.executor));
   }
 }

@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.client.domain.usecases;
+package marc.nguyen.minesweeper.client.domain.usecases.connect;
 
 import dagger.Lazy;
 import io.reactivex.rxjava3.core.Observable;
@@ -8,28 +8,28 @@ import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
-import marc.nguyen.minesweeper.common.data.models.EndGameMessage;
+import marc.nguyen.minesweeper.common.data.models.StartGame;
 import org.jetbrains.annotations.NotNull;
 
-/** A User should be able to listen to changes from the server. */
+/** A User should be able to listen to start game from the server. */
 @Singleton
-public class WatchEndGameMessages implements UseCase<Void, Observable<EndGameMessage>> {
+public class WatchServerStartGame implements UseCase<Void, Observable<StartGame>> {
 
   private final Lazy<ServerSocketDevice> device;
 
   @Inject
-  public WatchEndGameMessages(Lazy<ServerSocketDevice> device) {
+  public WatchServerStartGame(Lazy<ServerSocketDevice> device) {
     this.device = device;
   }
 
   @Override
   @NotNull
-  public Observable<EndGameMessage> execute(Void params) {
+  public Observable<StartGame> execute(Void params) {
     final var observable = device.get().getObservable();
     if (observable != null) {
       return observable
-          .filter(e -> e instanceof EndGameMessage)
-          .map(e -> (EndGameMessage) e)
+          .filter(e -> e instanceof StartGame)
+          .map(e -> (StartGame) e)
           .observeOn(Schedulers.from(IO.executor));
     } else {
       return Observable.empty();

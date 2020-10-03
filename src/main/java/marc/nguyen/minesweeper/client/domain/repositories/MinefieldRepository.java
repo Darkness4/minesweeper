@@ -4,7 +4,7 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
-import marc.nguyen.minesweeper.common.data.models.Tile;
+import marc.nguyen.minesweeper.common.data.models.Position;
 import org.jetbrains.annotations.NotNull;
 
 /** Minefield Repository. */
@@ -22,13 +22,13 @@ public interface MinefieldRepository {
    *
    * @return Stream of tiles from the server.
    */
-  Observable<Tile> watchTiles();
+  Observable<Position> watchTiles();
 
   /**
-   * Send a tile to the server.
+   * Send a position to the server.
    *
-   * @param tile New Tile.
+   * @param position New position.
    * @return A completable.
    */
-  Completable updateTile(@NotNull Tile tile);
+  Completable updateTile(@NotNull Position position);
 }

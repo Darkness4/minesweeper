@@ -27,15 +27,17 @@ public class ServerWorkerRunnable implements Runnable {
   @Override
   public void run() {
     try (final var input = new ObjectInputStream(serverSocket.getInputStream())) {
-
       while (!isStopped.get()) {
         try {
           final var packet = input.readObject();
 
           // Publish packet
           publisher.onNext(packet);
+
           if (packet instanceof Message) {
             System.out.printf("Server said: %s\n", packet);
+          } else {
+            System.out.printf("[DEBUG] %s\n", packet);
           }
 
         } catch (IOException | ClassNotFoundException e) {
@@ -47,6 +49,7 @@ public class ServerWorkerRunnable implements Runnable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
     publisher.onComplete();
     System.out.println("Server listener stopped.");
   }

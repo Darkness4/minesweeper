@@ -1,4 +1,4 @@
-package marc.nguyen.minesweeper.client.domain.usecases;
+package marc.nguyen.minesweeper.client.domain.usecases.connect;
 
 import dagger.Lazy;
 import io.reactivex.rxjava3.core.Maybe;

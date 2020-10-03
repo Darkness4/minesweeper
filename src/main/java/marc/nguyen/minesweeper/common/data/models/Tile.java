@@ -15,18 +15,32 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class Tile implements Serializable {
 
-  public final int x;
-  public final int y;
+  public final Position position;
   private final State state;
+
+  private Tile(@NotNull Position position, @NotNull State state) {
+    this.position = position;
+    this.state = state;
+  }
+
+  private Tile(@NotNull Position position) {
+    this(position, State.BLANK);
+  }
 
   private Tile(int x, int y) {
     this(x, y, State.BLANK);
   }
 
   private Tile(int x, int y, @NotNull State state) {
-    this.x = x;
-    this.y = y;
-    this.state = state;
+    this(new Position(x, y), state);
+  }
+
+  public Integer getX() {
+    return position.getX();
+  }
+
+  public Integer getY() {
+    return position.getY();
   }
 
   /**
@@ -39,16 +53,16 @@ public abstract class Tile implements Serializable {
     final int maxX = tiles.length - 1;
     final int maxY = tiles[0].length - 1;
 
-    final int startX = x > 0 ? x - 1 : x;
-    final int endX = x < maxX ? x + 1 : x;
-    final int startY = y > 0 ? y - 1 : y;
-    final int endY = y < maxY ? y + 1 : y;
+    final int startX = position.getX() > 0 ? position.getX() - 1 : position.getX();
+    final int endX = position.getX() < maxX ? position.getX() + 1 : position.getX();
+    final int startY = position.getY() > 0 ? position.getY() - 1 : position.getY();
+    final int endY = position.getY() < maxY ? position.getY() + 1 : position.getY();
 
     return IntStream.rangeClosed(startX, endX)
         .mapToObj(
             i ->
                 IntStream.rangeClosed(startY, endY)
-                    .filter(j -> i != x || j != y)
+                    .filter(j -> i != position.getX() || j != position.getY())
                     .mapToObj(j -> tiles[i][j]))
         .flatMap(Function.identity());
   }
@@ -72,17 +86,17 @@ public abstract class Tile implements Serializable {
       return false;
     }
     Tile tile = (Tile) o;
-    return x == tile.x && y == tile.y && state == tile.state;
+    return Objects.equals(position, tile.position) && state == tile.state;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(state, x, y);
+    return Objects.hash(position, state);
   }
 
   @Override
   public String toString() {
-    return "Tile{" + "state=" + state + ", x=" + x + ", y=" + y + '}';
+    return "Tile{" + "position=" + position + ", state=" + state + '}';
   }
 
   /**
@@ -106,6 +120,14 @@ public abstract class Tile implements Serializable {
   /** A <code>Tile</code> filled with a <code>Mine</code>. */
   public static final class Mine extends Tile {
 
+    public Mine(Position position) {
+      super(position);
+    }
+
+    public Mine(Position position, @NotNull State state) {
+      super(position, state);
+    }
+
     public Mine(int x, int y) {
       super(x, y);
     }
@@ -116,7 +138,7 @@ public abstract class Tile implements Serializable {
 
     @Override
     public String toString() {
-      return "Mine{" + "state=" + getState() + ", x=" + x + ", y=" + y + '}';
+      return "Mine{" + "state=" + getState() + ", position=" + position + '}';
     }
 
     /**
@@ -128,7 +150,7 @@ public abstract class Tile implements Serializable {
     @Override
     @NotNull
     public Mine copyWith(@NotNull State state) {
-      return new Mine(x, y, state);
+      return new Mine(position, state);
     }
   }
 
@@ -136,6 +158,16 @@ public abstract class Tile implements Serializable {
   public static final class Empty extends Tile {
 
     private final int adjacentMines;
+
+    public Empty(Position position) {
+      super(position);
+      adjacentMines = 0;
+    }
+
+    public Empty(Position position, @NotNull State state, int adjacentMines) {
+      super(position, state);
+      this.adjacentMines = adjacentMines;
+    }
 
     public Empty(int x, int y) {
       super(x, y);
@@ -161,10 +193,8 @@ public abstract class Tile implements Serializable {
       return "Empty{"
           + "state="
           + getState()
-          + ", x="
-          + x
-          + ", y="
-          + y
+          + ", position="
+          + position
           + ", adjacentMines="
           + adjacentMines
           + '}';
@@ -179,7 +209,7 @@ public abstract class Tile implements Serializable {
     @Override
     @NotNull
     public Empty copyWith(@NotNull State state) {
-      return new Empty(x, y, state, this.adjacentMines);
+      return new Empty(position, state, this.adjacentMines);
     }
 
     /**
@@ -189,7 +219,7 @@ public abstract class Tile implements Serializable {
      */
     @NotNull
     public Empty copyAndIncrementAdjacentMines() {
-      return new Empty(x, y, this.getState(), this.adjacentMines + 1);
+      return new Empty(position, this.getState(), this.adjacentMines + 1);
     }
 
     @Override

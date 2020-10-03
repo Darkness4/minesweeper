@@ -11,7 +11,6 @@ import java.net.Socket;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.IO;
-import marc.nguyen.minesweeper.common.data.models.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,10 +53,9 @@ public class ServerSocketDevice {
    */
   public void connect(@NotNull InetAddress address, int port) throws IOException {
     try {
-      this.serverSocket = new Socket(address, port);
+      serverSocket = new Socket(address, port);
       output = new ObjectOutputStream(serverSocket.getOutputStream());
       publisher = BehaviorSubject.create();
-      write(new Message("Hello server !"));
       IO.executor.execute(new ServerWorkerRunnable(serverSocket, publisher));
     } catch (IOException e) {
       close();

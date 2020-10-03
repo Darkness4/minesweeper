@@ -7,7 +7,7 @@ import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
 /** Main Client Entrypoint. */
 public final class Client {
 
-  // TODO: Multiplayer board
+  // TODO: Multiplayer leaderboard
   public static void main(String[] args) {
     SwingUtilities.invokeLater(
         () -> {

@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import java.util.List;
 import marc.nguyen.minesweeper.common.data.models.Level;
+import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.server.api.GameServer;
 import marc.nguyen.minesweeper.server.enums.LevelParams;
 
@@ -26,6 +27,16 @@ public final class Server {
       description =
           "Settings of the mine field. Format `-s length height mines`. Overrides --level.")
   private List<Integer> settings;
+
+  @Parameter(
+      names = {"--max-players"},
+      description = "Max players in the game.")
+  private int maxPlayers = 10;
+
+  @Parameter(
+      names = {"--timeout"},
+      description = "Launch the game on timeout. Unit is seconds.")
+  private long timeout = 10L;
 
   @Parameter(
       names = {"-h", "--help"},
@@ -53,21 +64,21 @@ public final class Server {
   }
 
   public void run() {
-    final GameServer gameServer;
+    final Minefield minefield;
     if (settings != null) {
-      gameServer = new GameServer(settings.get(0), settings.get(1), settings.get(2));
+      minefield = new Minefield(settings.get(0), settings.get(1), settings.get(2), false);
     } else {
       switch (level) {
         case MEDIUM:
-          gameServer = new GameServer(Level.MEDIUM);
+          minefield = new Minefield(Level.MEDIUM, false);
           break;
         case HARD:
-          gameServer = new GameServer(Level.HARD);
+          minefield = new Minefield(Level.HARD, false);
           break;
         default:
-          gameServer = new GameServer(Level.EASY);
+          minefield = new Minefield(Level.EASY, false);
       }
     }
-    gameServer.start(port);
+    new GameServer(minefield, maxPlayers, timeout).start(port);
   }
 }

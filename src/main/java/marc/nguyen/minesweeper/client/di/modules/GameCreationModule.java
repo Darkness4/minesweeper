@@ -13,9 +13,8 @@ import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
-import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
+import marc.nguyen.minesweeper.client.domain.usecases.SendPlayerToServer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
-import marc.nguyen.minesweeper.client.domain.usecases.WatchEndGameMessages;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameController;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
@@ -38,6 +37,8 @@ public class GameCreationModule {
       Lazy<SaveSettings> saveSettings,
       Lazy<DeleteSettings> deleteSettings,
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
+      Lazy<Quit> quit,
+      Lazy<SendPlayerToServer> sendPlayerToServerLazy,
       Provider<Builder> mainComponentProvider) {
     return new GameCreationController.Factory(
         connect,
@@ -45,18 +46,15 @@ public class GameCreationModule {
         saveSettings,
         deleteSettings,
         fetchAllSettingsName,
+        quit,
+        sendPlayerToServerLazy,
         mainComponentProvider);
   }
 
   @Provides
   static GameController.Factory provideGameControllerFactory(
-      Lazy<UpdateServerTile> updateMinefield,
-      Lazy<UpdateServerPlayer> updateServerPlayer,
-      Lazy<SaveScore> saveScore,
-      Lazy<Quit> quit,
-      Lazy<WatchEndGameMessages> watchEndGameMessages) {
-    return new GameController.Factory(
-        updateMinefield, updateServerPlayer, saveScore, quit, watchEndGameMessages);
+      Lazy<UpdateServerTile> updateMinefield, Lazy<SaveScore> saveScore, Lazy<Quit> quit) {
+    return new GameController.Factory(updateMinefield, saveScore, quit);
   }
 
   @Provides

@@ -34,10 +34,7 @@ public class Minefield implements Serializable {
     }
     this.isSinglePlayer = isSinglePlayer;
     tiles = new Tile[length][height];
-    for (int i = 0; i < tiles.length; i++) {
-      final int finalI = i;
-      Arrays.parallelSetAll(tiles[i], j -> new Tile.Empty(finalI, j));
-    }
+    clear();
   }
 
   /**
@@ -66,6 +63,20 @@ public class Minefield implements Serializable {
     placeMines(level.mines);
   }
 
+  /** Clear everything, and replace mines */
+  public synchronized void rebuild() {
+    clear();
+    placeMines(minesOnField);
+    System.out.println("MINEFIELD HAS BEEN REBUILT.");
+  }
+
+  private void clear() {
+    for (int i = 0; i < tiles.length; i++) {
+      final int finalI = i;
+      Arrays.parallelSetAll(tiles[i], j -> new Tile.Empty(finalI, j));
+    }
+  }
+
   /**
    * Get the number of mines on the field.
    *
@@ -80,7 +91,7 @@ public class Minefield implements Serializable {
    *
    * @param mines Number of mines to be placed.
    */
-  private synchronized void placeMines(int mines) {
+  private synchronized void placeMines(long mines) {
     if (mines >= tiles.length * tiles[0].length) {
       throw new IllegalArgumentException(
           "Game is unplayable if mines >= length * height. Please set a lower number of mines.");
@@ -118,31 +129,32 @@ public class Minefield implements Serializable {
   public synchronized void flag(Tile tile) {
     final var state = tile.getState();
     if (state == Tile.State.BLANK) {
-      tiles[tile.x][tile.y] = tile.copyWith(Tile.State.FLAG);
+      tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.FLAG);
     } else if (state == Tile.State.FLAG) {
-      tiles[tile.x][tile.y] = tile.copyWith(Tile.State.BLANK);
+      tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.BLANK);
     }
   }
 
   /**
    * Expose a tile if Empty. Else, change to HIT_MINE.
    *
-   * @param tile Tile to be exposed.
+   * @param position Position of the tile to be exposed.
    */
-  public void expose(Tile tile) {
+  public void expose(Position position) {
+    final var tile = tiles[position.getX()][position.getY()];
     if (tile instanceof Tile.Empty) {
       if (isSinglePlayer) {
         treeSearchEmptyTile((Tile.Empty) tile);
       } else {
         if (tile.getState() != Tile.State.EXPOSED) {
-          synchronized (tiles[tile.x][tile.y]) {
-            tiles[tile.x][tile.y] = tile.copyWith(Tile.State.EXPOSED);
+          synchronized (tiles[tile.getX()][tile.getY()]) {
+            tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.EXPOSED);
           }
         }
       }
     } else if (tile instanceof Tile.Mine) {
-      synchronized (tiles[tile.x][tile.y]) {
-        tiles[tile.x][tile.y] = tile.copyWith(Tile.State.HIT_MINE);
+      synchronized (tiles[tile.getX()][tile.getY()]) {
+        tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.HIT_MINE);
       }
     }
   }
@@ -174,8 +186,8 @@ public class Minefield implements Serializable {
       final var head = queue.poll();
 
       if (head.getState() != Tile.State.EXPOSED) {
-        synchronized (tiles[head.x][head.y]) {
-          tiles[head.x][head.y] = head.copyWith(Tile.State.EXPOSED);
+        synchronized (tiles[head.getX()][head.getY()]) {
+          tiles[head.getX()][head.getY()] = head.copyWith(Tile.State.EXPOSED);
         }
 
         if (head.getNeighborMinesCount() == 0) {
@@ -195,6 +207,17 @@ public class Minefield implements Serializable {
   @NotNull
   public Tile get(int x, int y) {
     return tiles[x][y];
+  }
+
+  /**
+   * Get a tile from x and y coordinates.
+   *
+   * @param position Position.
+   * @return A <code>Tile</code> reference.
+   */
+  @NotNull
+  public Tile get(Position position) {
+    return tiles[position.getX()][position.getY()];
   }
 
   /**
@@ -256,7 +279,7 @@ public class Minefield implements Serializable {
         .forEach(
             neighbor -> {
               if (neighbor instanceof Tile.Empty) {
-                tiles[neighbor.x][neighbor.y] =
+                tiles[neighbor.getX()][neighbor.getY()] =
                     ((Tile.Empty) neighbor).copyAndIncrementAdjacentMines();
               }
             });

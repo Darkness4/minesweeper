@@ -5,6 +5,9 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -21,13 +24,16 @@ import marc.nguyen.minesweeper.client.domain.usecases.Connect;
 import marc.nguyen.minesweeper.client.domain.usecases.DeleteSettings;
 import marc.nguyen.minesweeper.client.domain.usecases.FetchAllSettingsName;
 import marc.nguyen.minesweeper.client.domain.usecases.LoadSettings;
+import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveSettings;
+import marc.nguyen.minesweeper.client.domain.usecases.SendPlayerToServer;
 import marc.nguyen.minesweeper.client.presentation.controllers.listeners.OnUpdate;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameCreationView;
 import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The Game Creation Controller.
@@ -52,8 +58,11 @@ public class GameCreationController {
   private final Lazy<SaveSettings> saveSettings;
   private final Lazy<DeleteSettings> deleteSettings;
   private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
+  private final Lazy<SendPlayerToServer> sendPlayerToServerLazy;
+  private final Lazy<Quit> quit;
   private final Provider<Builder> gameComponentProvider;
-  private final Disposable fetchAllSettingsNameListener;
+  private @Nullable Disposable fetchAllSettingsNameListener;
+  private @Nullable Disposable startGameListener;
 
   public GameCreationController(
       Lazy<Connect> connect,
@@ -61,6 +70,8 @@ public class GameCreationController {
       Lazy<SaveSettings> saveSettings,
       Lazy<DeleteSettings> deleteSettings,
       Lazy<FetchAllSettingsName> fetchAllSettingsName,
+      Lazy<Quit> quit,
+      Lazy<SendPlayerToServer> sendPlayerToServerLazy,
       Provider<Builder> gameComponentProvider,
       GameCreationModel model,
       GameCreationView view) {
@@ -71,7 +82,9 @@ public class GameCreationController {
     this.saveSettings = saveSettings;
     this.deleteSettings = deleteSettings;
     this.fetchAllSettingsName = fetchAllSettingsName;
+    this.quit = quit;
     this.gameComponentProvider = gameComponentProvider;
+    this.sendPlayerToServerLazy = sendPlayerToServerLazy;
 
     listModel = new DefaultListModel<>();
     this.view.savedSettingsPanel.settingsList.setModel(listModel);
@@ -139,7 +152,12 @@ public class GameCreationController {
         this.fetchAllSettingsName
             .get()
             .execute(null)
-            .subscribe((settings) -> settings.forEach(listModel::addElement));
+            .subscribe(
+                (settings) -> settings.forEach(listModel::addElement),
+                t -> {
+                  System.err.println("[ERROR] fetchAllSettingsName error.");
+                  t.printStackTrace();
+                });
 
     this.view.editSettingsPanel.networkSettingsPanel.ipTextField.setText(this.model.getAddress());
     this.view.savedSettingsPanel.settingsNameTextField.setText(this.model.getSettingsName());
@@ -147,20 +165,41 @@ public class GameCreationController {
 
   /** Closes every listeners */
   public void dispose() {
-    fetchAllSettingsNameListener.dispose();
+    if (fetchAllSettingsNameListener != null) {
+      fetchAllSettingsNameListener.dispose();
+      fetchAllSettingsNameListener = null;
+    }
+    if (startGameListener != null) {
+      startGameListener.dispose();
+      startGameListener = null;
+    }
   }
 
   private void onDeleteSettingsPushed(ActionEvent e) {
     deleteSettings
         .get()
         .execute(model.getSettingsName())
+        .doOnError(
+            t -> {
+              System.err.println("[ERROR] deleteSettings error.");
+              t.printStackTrace();
+            })
         .doFinally(this::refreshListModel)
         .subscribe();
   }
 
   private void onSaveSettingsPushed(ActionEvent e) {
     try {
-      saveSettings.get().execute(model.toEntity()).doFinally(this::refreshListModel).subscribe();
+      saveSettings
+          .get()
+          .execute(model.toEntity())
+          .doOnError(
+              t -> {
+                System.err.println("[ERROR] saveSettings error.");
+                t.printStackTrace();
+              })
+          .doFinally(this::refreshListModel)
+          .subscribe();
     } catch (UnknownHostException unknownHostException) {
       view.invokeErrorDialog(
           String.format("Error: Incorrect Internet Address %s", model.getAddress()));
@@ -173,15 +212,24 @@ public class GameCreationController {
    * <p>This is called in any CRUD operation around the list (besides Read).
    */
   private void refreshListModel() {
-    fetchAllSettingsName
-        .get()
-        .execute(null)
-        .subscribe(
-            settings -> {
-              listModel.clear();
-              settings.forEach(listModel::addElement);
-            },
-            throwable -> System.out.println("Settings couldn't be loaded."));
+    if (fetchAllSettingsNameListener != null) {
+      fetchAllSettingsNameListener.dispose();
+    }
+    fetchAllSettingsNameListener =
+        fetchAllSettingsName
+            .get()
+            .execute(null)
+            .doOnError(
+                t -> {
+                  System.err.println("[ERROR] fetchAllSettingsName error.");
+                  t.printStackTrace();
+                })
+            .subscribe(
+                settings -> {
+                  listModel.clear();
+                  settings.forEach(listModel::addElement);
+                },
+                throwable -> System.out.println("Settings couldn't be loaded."));
   }
 
   private void onLoadSettingsPushed(ActionEvent e) {
@@ -202,7 +250,7 @@ public class GameCreationController {
       final var mode = model.getMode();
       if (mode == GameMode.SINGLEPLAYER) {
         final var level = model.getLevel();
-        final CompletableFuture<Minefield> minefield =
+        final var minefield =
             CompletableFuture.supplyAsync(
                 () -> {
                   if (level == Level.CUSTOM) {
@@ -214,7 +262,8 @@ public class GameCreationController {
                   } else {
                     return new Minefield(level, model.isSinglePlayer());
                   }
-                });
+                },
+                IO.executor);
 
         SwingUtilities.windowForComponent(view).dispose();
         SwingUtilities.invokeLater(
@@ -225,6 +274,8 @@ public class GameCreationController {
                     .minefield(minefield.get())
                     .player(new Player(model.getPlayerName()))
                     .updateTiles(Observable.empty())
+                    .endGameMessages(Observable.empty())
+                    .playerList(Observable.empty())
                     .build()
                     .gameFrame();
               } catch (InterruptedException | ExecutionException e) {
@@ -240,16 +291,59 @@ public class GameCreationController {
                 result -> {
                   final var minefield = result.initialMinefield;
 
-                  SwingUtilities.windowForComponent(view).dispose();
-                  SwingUtilities.invokeLater(
-                      () ->
-                          gameComponentProvider
-                              .get()
-                              .minefield(minefield)
-                              .player(new Player(model.getPlayerName()))
-                              .updateTiles(result.tiles)
-                              .build()
-                              .gameFrame());
+                  sendPlayerToServerLazy
+                      .get()
+                      .execute(new Player(model.getPlayerName()))
+                      .doOnError(
+                          e -> {
+                            System.err.println("[ERROR] sendPlayerToServer error.");
+                            e.printStackTrace();
+                          })
+                      .subscribe();
+
+                  // Wait for server start signal before launching the game.
+                  result.startGame$.subscribe(
+                      s ->
+                          SwingUtilities.invokeLater(
+                              () -> {
+                                SwingUtilities.windowForComponent(view).dispose();
+                                gameComponentProvider
+                                    .get()
+                                    .minefield(minefield)
+                                    .player(new Player(model.getPlayerName()))
+                                    .updateTiles(result.position$)
+                                    .endGameMessages(result.endGameMessage$)
+                                    .playerList(result.playerList$)
+                                    .build()
+                                    .gameFrame();
+                              }),
+                      t -> {
+                        System.err.println("[ERROR] startGame$ error.");
+                        t.printStackTrace();
+                      });
+
+                  // Launch a waiting dialog
+                  this.view.invokeGameWaitingToStartDialog(
+                      new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent windowEvent) {
+                          quit.get()
+                              .execute(null)
+                              .doOnError(Throwable::printStackTrace)
+                              .subscribe();
+                        }
+                      },
+                      result.startGame$);
+                },
+                t -> {
+                  System.err.format("[ERROR] connect error : %s.\n", t);
+
+                  if (t instanceof IOException) {
+                    this.view.invokeErrorDialog(t.toString());
+                  } else if (t instanceof NullPointerException) {
+                    // TODO: Better handling
+                    this.view.invokeErrorDialog("Max players reached.");
+                  }
                 });
       }
     } catch (UnknownHostException e) {
@@ -320,6 +414,8 @@ public class GameCreationController {
     private final Lazy<SaveSettings> saveSettings;
     private final Lazy<DeleteSettings> deleteSettings;
     private final Lazy<FetchAllSettingsName> fetchAllSettingsName;
+    private final Lazy<Quit> quit;
+    private final Lazy<SendPlayerToServer> sendPlayerToServerLazy;
     private final Provider<Builder> mainComponentProvider;
 
     @Inject
@@ -329,12 +425,16 @@ public class GameCreationController {
         Lazy<SaveSettings> saveSettings,
         Lazy<DeleteSettings> deleteSettings,
         Lazy<FetchAllSettingsName> fetchAllSettingsName,
+        Lazy<Quit> quit,
+        Lazy<SendPlayerToServer> sendPlayerToServerLazy,
         Provider<Builder> mainComponentProvider) {
       this.connect = connect;
       this.loadSettings = loadSettings;
       this.saveSettings = saveSettings;
       this.deleteSettings = deleteSettings;
       this.fetchAllSettingsName = fetchAllSettingsName;
+      this.quit = quit;
+      this.sendPlayerToServerLazy = sendPlayerToServerLazy;
       this.mainComponentProvider = mainComponentProvider;
     }
 
@@ -345,6 +445,8 @@ public class GameCreationController {
           saveSettings,
           deleteSettings,
           fetchAllSettingsName,
+          quit,
+          sendPlayerToServerLazy,
           mainComponentProvider,
           model,
           view);

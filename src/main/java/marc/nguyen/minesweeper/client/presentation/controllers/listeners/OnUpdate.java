@@ -5,7 +5,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /**
- * A Document listener that execute a comsumer of document events of every type (insert, remove,
+ * A Document listener that execute a consumer of document events of every type (insert, remove,
  * changed).
  */
 public class OnUpdate implements DocumentListener {

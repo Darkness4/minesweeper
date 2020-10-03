@@ -1,35 +1,32 @@
 package marc.nguyen.minesweeper.server.api;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import marc.nguyen.minesweeper.common.data.models.Level;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import marc.nguyen.minesweeper.common.data.models.StartGame;
 import marc.nguyen.minesweeper.server.api.workers.ClientWorkerRunnable;
 import marc.nguyen.minesweeper.server.core.IO;
 import marc.nguyen.minesweeper.server.models.ClientModel;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** Implementation of the Server. */
 public class GameServer {
 
   private final AtomicBoolean isStopped = new AtomicBoolean(false);
-  private final ConcurrentLinkedQueue<ObjectOutputStream> outputStreams =
-      new ConcurrentLinkedQueue<>();
-  private final ConcurrentLinkedQueue<ClientModel> clientModels = new ConcurrentLinkedQueue<>();
-  private @Nullable ServerSocket serverSocket = null;
-
+  private final CommunicationHandler communicationHandler = new CommunicationHandler();
   private final Minefield minefield;
+  private final int maxPlayers;
+  private final long timeout;
+  private @Nullable ServerSocket serverSocket = null;
+  private @Nullable Timer timeoutTimer = null;
 
-  public GameServer(int length, int height, int mines) {
-    minefield = new Minefield(length, height, mines, false);
-  }
-
-  public GameServer(@NotNull Level level) {
-    minefield = new Minefield(level, false);
+  public GameServer(Minefield minefield, int maxPlayers, long timeout) {
+    this.minefield = minefield;
+    this.maxPlayers = maxPlayers;
+    this.timeout = timeout * 1000; // Convert seconds to millis
   }
 
   /**
@@ -46,17 +43,43 @@ public class GameServer {
         minefield.getLength(), minefield.getHeight(), minefield.getMinesOnField());
 
     while (!isStopped.get()) {
-      // TODO: Server lobby
       try {
         assert serverSocket != null;
+
+        // (Blocking IO) Waiting for players
         final var clientSocket = serverSocket.accept();
+
+        if (communicationHandler.size() == maxPlayers) {
+          System.out.printf(
+              "Client %s refused: Max players reached.\n",
+              clientSocket.getInetAddress().getCanonicalHostName());
+          clientSocket.close();
+          continue;
+        }
+
         System.out.printf(
             "Client %s accepted.\n", clientSocket.getInetAddress().getCanonicalHostName());
-        final var clientModel = new ClientModel();
-        clientModel.setClientSocket(clientSocket);
-        clientModels.add(clientModel);
+        final var clientModel = new ClientModel(clientSocket);
+
+        communicationHandler.add(clientModel);
+
+        // On first person connected.
+        if (communicationHandler.size() == 1) {
+          launchTimeoutTimer();
+          minefield.rebuild();
+        }
+
         IO.executor.execute(
-            new ClientWorkerRunnable(clientModel, outputStreams, clientModels, minefield));
+            new ClientWorkerRunnable(clientModel, communicationHandler, minefield, maxPlayers));
+
+        // Stop timeout if enough players
+        if (communicationHandler.size() == maxPlayers) {
+          if (timeoutTimer != null) {
+            timeoutTimer.cancel();
+            timeoutTimer = null;
+          }
+        }
+
       } catch (IOException e) {
         if (isStopped.get()) {
           break;
@@ -66,6 +89,28 @@ public class GameServer {
     }
     close();
     System.out.println("Server Stopped.");
+  }
+
+  private void startGame() {
+    System.out.println("Game start !");
+    communicationHandler.broadcast(new StartGame());
+    communicationHandler.broadcastListOfPlayer();
+  }
+
+  private void launchTimeoutTimer() {
+    if (timeoutTimer != null) {
+      timeoutTimer.cancel();
+      timeoutTimer = null;
+    }
+    timeoutTimer = new Timer("Timeout in x seconds timer");
+    timeoutTimer.schedule(
+        new TimerTask() {
+          @Override
+          public void run() {
+            startGame();
+          }
+        },
+        timeout);
   }
 
   private void open(int port) {
@@ -89,15 +134,11 @@ public class GameServer {
       }
     }
 
-    outputStreams.parallelStream()
-        .forEach(
-            s -> {
-              try {
-                s.close();
-                System.out.println("A thread has been closed.");
-              } catch (IOException ioException) {
-                ioException.printStackTrace();
-              }
-            });
+    if (timeoutTimer != null) {
+      timeoutTimer.cancel();
+      timeoutTimer = null;
+    }
+
+    communicationHandler.broadcastClose();
   }
 }

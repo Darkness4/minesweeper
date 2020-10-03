@@ -7,25 +7,24 @@ import java.awt.Image;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
+import marc.nguyen.minesweeper.common.data.models.Position;
 import marc.nguyen.minesweeper.common.data.models.Tile;
 import marc.nguyen.minesweeper.common.data.models.Tile.Empty;
 
 public class MineButton extends JPanel {
 
   private static final int SIZE = 32;
-  public final int x;
-  public final int y;
+  public final Position position;
   Image image;
   private final ResourcesLoader resourcesLoader;
 
-  public MineButton(int x, int y, ResourcesLoader resourcesLoader) {
+  public MineButton(Position position, ResourcesLoader resourcesLoader) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     this.resourcesLoader = resourcesLoader;
-    this.x = x;
-    this.y = y;
+    this.position = position;
 
-    setName("Button_" + x + '_' + y);
+    setName("Button_" + position);
     setPreferredSize(new Dimension(SIZE, SIZE));
     final var font = getFont();
     setFont(font.deriveFont(font.getStyle() | Font.BOLD));
@@ -81,8 +80,12 @@ public class MineButton extends JPanel {
       this.resourcesLoader = resourcesLoader;
     }
 
+    public MineButton create(Position position) {
+      return new MineButton(position, resourcesLoader);
+    }
+
     public MineButton create(int x, int y) {
-      return new MineButton(x, y, resourcesLoader);
+      return create(new Position(x, y));
     }
   }
 }

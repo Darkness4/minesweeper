@@ -1,6 +1,8 @@
 package marc.nguyen.minesweeper.client.presentation.views;
 
+import io.reactivex.rxjava3.core.Observable;
 import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -9,6 +11,8 @@ import marc.nguyen.minesweeper.client.core.mvc.View;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.EditSettingsPanel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.SavedSettingsPanel;
+import marc.nguyen.minesweeper.client.presentation.widgets.WaitingForPlayersDialog;
+import marc.nguyen.minesweeper.common.data.models.StartGame;
 
 /**
  * The Game Creation View.
@@ -55,5 +59,11 @@ public final class GameCreationView extends JPanel implements View {
         () ->
             JOptionPane.showMessageDialog(
                 null, message, "Error Message", JOptionPane.ERROR_MESSAGE));
+  }
+
+  /** Invoke a waiting dialog. */
+  public void invokeGameWaitingToStartDialog(
+      WindowAdapter windowAdapter, Observable<StartGame> startGame$) {
+    SwingUtilities.invokeLater(() -> new WaitingForPlayersDialog(windowAdapter, startGame$));
   }
 }

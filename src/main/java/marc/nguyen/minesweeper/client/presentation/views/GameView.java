@@ -10,7 +10,9 @@ import marc.nguyen.minesweeper.client.core.mvc.View;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 import marc.nguyen.minesweeper.client.presentation.views.game.DisplayPanel;
 import marc.nguyen.minesweeper.client.presentation.views.game.GamePanel;
+import marc.nguyen.minesweeper.client.presentation.views.game.PlayerListPanel;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The Game View.
@@ -22,6 +24,7 @@ public final class GameView extends JPanel implements View {
 
   public final GamePanel gamePanel;
   public final DisplayPanel displayPanel;
+  public @Nullable final PlayerListPanel playerListPanel;
 
   @Inject
   public GameView(Minefield minefield, ResourcesLoader resourcesLoader) {
@@ -32,8 +35,17 @@ public final class GameView extends JPanel implements View {
     displayPanel = new DisplayPanel(minefield);
     add(displayPanel, BorderLayout.PAGE_START);
 
+    final var panel = new JPanel();
     gamePanel = new GamePanel(minefield, resourcesLoader);
-    add(gamePanel, BorderLayout.CENTER);
+    panel.add(gamePanel);
+    add(panel, BorderLayout.CENTER);
+
+    if (!minefield.isSinglePlayer) {
+      playerListPanel = new PlayerListPanel();
+      add(playerListPanel, BorderLayout.LINE_END);
+    } else {
+      playerListPanel = null;
+    }
   }
 
   public void invokeGameEndedDialog() {

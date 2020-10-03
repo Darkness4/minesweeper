@@ -3,12 +3,14 @@ package marc.nguyen.minesweeper.client.di.modules;
 import dagger.Module;
 import dagger.Provides;
 import io.reactivex.rxjava3.core.Observable;
+import java.util.List;
 import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
 import marc.nguyen.minesweeper.client.presentation.views.GameView;
+import marc.nguyen.minesweeper.common.data.models.EndGameMessage;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
-import marc.nguyen.minesweeper.common.data.models.Tile;
+import marc.nguyen.minesweeper.common.data.models.Position;
 
 /**
  * Provides the dependencies for the Game MVC.
@@ -19,8 +21,13 @@ import marc.nguyen.minesweeper.common.data.models.Tile;
 public class GameModule {
 
   @Provides
-  static GameModel provideGameModel(Minefield minefield, Player player, Observable<Tile> tiles) {
-    return new GameModel(minefield, player, tiles);
+  static GameModel provideGameModel(
+      Minefield minefield,
+      Player player,
+      Observable<Position> position$,
+      Observable<EndGameMessage> endGameMessage$,
+      Observable<List<Player>> playerList$) {
+    return new GameModel(minefield, player, position$, endGameMessage$, playerList$);
   }
 
   @Provides

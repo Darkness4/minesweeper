@@ -13,9 +13,7 @@ import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
-import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerPlayer;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
-import marc.nguyen.minesweeper.client.domain.usecases.WatchEndGameMessages;
 import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.views.GameView;
 import marc.nguyen.minesweeper.client.presentation.widgets.MineButton;
@@ -39,50 +37,55 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
   private final GameModel model;
   private final GameView view;
-  private final Lazy<UpdateServerTile> updateMinefield;
-  private final Timer timer;
+  private final Lazy<UpdateServerTile> updateServerTile;
   private final Lazy<SaveScore> saveScore;
   private final Lazy<Quit> quit;
   private final Disposable updateTilesListener;
-  private final Disposable watchEndGameMessagesListener;
-  private final Disposable updateServerPlayerListener;
+  private final Disposable endGameMessagesListener;
+  private final Timer timer;
 
   public GameController(
-      Lazy<UpdateServerTile> updateMinefield,
-      Lazy<UpdateServerPlayer> updateServerPlayer,
+      Lazy<UpdateServerTile> updateServerTile,
       Lazy<SaveScore> saveScore,
       Lazy<Quit> quit,
-      Lazy<WatchEndGameMessages> watchEndGameMessages,
       GameModel model,
       GameView view) {
     this.model = model;
     this.view = view;
-    this.updateMinefield = updateMinefield;
+    this.updateServerTile = updateServerTile;
     this.saveScore = saveScore;
     this.quit = quit;
 
     // Initial update
     update();
-    updateServerPlayerListener = updateServerPlayer.get().execute(this.model.player).subscribe();
-    watchEndGameMessagesListener =
-        watchEndGameMessages
-            .get()
-            .execute(null)
-            .subscribe(
-                m -> {
-                  onEndGame();
-                  this.view.invokeGameEndedDialog(m.toString());
-                  onExitButtonPushed();
-                  System.out.println("Game has ended.");
-                });
 
     // Listen to remote changes
     updateTilesListener =
-        this.model.tiles.subscribe(
+        this.model.position$.subscribe(
             tile -> {
               this.model.minefield.expose(tile);
               update();
+            },
+            e -> {
+              System.err.println("[ERROR] updateTilesListener error.");
+              e.printStackTrace();
             });
+    endGameMessagesListener =
+        this.model.endGameMessage$.subscribe(
+            m -> {
+              onEndGame();
+              this.view.invokeGameEndedDialog(m.toString());
+              onExitButtonPushed();
+              System.out.println("Game has ended.");
+            },
+            e -> {
+              System.err.println("[ERROR] endGameMessagesListener error.");
+              e.printStackTrace();
+            });
+
+    if (this.view.playerListPanel != null) {
+      this.view.playerListPanel.playerTable.setModel(this.model.playerListTableModel);
+    }
 
     this.view.gamePanel.addButtonListener(this);
 
@@ -98,9 +101,9 @@ public class GameController implements MouseListener, Controller<GameModel, Game
 
   /** Closes every listeners */
   public void dispose() {
-    updateServerPlayerListener.dispose();
-    watchEndGameMessagesListener.dispose();
+    endGameMessagesListener.dispose();
     updateTilesListener.dispose();
+    this.model.playerListTableModel.dispose();
   }
 
   private void updateBombLeft() {
@@ -123,7 +126,15 @@ public class GameController implements MouseListener, Controller<GameModel, Game
     this.timer.stop();
 
     // Save the personal score
-    this.saveScore.get().execute(this.model.player).subscribe();
+    this.saveScore
+        .get()
+        .execute(this.model.player)
+        .doOnError(
+            e -> {
+              System.err.println("[ERROR] saveScore error.");
+              e.printStackTrace();
+            })
+        .subscribe();
 
     // Expose all the mines (show the solution)
     this.model.minefield.exposeAllMines();
@@ -155,7 +166,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
           final var source = e.getSource();
           if (source instanceof MineButton && ((MineButton) source).isEnabled()) {
             final var mineButton = (MineButton) source;
-            final var tile = model.minefield.get(mineButton.x, mineButton.y);
+            final var tile = model.minefield.get(mineButton.position);
             if (SwingUtilities.isRightMouseButton(e)) {
               model.minefield.flag(tile);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -163,8 +174,16 @@ public class GameController implements MouseListener, Controller<GameModel, Game
                 if (!timer.isRunning()) {
                   timer.start();
                 }
-                model.minefield.expose(tile);
-                updateMinefield.get().execute(tile).subscribe();
+                model.minefield.expose(tile.position);
+                updateServerTile
+                    .get()
+                    .execute(tile.position)
+                    .doOnError(
+                        t -> {
+                          System.err.println("[ERROR] updateMinefield error.");
+                          t.printStackTrace();
+                        })
+                    .subscribe();
 
                 if (tile instanceof Tile.Empty) {
                   model.player.incrementScore();
@@ -200,29 +219,20 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   /** Factory used for assisted dependencies injection. */
   public static final class Factory {
 
-    final Lazy<UpdateServerTile> updateMinefield;
-    final Lazy<UpdateServerPlayer> updateServerPlayer;
+    final Lazy<UpdateServerTile> updateServerTile;
     final Lazy<SaveScore> saveScore;
     final Lazy<Quit> quit;
-    final Lazy<WatchEndGameMessages> watchEndGameMessages;
 
     @Inject
     public Factory(
-        Lazy<UpdateServerTile> updateMinefield,
-        Lazy<UpdateServerPlayer> updateServerPlayer,
-        Lazy<SaveScore> saveScore,
-        Lazy<Quit> quit,
-        Lazy<WatchEndGameMessages> watchEndGameMessages) {
-      this.updateMinefield = updateMinefield;
-      this.updateServerPlayer = updateServerPlayer;
+        Lazy<UpdateServerTile> updateServerTile, Lazy<SaveScore> saveScore, Lazy<Quit> quit) {
+      this.updateServerTile = updateServerTile;
       this.saveScore = saveScore;
       this.quit = quit;
-      this.watchEndGameMessages = watchEndGameMessages;
     }
 
     public GameController create(GameModel model, GameView view) {
-      return new GameController(
-          updateMinefield, updateServerPlayer, saveScore, quit, watchEndGameMessages, model, view);
+      return new GameController(updateServerTile, saveScore, quit, model, view);
     }
   }
 }

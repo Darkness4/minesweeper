@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 /** Update the Player model on the server */
 @Singleton
-public class UpdateServerPlayer implements UseCase<Player, Completable> {
+public class SendPlayerToServer implements UseCase<Player, Completable> {
 
   private final Lazy<PlayerRepository> repository;
 
   @Inject
-  public UpdateServerPlayer(Lazy<PlayerRepository> repository) {
+  public SendPlayerToServer(Lazy<PlayerRepository> repository) {
     this.repository = repository;
   }
 
