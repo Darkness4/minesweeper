@@ -38,7 +38,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build Javadoc with Gradle
-      run: ./gradlew javadoc
+      run: ./gradlew alljavadoc
     - name: Deploy Javadoc
       uses: JamesIves/github-pages-deploy-action@master
       env:
@@ -61,9 +61,9 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew jar
+      run: ./gradlew exportJar
     - name: Upload artifact
       uses: actions/upload-artifact@master
       with:
         name: Jars
-        path: build/libs
+        path: build/bin

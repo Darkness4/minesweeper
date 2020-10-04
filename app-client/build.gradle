@@ -1,0 +1,40 @@
+plugins {
+    id 'com.github.sherter.google-java-format'
+    id 'java'
+}
+
+dependencies {
+    // Reactive Programming
+    implementation "io.reactivex.rxjava3:rxjava:3.0.6"
+
+    // Persistent Cache
+    implementation 'org.xerial:sqlite-jdbc:3.32.3.2'
+
+    // DI
+    implementation 'com.google.dagger:dagger:2.29.1'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.29.1'
+}
+
+task run(type: JavaExec, group: 'run') {
+    classpath = sourceSets.main.runtimeClasspath
+
+    enableAssertions = true
+
+    main = 'marc.nguyen.minesweeper.client.Client'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'marc.nguyen.minesweeper.client.Client'
+        )
+    }
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class')
+}

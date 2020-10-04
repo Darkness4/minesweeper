@@ -1,2 +1,4 @@
 rootProject.name = 'minesweeper'
-
+include 'app-client'
+include 'app-common'
+include 'app-server'

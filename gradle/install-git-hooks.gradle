@@ -3,4 +3,6 @@ task installGitHooks(type: Copy) {
     into { new File(rootProject.rootDir, '.git/hooks') }
 }
 
-build.dependsOn installGitHooks
+subprojects {
+    build.dependsOn(installGitHooks)
+}

@@ -15,13 +15,13 @@ A multiplayer minesweeper.
 Server :
 
 ```sh
-./gradlew runServer
+./gradlew :server:run
 ```
 
 Client :
 
 ```sh
-./gradlew runClient
+./gradlew :client:run
 ```
 
 #### b) Exporting and executing
@@ -30,10 +30,10 @@ Client :
 
 ```sh
 # Server and Client
-./gradlew jar
+./gradlew exportJar
 ```
 
-The fat JARs are stored in `./build/libs/minesweeper-*-server.jar` and `./build/libs/minesweeper-*-client.jar`
+The fat JARs are stored in `./build/bin/app-server-*.jar` and `./build/bin/app-client-*.jar`
 
 #### Executing
 
@@ -41,10 +41,10 @@ You can execute it with :
 
 ```sh
 # Server
-java -jar ./minesweeper-*-server.jar
+java -jar ./build/bin/app-server-*.jar
 
 # Client
-java -jar ./minesweeper-*-client.jar
+java -jar ./build/bin/app-client-*.jar
 ```
 
 ## Docs

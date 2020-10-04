@@ -1,0 +1,7 @@
+plugins {
+    id 'com.github.sherter.google-java-format'
+    id 'java'
+}
+
+dependencies {
+}
