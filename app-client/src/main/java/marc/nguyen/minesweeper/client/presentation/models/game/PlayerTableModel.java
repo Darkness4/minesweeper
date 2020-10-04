@@ -8,13 +8,13 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import marc.nguyen.minesweeper.common.data.models.Player;
 
-public class PlayerListTableModel extends AbstractTableModel {
+public class PlayerTableModel extends AbstractTableModel {
 
   private static final String[] columnNames = {"Player", "Score"};
   private final List<Player> playerList = new ArrayList<>();
   private final Disposable playerListListener;
 
-  public PlayerListTableModel(Observable<List<Player>> playerList$) {
+  public PlayerTableModel(Observable<List<Player>> playerList$) {
     playerListListener =
         playerList$.subscribe(
             l -> {

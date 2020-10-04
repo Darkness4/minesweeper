@@ -139,24 +139,31 @@ public class Minefield implements Serializable {
    * Expose a tile if Empty. Else, change to HIT_MINE.
    *
    * @param position Position of the tile to be exposed.
+   * @return Number of tiles discovered.
    */
-  public void expose(Position position) {
+  public int expose(Position position) {
+    int numberOfTileDiscovered = 0;
+
     final var tile = tiles[position.getX()][position.getY()];
     if (tile instanceof Tile.Empty) {
       if (isSinglePlayer) {
-        treeSearchEmptyTile((Tile.Empty) tile);
+        numberOfTileDiscovered = treeSearchEmptyTile((Tile.Empty) tile);
       } else {
         if (tile.getState() != Tile.State.EXPOSED) {
           synchronized (tiles[tile.getX()][tile.getY()]) {
             tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.EXPOSED);
+            numberOfTileDiscovered = 1;
           }
         }
       }
     } else if (tile instanceof Tile.Mine) {
       synchronized (tiles[tile.getX()][tile.getY()]) {
         tiles[tile.getX()][tile.getY()] = tile.copyWith(Tile.State.HIT_MINE);
+        numberOfTileDiscovered = 1;
       }
     }
+
+    return numberOfTileDiscovered;
   }
 
   public synchronized void exposeAllMines() {
@@ -176,8 +183,10 @@ public class Minefield implements Serializable {
    * Use BFS Tree Search Algorithm to reveal tiles.
    *
    * @param tile Find neighbors of that tile.
+   * @return Number of tile discovered.
    */
-  private void treeSearchEmptyTile(@NotNull Tile.Empty tile) {
+  private synchronized int treeSearchEmptyTile(@NotNull Tile.Empty tile) {
+    int numberOfTileDiscovered = 0;
     final Queue<Tile.Empty> queue = new LinkedList<>();
 
     queue.add(tile);
@@ -185,16 +194,18 @@ public class Minefield implements Serializable {
     while (!queue.isEmpty()) {
       final var head = queue.poll();
 
-      if (head.getState() != Tile.State.EXPOSED) {
-        synchronized (tiles[head.getX()][head.getY()]) {
-          tiles[head.getX()][head.getY()] = head.copyWith(Tile.State.EXPOSED);
-        }
+      if (tiles[head.getX()][head.getY()].getState() != Tile.State.EXPOSED) {
+        tiles[head.getX()][head.getY()] = head.copyWith(Tile.State.EXPOSED);
+        numberOfTileDiscovered++;
 
         if (head.getNeighborMinesCount() == 0) {
-          head.getNeighborsTilesIn(tiles).forEach(neighbor -> queue.add((Tile.Empty) neighbor));
+          head.getNeighborsTilesIn(tiles)
+              .filter(t -> t.getState() != Tile.State.EXPOSED)
+              .forEach(neighbor -> queue.add((Tile.Empty) neighbor));
         }
       }
     }
+    return numberOfTileDiscovered;
   }
 
   /**

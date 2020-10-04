@@ -23,6 +23,7 @@ public class GameServer {
   private final long timeout;
   private @Nullable ServerSocket serverSocket = null;
   private @Nullable Timer timeoutTimer = null;
+  private final AtomicBoolean hasStarted = new AtomicBoolean(false);
 
   public GameServer(Minefield minefield, int maxPlayers, long timeout) {
     this.minefield = minefield;
@@ -52,7 +53,7 @@ public class GameServer {
 
         final var clientModel = new ClientModel(clientSocket);
 
-        if (communicationHandler.size() >= maxPlayers) {
+        if (!hasStarted.get()) {
           System.out.printf(
               "Client %s refused: Max players reached.\n",
               clientSocket.getInetAddress().getCanonicalHostName());
@@ -74,10 +75,12 @@ public class GameServer {
         }
 
         IO.executor.execute(
-            new ClientWorkerRunnable(clientModel, communicationHandler, minefield, maxPlayers));
+            new ClientWorkerRunnable(
+                clientModel, communicationHandler, minefield, maxPlayers, hasStarted));
 
         // Stop timeout if enough players
         if (communicationHandler.size() == maxPlayers) {
+          hasStarted.set(true);
           if (timeoutTimer != null) {
             timeoutTimer.cancel();
             timeoutTimer = null;
@@ -111,6 +114,7 @@ public class GameServer {
         new TimerTask() {
           @Override
           public void run() {
+            hasStarted.set(true);
             startGame();
           }
         },

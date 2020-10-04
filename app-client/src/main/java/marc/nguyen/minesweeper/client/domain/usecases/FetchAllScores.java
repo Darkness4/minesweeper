@@ -7,21 +7,21 @@ import java.util.List;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
-import marc.nguyen.minesweeper.client.domain.repositories.PlayerRepository;
-import marc.nguyen.minesweeper.common.data.models.Player;
+import marc.nguyen.minesweeper.client.domain.entities.HighScore;
+import marc.nguyen.minesweeper.client.domain.repositories.HighScoreRepository;
 import org.jetbrains.annotations.NotNull;
 
-public class FetchAllScores implements UseCase<Void, Single<List<Player>>> {
-  private final Lazy<PlayerRepository> repository;
+public class FetchAllScores implements UseCase<Void, Single<List<HighScore>>> {
+  private final Lazy<HighScoreRepository> repository;
 
   @Inject
-  public FetchAllScores(Lazy<PlayerRepository> repository) {
+  public FetchAllScores(Lazy<HighScoreRepository> repository) {
     this.repository = repository;
   }
 
   @Override
   @NotNull
-  public Single<List<Player>> execute(Void params) {
+  public Single<List<HighScore>> execute(Void params) {
     return repository.get().fetchAll().observeOn(Schedulers.from(IO.executor));
   }
 }

@@ -24,16 +24,19 @@ public class ClientWorkerRunnable implements Runnable {
   private final AtomicBoolean isStopped = new AtomicBoolean(false);
   private final Minefield minefield;
   private final int maxPlayers;
+  private final AtomicBoolean hasStarted;
 
   public ClientWorkerRunnable(
       ClientModel clientModel,
       CommunicationHandler communicationHandler,
       Minefield minefield,
-      int maxPlayers) {
+      int maxPlayers,
+      AtomicBoolean hasStarted) {
     this.clientModel = clientModel;
     this.minefield = minefield;
     this.communicationHandler = communicationHandler;
     this.maxPlayers = maxPlayers;
+    this.hasStarted = hasStarted;
   }
 
   @Override
@@ -78,6 +81,7 @@ public class ClientWorkerRunnable implements Runnable {
       communicationHandler.broadcastListOfPlayer();
 
       if (minefield.hasEnded()) {
+        hasStarted.set(false);
         communicationHandler.broadcastEndGame();
         minefield.rebuild();
         communicationHandler.kickEveryone();

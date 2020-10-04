@@ -5,6 +5,7 @@ import java.awt.event.WindowListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import marc.nguyen.minesweeper.common.data.models.StartGame;
 
@@ -12,6 +13,7 @@ public class WaitingForPlayersDialog extends JDialog {
 
   public WaitingForPlayersDialog(WindowListener windowListener, Observable<StartGame> startGame$) {
     super((JFrame) null, "Waiting for others to connect...");
+    assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     startGame$.subscribe(
         s -> {

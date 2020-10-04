@@ -6,21 +6,21 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.usecases.UseCase;
-import marc.nguyen.minesweeper.client.domain.repositories.PlayerRepository;
-import marc.nguyen.minesweeper.common.data.models.Player;
+import marc.nguyen.minesweeper.client.domain.entities.HighScore;
+import marc.nguyen.minesweeper.client.domain.repositories.HighScoreRepository;
 import org.jetbrains.annotations.NotNull;
 
-public class SaveScore implements UseCase<Player, Completable> {
-  private final Lazy<PlayerRepository> repository;
+public class SaveScore implements UseCase<HighScore, Completable> {
+  private final Lazy<HighScoreRepository> repository;
 
   @Inject
-  public SaveScore(Lazy<PlayerRepository> repository) {
+  public SaveScore(Lazy<HighScoreRepository> repository) {
     this.repository = repository;
   }
 
   @Override
   @NotNull
-  public Completable execute(@NotNull Player params) {
+  public Completable execute(@NotNull HighScore params) {
     return repository.get().save(params).observeOn(Schedulers.from(IO.executor));
   }
 }

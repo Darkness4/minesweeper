@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.data.devices.ServerSocketDevice;
+import marc.nguyen.minesweeper.client.domain.repositories.HighScoreRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.MinefieldRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.PlayerRepository;
 import marc.nguyen.minesweeper.client.domain.repositories.SettingsRepository;
@@ -99,13 +100,13 @@ public abstract class DomainModule {
 
   @Provides
   @Singleton
-  static SaveScore provideSaveScore(Lazy<PlayerRepository> repository) {
+  static SaveScore provideSaveScore(Lazy<HighScoreRepository> repository) {
     return new SaveScore(repository);
   }
 
   @Provides
   @Singleton
-  static FetchAllScores provideFetchAllScores(Lazy<PlayerRepository> repository) {
+  static FetchAllScores provideFetchAllScores(Lazy<HighScoreRepository> repository) {
     return new FetchAllScores(repository);
   }
 

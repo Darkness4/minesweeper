@@ -10,6 +10,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
+import marc.nguyen.minesweeper.client.di.components.DaggerLeaderboardComponent;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 
 public class MainMenuBar extends JMenuBar {
@@ -38,6 +39,18 @@ public class MainMenuBar extends JMenuBar {
               () -> DaggerGameCreationComponent.builder().build().gameCreationDialog());
         });
     menu.add(newGameItem);
+
+    final var leaderboardItem = new JMenuItem("Leaderboard", KeyEvent.VK_N);
+    leaderboardItem.setAccelerator(
+        KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
+    leaderboardItem.getAccessibleContext().setAccessibleDescription("The leaderboard.");
+    leaderboardItem.setToolTipText("Open the leaderboard.");
+    leaderboardItem.addActionListener(
+        (e) -> {
+          SwingUtilities.invokeLater(
+              () -> DaggerLeaderboardComponent.builder().build().leaderboardDialog());
+        });
+    menu.add(leaderboardItem);
 
     menu.addSeparator();
 

@@ -11,6 +11,7 @@ import javax.swing.Timer;
 import marc.nguyen.minesweeper.client.core.IO;
 import marc.nguyen.minesweeper.client.core.mvc.Controller;
 import marc.nguyen.minesweeper.client.di.components.DaggerGameCreationComponent;
+import marc.nguyen.minesweeper.client.domain.entities.HighScore;
 import marc.nguyen.minesweeper.client.domain.usecases.Quit;
 import marc.nguyen.minesweeper.client.domain.usecases.SaveScore;
 import marc.nguyen.minesweeper.client.domain.usecases.UpdateServerTile;
@@ -96,7 +97,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
             });
 
     if (this.view.playerListPanel != null) {
-      this.view.playerListPanel.playerTable.setModel(this.model.playerListTableModel);
+      this.view.playerListPanel.playerTable.setModel(this.model.playerTableModel);
     }
 
     this.view.gamePanel.addButtonListener(this);
@@ -106,7 +107,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
   public void dispose() {
     endGameMessagesListener.dispose();
     updateTilesListener.dispose();
-    this.model.playerListTableModel.dispose();
+    this.model.playerTableModel.dispose();
   }
 
   private void updateBombLeft() {
@@ -131,7 +132,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
     // Save the personal score
     this.saveScore
         .get()
-        .execute(this.model.player)
+        .execute(new HighScore(this.model.player, this.model.minefield))
         .doOnError(
             e -> {
               System.err.println("[ERROR] saveScore error.");
@@ -177,7 +178,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
                 if (!timer.isRunning()) {
                   timer.start();
                 }
-                model.minefield.expose(tile.position);
+                final var numberOfTileDiscovered = model.minefield.expose(tile.position);
                 updateServerTile
                     .get()
                     .execute(tile.position)
@@ -189,7 +190,7 @@ public class GameController implements MouseListener, Controller<GameModel, Game
                     .subscribe();
 
                 if (tile instanceof Tile.Empty) {
-                  model.player.incrementScore();
+                  model.player.addScore(numberOfTileDiscovered);
                 } else if (tile instanceof Tile.Mine) {
                   model.player.decrementScore();
                 }

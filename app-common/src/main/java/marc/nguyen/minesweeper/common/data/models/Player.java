@@ -28,6 +28,10 @@ public class Player implements Serializable {
     score++;
   }
 
+  public synchronized void addScore(int delta) {
+    score += delta;
+  }
+
   public synchronized void decrementScore() {
     score--;
   }

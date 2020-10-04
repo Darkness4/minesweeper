@@ -2,6 +2,7 @@ package marc.nguyen.minesweeper.client.presentation.views.gamecreation;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -11,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import marc.nguyen.minesweeper.client.di.components.DaggerLeaderboardComponent;
 import marc.nguyen.minesweeper.client.domain.entities.GameMode;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.settings.GameSettingsPanel;
@@ -24,6 +26,7 @@ public class EditSettingsPanel extends JPanel {
   public final GameSettingsPanel gameSettingsPanel;
   public final NetworkSettingsPanel networkSettingsPanel;
   public final JButton startButton;
+  public final JButton leaderboardButton;
   private final JPanel cards = new JPanel();
 
   public EditSettingsPanel() {
@@ -59,13 +62,23 @@ public class EditSettingsPanel extends JPanel {
     cards.add(gameSettingsPanel, GameMode.SINGLEPLAYER.name());
     cards.add(networkSettingsPanel, GameMode.MULTIPLAYER.name());
 
+    final var buttonPanel = new JPanel(new FlowLayout());
     startButton = new JButton("Play !");
     startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+    buttonPanel.add(startButton);
+
+    leaderboardButton = new JButton("Leaderboard");
+    leaderboardButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+    leaderboardButton.addActionListener(
+        e ->
+            SwingUtilities.invokeLater(
+                () -> DaggerLeaderboardComponent.builder().build().leaderboardDialog()));
+    buttonPanel.add(leaderboardButton);
 
     add(gameModeComboBox);
     add(playerTextField);
     add(cards);
-    add(startButton);
+    add(buttonPanel);
 
     setOpaque(true);
   }

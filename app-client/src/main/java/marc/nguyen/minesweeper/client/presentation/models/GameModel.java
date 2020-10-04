@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import javax.inject.Inject;
 import marc.nguyen.minesweeper.client.core.mvc.Model;
-import marc.nguyen.minesweeper.client.presentation.models.game.PlayerListTableModel;
+import marc.nguyen.minesweeper.client.presentation.models.game.PlayerTableModel;
 import marc.nguyen.minesweeper.common.data.models.EndGameMessage;
 import marc.nguyen.minesweeper.common.data.models.Minefield;
 import marc.nguyen.minesweeper.common.data.models.Player;
@@ -28,7 +28,7 @@ public class GameModel implements Model {
   /** Stream of end game message. */
   public final Observable<EndGameMessage> endGameMessage$;
   /** Player list */
-  public final PlayerListTableModel playerListTableModel;
+  public final PlayerTableModel playerTableModel;
 
   private LocalTime time;
 
@@ -43,7 +43,7 @@ public class GameModel implements Model {
     this.player = player;
     this.position$ = position$;
     this.endGameMessage$ = endGameMessage$;
-    playerListTableModel = new PlayerListTableModel(playerList$);
+    playerTableModel = new PlayerTableModel(playerList$);
     time = LocalTime.MIN;
   }
 
