@@ -32,7 +32,7 @@ public class SettingsDaoSqlite implements SettingsDao {
     try (final var connection = dataSource.get().getConnection();
         final var statement =
             connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS settings "
+                "CREATE TABLE IF NOT EXISTS Settings "
                     + "(name           VARCHAR(128)    NOT NULL PRIMARY KEY,"
                     + " address        VARCHAR(128)    NOT NULL,"
                     + " port           INT             NOT NULL,"
@@ -58,7 +58,7 @@ public class SettingsDaoSqlite implements SettingsDao {
   @Override
   public void deleteByName(@NotNull String name) {
     try (final var connection = dataSource.get().getConnection();
-        final var statement = connection.prepareStatement("DELETE FROM settings WHERE name = ?")) {
+        final var statement = connection.prepareStatement("DELETE FROM Settings WHERE name = ?")) {
       statement.setString(1, name);
 
       final var result = statement.executeUpdate();
@@ -79,7 +79,7 @@ public class SettingsDaoSqlite implements SettingsDao {
     try (final var connection = dataSource.get().getConnection();
         final var statement =
             connection.prepareStatement(
-                "REPLACE INTO settings (name, address, port, length, height, mines, level, mode, player_name) "
+                "REPLACE INTO Settings (name, address, port, length, height, mines, level, mode, player_name) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
       statement.setString(1, settings.name);
       statement.setString(2, settings.address.getHostAddress());
@@ -109,7 +109,7 @@ public class SettingsDaoSqlite implements SettingsDao {
     final List<Settings> settings = new ArrayList<>();
 
     try (final var connection = dataSource.get().getConnection();
-        final var statement = connection.prepareStatement("SELECT * FROM settings")) {
+        final var statement = connection.prepareStatement("SELECT * FROM Settings")) {
       try (final var result = statement.executeQuery()) {
         if (!result.isBeforeFirst()) {
           System.out.println("No settings are stored.");
@@ -146,7 +146,7 @@ public class SettingsDaoSqlite implements SettingsDao {
 
     try (final var connection = dataSource.get().getConnection();
         final var statement =
-            connection.prepareStatement("SELECT * FROM settings WHERE name = ?")) {
+            connection.prepareStatement("SELECT * FROM Settings WHERE name = ?")) {
       statement.setString(1, name);
 
       try (final var result = statement.executeQuery()) {

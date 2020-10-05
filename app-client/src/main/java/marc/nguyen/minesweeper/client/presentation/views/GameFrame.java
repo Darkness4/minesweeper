@@ -8,7 +8,7 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameController;
 import marc.nguyen.minesweeper.client.presentation.models.GameModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
-import marc.nguyen.minesweeper.client.presentation.widgets.MainMenuBar;
+import marc.nguyen.minesweeper.client.presentation.widgets.GameMenuBar;
 
 /** The Game Frame. */
 public final class GameFrame extends JFrame {
@@ -18,7 +18,7 @@ public final class GameFrame extends JFrame {
   @Inject
   public GameFrame(
       ResourcesLoader resourcesLoader,
-      MainMenuBar mainMenuBar,
+      GameMenuBar gameMenuBar,
       GameView view,
       GameModel model,
       GameController.Factory gameControllerFactory) {
@@ -33,7 +33,7 @@ public final class GameFrame extends JFrame {
           }
         });
 
-    setJMenuBar(mainMenuBar);
+    setJMenuBar(gameMenuBar);
     setContentPane(view);
 
     pack();

@@ -154,3 +154,5 @@ gradle-app.setting
 *.db
 *.sqlite
 *.sqlite3
+
+local.properties

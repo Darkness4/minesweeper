@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import marc.nguyen.minesweeper.client.core.IO;
@@ -40,10 +41,10 @@ public class ServerSocketDevice {
   @Inject
   public ServerSocketDevice() {}
 
-  /** @return Incoming Packets. Is null if socket is closed. */
-  @Nullable
+  /** @return Incoming Packets. Return empty observable if closed. */
+  @NotNull
   public Observable<Object> getObservable() {
-    return publisher;
+    return Observable.fromOptional(Optional.ofNullable(publisher));
   }
 
   /**

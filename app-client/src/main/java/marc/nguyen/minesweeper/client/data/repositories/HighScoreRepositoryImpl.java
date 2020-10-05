@@ -11,6 +11,7 @@ import marc.nguyen.minesweeper.client.domain.repositories.HighScoreRepository;
 import org.jetbrains.annotations.NotNull;
 
 public class HighScoreRepositoryImpl implements HighScoreRepository {
+
   private final Lazy<HighScoreDao> highScoreDao;
 
   @Inject
@@ -24,7 +25,7 @@ public class HighScoreRepositoryImpl implements HighScoreRepository {
   }
 
   @Override
-  public @NotNull Single<List<HighScore>> fetchAll() {
+  public @NotNull Single<List<HighScore>> findAll() {
     return Single.fromCallable(() -> highScoreDao.get().findAll());
   }
 }

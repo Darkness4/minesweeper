@@ -22,6 +22,6 @@ public class FetchAllScores implements UseCase<Void, Single<List<HighScore>>> {
   @Override
   @NotNull
   public Single<List<HighScore>> execute(Void params) {
-    return repository.get().fetchAll().observeOn(Schedulers.from(IO.executor));
+    return repository.get().findAll().observeOn(Schedulers.from(IO.executor));
   }
 }

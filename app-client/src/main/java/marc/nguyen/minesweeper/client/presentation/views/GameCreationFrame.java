@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import marc.nguyen.minesweeper.client.presentation.controllers.GameCreationController;
 import marc.nguyen.minesweeper.client.presentation.models.GameCreationModel;
 import marc.nguyen.minesweeper.client.presentation.utils.ResourcesLoader;
+import marc.nguyen.minesweeper.client.presentation.widgets.MainMenuBar;
 
 /** The Game Creation Frame. */
 public class GameCreationFrame extends JFrame {
@@ -18,6 +19,7 @@ public class GameCreationFrame extends JFrame {
   public GameCreationFrame(
       GameCreationView view,
       GameCreationModel model,
+      MainMenuBar menuBar,
       GameCreationController.Factory gameCreationControllerFactory,
       ResourcesLoader resourcesLoader) {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
@@ -34,6 +36,7 @@ public class GameCreationFrame extends JFrame {
         });
 
     setContentPane(view);
+    setJMenuBar(menuBar);
 
     pack();
     setLocationRelativeTo(null); // Center of the screen

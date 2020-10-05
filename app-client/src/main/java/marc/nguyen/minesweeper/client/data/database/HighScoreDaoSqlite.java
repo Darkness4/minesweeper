@@ -20,8 +20,6 @@ public class HighScoreDaoSqlite implements HighScoreDao {
     createTable();
   }
 
-  // TODO: save settings
-
   /** Create "settings" SQL table. */
   public void createTable() {
     try (final var connection = dataSource.get().getConnection();

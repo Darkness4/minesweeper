@@ -44,7 +44,7 @@ class SettingsDaoSqliteTest {
   void createTable() throws SQLException {
     // Assert
     final var metaData = connection.getMetaData();
-    final var rs = metaData.getTables(null, null, "settings", null);
+    final var rs = metaData.getTables(null, null, "Settings", null);
     assertTrue(rs.isBeforeFirst());
   }
 
@@ -67,7 +67,7 @@ class SettingsDaoSqliteTest {
     settingsDao.deleteByName("name");
 
     // Assert
-    final var statement = connection.prepareStatement("SELECT COUNT(*) FROM settings");
+    final var statement = connection.prepareStatement("SELECT COUNT(*) FROM Settings");
     final var rs = statement.executeQuery();
     assertEquals(rs.getInt(1), 0);
   }
@@ -88,7 +88,7 @@ class SettingsDaoSqliteTest {
             "playerName"));
 
     // Assert
-    final var statement = connection.prepareStatement("SELECT COUNT(*) FROM settings");
+    final var statement = connection.prepareStatement("SELECT COUNT(*) FROM Settings");
     final var rs = statement.executeQuery();
     assertEquals(rs.getInt(1), 1);
   }

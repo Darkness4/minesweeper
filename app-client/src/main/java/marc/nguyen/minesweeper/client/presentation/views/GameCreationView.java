@@ -3,10 +3,15 @@ package marc.nguyen.minesweeper.client.presentation.views;
 import io.reactivex.rxjava3.core.Observable;
 import java.awt.BorderLayout;
 import java.awt.event.WindowListener;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import marc.nguyen.minesweeper.client.core.mvc.View;
 import marc.nguyen.minesweeper.client.domain.entities.Settings;
 import marc.nguyen.minesweeper.client.presentation.views.gamecreation.EditSettingsPanel;
@@ -30,6 +35,15 @@ public final class GameCreationView extends JPanel implements View {
     assert SwingUtilities.isEventDispatchThread() : "View is running on unsafe thread!";
 
     setLayout(new BorderLayout());
+
+    try {
+      final var presentationImage = ImageIO.read(getClass().getResource("/img/presentation.png"));
+      final var label = new JLabel(new ImageIcon(presentationImage));
+      label.setBorder(new EmptyBorder(10, 10, 10, 10));
+      add(label, BorderLayout.PAGE_START);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     editSettingsPanel = new EditSettingsPanel();
     add(editSettingsPanel, BorderLayout.CENTER);

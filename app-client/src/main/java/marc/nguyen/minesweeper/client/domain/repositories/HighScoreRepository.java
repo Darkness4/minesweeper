@@ -24,5 +24,5 @@ public interface HighScoreRepository {
    * @return A Single List of HighScore.
    */
   @NotNull
-  Single<List<HighScore>> fetchAll();
+  Single<List<HighScore>> findAll();
 }

@@ -1,6 +1,7 @@
 package marc.nguyen.minesweeper.server.api;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,7 +54,7 @@ public class GameServer {
 
         final var clientModel = new ClientModel(clientSocket);
 
-        if (!hasStarted.get()) {
+        if (hasStarted.get()) {
           System.out.printf(
               "Client %s refused: Max players reached.\n",
               clientSocket.getInetAddress().getCanonicalHostName());
@@ -124,6 +125,14 @@ public class GameServer {
   private void open(int port) {
     try {
       serverSocket = new ServerSocket(port);
+      final var allMyIps =
+          InetAddress.getAllByName(InetAddress.getLocalHost().getCanonicalHostName());
+      if (allMyIps != null) {
+        System.out.println("Full list of IP addresses: ");
+        for (InetAddress allMyIp : allMyIps) {
+          System.out.println("    " + allMyIp.getHostAddress());
+        }
+      }
     } catch (IOException e) {
       throw new RuntimeException("Cannot open port.", e);
     }

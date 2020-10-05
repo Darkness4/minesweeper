@@ -28,19 +28,15 @@ public class PlayerRepositoryImpl implements PlayerRepository {
   @Override
   public @NotNull Observable<List<Player>> fetchServerPlayerList() {
     final var observable = serverSocketDevice.get().getObservable();
-    if (observable != null) {
-      return observable
-          .filter(o -> o instanceof List<?>)
-          .map(
-              o -> {
-                final var list = (List<?>) o;
-                return list.stream()
-                    .filter(e -> e instanceof Player)
-                    .map(e -> (Player) e)
-                    .collect(Collectors.toUnmodifiableList());
-              });
-    } else {
-      return Observable.empty();
-    }
+    return observable
+        .filter(o -> o instanceof List<?>)
+        .map(
+            o -> {
+              final var list = (List<?>) o;
+              return list.stream()
+                  .filter(e -> e instanceof Player)
+                  .map(e -> (Player) e)
+                  .collect(Collectors.toUnmodifiableList());
+            });
   }
 }

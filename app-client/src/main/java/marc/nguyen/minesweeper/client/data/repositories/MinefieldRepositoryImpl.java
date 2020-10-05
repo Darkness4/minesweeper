@@ -29,12 +29,8 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
   @Override
   public Maybe<Minefield> fetch() {
     final var observable = serverSocketDevice.get().getObservable();
-    if (observable != null) {
-      return Maybe.fromObservable(
-          observable.filter((e) -> e instanceof Minefield).map((e) -> (Minefield) e));
-    } else {
-      return Maybe.empty();
-    }
+    return Maybe.fromObservable(
+        observable.filter((e) -> e instanceof Minefield).map((e) -> (Minefield) e));
   }
 
   /**
@@ -45,11 +41,7 @@ public class MinefieldRepositoryImpl implements MinefieldRepository {
   @Override
   public Observable<Position> watchTiles() {
     final var observable = serverSocketDevice.get().getObservable();
-    if (observable != null) {
-      return observable.filter((e) -> e instanceof Position).map((e) -> (Position) e);
-    } else {
-      return Observable.empty();
-    }
+    return observable.filter((e) -> e instanceof Position).map((e) -> (Position) e);
   }
 
   /**
